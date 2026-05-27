@@ -1,15 +1,9 @@
-# auth.py - Authentication endpoints (ASYNC for PostgreSQL)
 """
-Authentication endpoints (ASYNC for PostgreSQL)
-Matches frontend expectations:
-- POST /api/v1/auth/register
-- POST /api/v1/auth/login
-- GET /api/v1/auth/me
-- POST /api/v1/auth/logout
+Authentication endpoints (SESSION-BASED)
+Production-ready version
 """
 
 import logging
-import secrets
 import traceback
 from datetime import datetime, timedelta
 from typing import Any, Literal
@@ -19,48 +13,59 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.core.config import settings
-from app.core.db import get_db
 from app.core.limiter import limiter
-from app.core.security import get_password_hash, verify_password
+from app.core.security import (
+    hash_password,
+    verify_password,
+    create_session_token,
+    create_session_expiry,
+)
+from app.db.database import get_db
 from app.db.models import User, UserSession
-from app.schemas.auth import SessionResponse, UserCreate, UserLogin, UserResponse
+from app.schemas import (
+    UserCreate,
+    UserLogin,
+    UserResponse,
+    SessionResponse,
+)
 
-# -----------------------------
+# ---------------------------------------------------------
 # LOGGER
-# -----------------------------
+# ---------------------------------------------------------
 logger = logging.getLogger("auth")
 
-# -----------------------------
-# RATE LIMITER
-# -----------------------------
+# ---------------------------------------------------------
+# ROUTER
+# ---------------------------------------------------------
+router = APIRouter(prefix="/auth", tags=["auth"])
 
 
-router: APIRouter = APIRouter(prefix="/auth", tags=["Authentication"])
-
-
-# -----------------------------
+# =========================================================
 # REGISTER
-# -----------------------------
+# =========================================================
 @router.post("/register", response_model=SessionResponse, status_code=status.HTTP_201_CREATED)
 async def register(user_data: UserCreate, db: AsyncSession = Depends(get_db)) -> SessionResponse:
 
-    username = await db.execute(select(User).where(User.username == user_data.username))
-    if username.scalar_one_or_none():
+    # Check username
+    existing_username = await db.execute(
+        select(User).where(User.username == user_data.username)
+    )
+    if existing_username.scalar_one_or_none():
         raise HTTPException(status_code=400, detail="Username already taken")
 
-    email = await db.execute(
+    # Check email
+    existing_email = await db.execute(
         select(User).where(func.lower(User.email) == func.lower(user_data.email))
     )
-    if email.scalar_one_or_none():
+    if existing_email.scalar_one_or_none():
         raise HTTPException(status_code=400, detail="Email already taken")
 
-    hashed_password = get_password_hash(user_data.password)
-
+    # Create user
     new_user = User(
         username=user_data.username,
         email=user_data.email,
         full_name=user_data.full_name,
-        hashed_password=hashed_password,
+        hashed_password=hash_password(user_data.password),
         is_active=True,
     )
 
@@ -73,7 +78,6 @@ async def register(user_data: UserCreate, db: AsyncSession = Depends(get_db)) ->
         "username": new_user.username,
         "user_id": new_user.id
     })
-    print(f"✅ REGISTER: {new_user.username} (ID: {new_user.id})")
 
     return SessionResponse(
         success=True,
@@ -83,9 +87,9 @@ async def register(user_data: UserCreate, db: AsyncSession = Depends(get_db)) ->
     )
 
 
-# -----------------------------
-# LOGIN (with rate limiting + logging)
-# -----------------------------
+# =========================================================
+# LOGIN
+# =========================================================
 @router.post("/login", response_model=SessionResponse)
 @limiter.limit("5/minute")
 async def login(
@@ -102,60 +106,25 @@ async def login(
         )
         user = result.scalar_one_or_none()
 
-        if not user:
-            client_ip = request.client.host if request.client else "unknown"
+        if not user or not verify_password(credentials.password, user.hashed_password):
             logger.warning({
                 "event": "auth_failed",
                 "username": credentials.username,
-                "ip": client_ip,
-                "reason": "user_not_found"
+                "ip": request.client.host if request.client else "unknown",
             })
-            print(f"❌ LOGIN FAILED: {credentials.username} - {client_ip} - User not found")
             raise HTTPException(status_code=401, detail="Invalid username or password")
 
-        # Verify password
-        if not verify_password(credentials.password, user.hashed_password):
-            client_ip = request.client.host if request.client else "unknown"
-            logger.warning({
-                "event": "auth_failed",
-                "username": credentials.username,
-                "ip": client_ip,
-                "reason": "invalid_password"
-            })
-            print(f"❌ LOGIN FAILED: {credentials.username} - {client_ip} - Invalid password")
-            raise HTTPException(status_code=401, detail="Invalid username or password")
-
-        # Check active
         if not user.is_active:
-            client_ip = request.client.host if request.client else "unknown"
-            logger.warning({
-                "event": "auth_failed",
-                "username": credentials.username,
-                "ip": client_ip,
-                "reason": "inactive_account"
-            })
-            print(f"❌ LOGIN FAILED: {credentials.username} - {client_ip} - Inactive account")
             raise HTTPException(status_code=403, detail="Account is inactive")
 
-        # SUCCESS LOG
-        client_ip = request.client.host if request.client else "unknown"
-        logger.info({
-            "event": "auth_success",
-            "user_id": user.id,
-            "username": user.username,
-            "ip": client_ip
-        })
-        print(f"🔐 LOGIN SUCCESS: {user.username} (ID: {user.id}) - {client_ip}")
-
         # Create session
-        session_token = secrets.token_urlsafe(32)
-        now = datetime.now()
-        expires_at = now + timedelta(minutes=settings.SESSION_EXPIRE_MINUTES)
+        session_token = create_session_token()
+        expires_at = create_session_expiry(hours=settings.SESSION_EXPIRE_HOURS)
 
         new_session = UserSession(
             session_token=session_token,
             user_id=user.id,
-            created_at=now,
+            created_at=datetime.now(),
             expires_at=expires_at,
             ip_address=request.client.host if request.client else None,
             user_agent=request.headers.get("user-agent"),
@@ -164,6 +133,7 @@ async def login(
         db.add(new_session)
         await db.commit()
 
+        # Cookie settings
         secure_flag = settings.ENVIRONMENT == "production"
         samesite_value: Literal["lax", "none"] = "none" if secure_flag else "lax"
 
@@ -173,25 +143,15 @@ async def login(
             httponly=True,
             secure=secure_flag,
             samesite=samesite_value,
-            max_age=settings.SESSION_EXPIRE_MINUTES * 60,
+            max_age=settings.SESSION_EXPIRE_HOURS * 3600,
             path="/",
-        )
-
-        user_response = UserResponse(
-            id=user.id,
-            username=user.username,
-            email=user.email,
-            full_name=user.full_name,
-            is_active=user.is_active,
-            created_at=user.created_at,
-            updated_at=user.updated_at,
         )
 
         return SessionResponse(
             success=True,
             username=user.username,
             session_token=session_token,
-            user=user_response
+            user=UserResponse.model_validate(user)
         )
 
     except HTTPException:
@@ -202,13 +162,12 @@ async def login(
             "error": str(e),
             "trace": traceback.format_exc()
         })
-        print(f"🚨 AUTH ERROR: {str(e)}")
-        raise HTTPException(status_code=500, detail="Login failed due to server error") from e
+        raise HTTPException(status_code=500, detail="Login failed due to server error")
 
 
-# -----------------------------
-# GET CURRENT USER
-# -----------------------------
+# =========================================================
+# CURRENT USER
+# =========================================================
 async def get_current_user_from_session(
     request: Request,
     db: AsyncSession = Depends(get_db)
@@ -241,21 +200,12 @@ async def get_current_user_from_session(
 async def get_current_user_endpoint(
     current_user: User = Depends(get_current_user_from_session)
 ) -> UserResponse:
-
-    return UserResponse(
-        id=current_user.id,
-        username=current_user.username,
-        email=current_user.email,
-        full_name=current_user.full_name,
-        is_active=current_user.is_active,
-        created_at=current_user.created_at,
-        updated_at=current_user.updated_at,
-    )
+    return UserResponse.model_validate(current_user)
 
 
-# -----------------------------
+# =========================================================
 # LOGOUT
-# -----------------------------
+# =========================================================
 @router.post("/logout")
 async def logout(
     request: Request,
@@ -284,10 +234,5 @@ async def logout(
             secure=secure_flag,
             samesite=samesite_value
         )
-
-    logger.info({
-        "event": "logout",
-        "ip": (request.client.host if request.client else "unknown")
-    })
 
     return {"success": True, "message": "Logged out successfully"}

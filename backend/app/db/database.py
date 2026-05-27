@@ -1,6 +1,7 @@
 """
-Async database configuration and session management
+Async SQLite database configuration and session management.
 """
+
 from collections.abc import AsyncGenerator
 
 from sqlalchemy.ext.asyncio import (
@@ -8,38 +9,40 @@ from sqlalchemy.ext.asyncio import (
     async_sessionmaker,
     create_async_engine,
 )
+from sqlalchemy.orm import declarative_base
 
 from app.core.config import settings
 
-# Create an asynchronous engine to connect to the PostgreSQL database
-# The DATABASE_URL is loaded from settings, which defaults to the local dev container DB
-# or can be overridden by an environment variable (e.g., for Neon).
-engine = create_async_engine(settings.DATABASE_URL, echo=True)
 
-# Create a sessionmaker for asynchronous sessions
-# expire_on_commit=False prevents objects from being expired after commit,
-# which can be useful for accessing attributes outside of the session.
-AsyncSessionLocal = async_sessionmaker(
-    autocommit=False,
-    autoflush=False,
+# -----------------------------
+# DATABASE CONFIG (SQLite)
+# -----------------------------
+DATABASE_URL = settings.DATABASE_URL  # should be sqlite+aiosqlite:///./dev.db
+
+engine = create_async_engine(
+    DATABASE_URL,
+    echo=True,  # set to False in production
+)
+
+# Base class for all ORM models
+Base = declarative_base()
+
+# Async session factory
+SessionLocal = async_sessionmaker(
     bind=engine,
     class_=AsyncSession,
-    expire_on_commit=False
+    expire_on_commit=False,
+    autoflush=False,
+    autocommit=False,
 )
 
 
+# -----------------------------
+# Dependency for FastAPI
+# -----------------------------
 async def get_db() -> AsyncGenerator[AsyncSession, None]:
     """
-    Dependency to get an asynchronous database session.
-
-    Yields an AsyncSession object that can be used for database operations.
-    The session is automatically closed after the request is finished.
-
-    Example:
-        @app.get("/users")
-        async def get_users(db: AsyncSession = Depends(get_db)):
-            result = await db.execute(select(User))
-            return result.scalars().all()
+    Provides an async database session for request handlers.
     """
-    async with AsyncSessionLocal() as session:
+    async with SessionLocal() as session:
         yield session

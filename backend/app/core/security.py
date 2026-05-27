@@ -1,9 +1,11 @@
 """
-Security utilities for authentication
-Handles password hashing, JWT tokens, and session management
+Security utilities for Connecto
+Primary authentication: SESSION-BASED
+Optional fallback: JWT tokens (for future mobile/API use)
 """
+
 import secrets
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, UTC
 from typing import Any
 
 import jwt
@@ -12,126 +14,80 @@ from pwdlib.hashers.argon2 import Argon2Hasher
 
 from app.core.config import settings
 
-# Password hasher using Argon2 (more secure than bcrypt)
+
+# ======================================================
+# PASSWORD HASHING (Argon2)
+# ======================================================
+
 pwd_context = PasswordHash((Argon2Hasher(),))
 
 
-# ============================================================================
-# PASSWORD HASHING
-# ============================================================================
-
-def verify_password(plain_password: str, hashed_password: str) -> bool:
+def hash_password(password: str) -> str:
     """
-    Verify a password against its hash
-
-    Args:
-        plain_password: The password to verify (from user input)
-        hashed_password: The stored hash from database
-
-    Returns:
-        True if password matches, False otherwise
-    """
-    return pwd_context.verify(plain_password, hashed_password)
-
-
-def get_password_hash(password: str) -> str:
-    """
-    Hash a password using Argon2
-
-    Args:
-        password: Plain text password to hash
-
-    Returns:
-        Hashed password string
-
-    Example:
-        hashed = get_password_hash("MySecurePassword123!")
+    Hash a password using Argon2.
     """
     return pwd_context.hash(password)
 
 
-# ============================================================================
-# JWT TOKEN MANAGEMENT
-# ============================================================================
-
-def create_access_token(data: dict, expires_delta: timedelta | None = None) -> str:
+def verify_password(plain_password: str, hashed_password: str) -> bool:
     """
-    Create JWT access token
-
-    Args:
-        data: Data to encode in token (usually {"sub": username})
-        expires_delta: Optional custom expiration time
-
-    Returns:
-        Encoded JWT token string
-
-    Example:
-        token = create_access_token({"sub": "johndoe"})
+    Verify a password against its Argon2 hash.
     """
-    to_encode = data.copy()
-
-    if expires_delta:
-        expire = datetime.now(UTC) + expires_delta
-    else:
-        expire = datetime.now(UTC) + timedelta(
-            minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES
-        )
-
-    to_encode.update({"exp": expire})
-    encoded_jwt = jwt.encode(
-        to_encode,
-        settings.SECRET_KEY,
-        algorithm=settings.ALGORITHM
-    )
-    return encoded_jwt
+    return pwd_context.verify(plain_password, hashed_password)
 
 
-def decode_token(token: str) -> Any:
-    """
-    Decode and verify JWT token
-
-    Args:
-        token: JWT token string to decode
-
-    Returns:
-        Decoded token payload dict
-
-    Raises:
-        JWTError: If token is invalid or expired
-    """
-    return jwt.decode(
-        token,
-        settings.SECRET_KEY,
-        algorithms=[settings.ALGORITHM]
-    )
-
-
-# ============================================================================
-# SESSION MANAGEMENT
-# ============================================================================
+# ======================================================
+# SESSION TOKENS (DEFAULT AUTH METHOD)
+# ======================================================
 
 def create_session_token() -> str:
     """
-    Create a secure random session token
-
-    Returns:
-        64-character hexadecimal session token
-
-    Example:
-        session_id = create_session_token()
-        # Returns: "a3f2b9e1c5d7..." (64 chars)
+    Create a secure random session token (64 hex chars).
+    Used for session-based authentication.
     """
     return secrets.token_hex(32)
 
 
 def create_session_expiry(hours: int = 24) -> datetime:
     """
-    Create session expiration datetime
-
-    Args:
-        hours: Number of hours until session expires (default 24)
-
-    Returns:
-        Datetime object for session expiration
+    Create expiration datetime for session tokens.
+    Default: 24 hours.
     """
     return datetime.now(UTC) + timedelta(hours=hours)
+
+
+# ======================================================
+# JWT TOKENS (OPTIONAL / FALLBACK)
+# ======================================================
+
+def create_access_token(data: dict, expires_delta: timedelta | None = None) -> str:
+    """
+    Create a JWT access token.
+    Used only for optional JWT-based authentication.
+    """
+    to_encode = data.copy()
+
+    expire = (
+        datetime.now(UTC) + expires_delta
+        if expires_delta
+        else datetime.now(UTC) + timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES)
+    )
+
+    to_encode.update({"exp": expire})
+
+    return jwt.encode(
+        to_encode,
+        settings.SECRET_KEY,
+        algorithm=settings.ALGORITHM,
+    )
+
+
+def decode_token(token: str) -> Any:
+    """
+    Decode and verify a JWT token.
+    """
+    return jwt.decode(
+        token,
+        settings.SECRET_KEY,
+        algorithms=[settings.ALGORITHM],
+    )

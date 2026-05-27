@@ -3,7 +3,6 @@ Application configuration
 Environment variables and settings management
 """
 
-
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -19,30 +18,36 @@ class Settings(BaseSettings):
     )
 
     # API Configuration
-    PROJECT_NAME: str = "DevSecOps Social App API"
+    PROJECT_NAME: str = "Social App API"
     VERSION: str = "0.1.0"
-    API_V1_STR: str = "/api/v1"
 
-    # Database
-    DATABASE_URL: str = ""  # loaded from .env
+    # Database (SQLite by default)
+    # Example for local dev:
+    #   sqlite+aiosqlite:///./dev.db
+    #
+    # Example for production (commented):
+    #   postgresql+asyncpg://user:password@host/dbname
+    DATABASE_URL: str = ""
 
     # Security - JWT Tokens
-    SECRET_KEY: str = ""  # loaded from .env
+    SECRET_KEY: str = ""
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
 
     # Security - Sessions
-    SESSION_SECRET_KEY: str = ""  # loaded from .env
+    SESSION_SECRET_KEY: str = ""
     SESSION_EXPIRE_MINUTES: int = 60 * 24  # 24 hours
 
     # CORS
     ALLOWED_ORIGINS: list[str] = [
-        "http://localhost:3000",
-        "https://discsecops.github.io"
+        "http://localhost:3000",  # dev
+        # "https://connecto.vercel.app",  # production (exemplu)
+        # "https://connecto.netlify.app", # production (exemplu)
+        # "https://connecto.se",          # production (domeniu propriu)
     ]
 
     # Environment
-    ENVIRONMENT: str = "development"  # overridden in production
+    ENVIRONMENT: str = "development"  # "production" on deploy
     FRONTEND_URL: str = "http://localhost:3000"  # used for CSP
 
 
