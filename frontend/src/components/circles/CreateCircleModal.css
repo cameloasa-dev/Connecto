@@ -15,8 +15,12 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 .modal {
@@ -168,21 +172,21 @@
     width: 95%;
     margin: 1rem;
   }
-  
+
   .modal h2 {
     padding: 1rem 1rem 0.5rem 1rem;
     font-size: 1.3rem;
   }
-  
+
   .modal form {
     padding: 1rem;
   }
-  
+
   .modal-actions {
     flex-direction: column;
     gap: 0.75rem;
   }
-  
+
   .modal-actions button {
     width: 100%;
   }
@@ -192,7 +196,7 @@
   .modal h2 {
     font-size: 1.2rem;
   }
-  
+
   .form-group input,
   .form-group textarea {
     padding: 0.6rem;

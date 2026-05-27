@@ -1,8 +1,8 @@
 // frontend/src/components/circles/CircleSettings.jsx
-import { useState } from 'react';
-import { circleMemberService } from '../../services/circleMember.service';
-import { useCirclePermissions } from '../../hooks/useCirclePermissions';
-import './CircleSettings.css';
+import { useState } from "react";
+import { circleMemberService } from "../../services/circleMember.service";
+import { useCirclePermissions } from "../../hooks/useCirclePermissions";
+import "./CircleSettings.css";
 
 const CircleSettings = ({ circle, onCircleUpdated }) => {
   const [isEditing, setIsEditing] = useState(false);
@@ -18,11 +18,14 @@ const CircleSettings = ({ circle, onCircleUpdated }) => {
 
     setLoading(true);
     try {
-      const updated = await circleMemberService.updateCircleName(circle.id, newName);
+      const updated = await circleMemberService.updateCircleName(
+        circle.id,
+        newName,
+      );
       onCircleUpdated(updated);
       setIsEditing(false);
     } catch (error) {
-      console.error('Failed to update circle name:', error);
+      console.error("Failed to update circle name:", error);
     } finally {
       setLoading(false);
     }
@@ -33,7 +36,7 @@ const CircleSettings = ({ circle, onCircleUpdated }) => {
   return (
     <div className="circle-settings">
       <h3>Circle Settings</h3>
-      
+
       <div className="setting-item">
         <label>Circle Name</label>
         {isEditing ? (

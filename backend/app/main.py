@@ -1,7 +1,7 @@
 """
-Main FastAPI application (ASYNC with PostgreSQL)
-Initializes the API with authentication endpoints, CORS, security headers,
-logging middleware and rate limiting.
+Main FastAPI application (ASYNC + SQLite)
+Initializes the API with authentication, circles, members, posts, users,
+CORS, security headers, logging middleware and rate limiting.
 """
 
 import logging
@@ -15,11 +15,12 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from slowapi.errors import RateLimitExceeded
 
-from app.api.v1.endpoints import auth, circle_members, circles, posts, users
+from app.api.endpoints import auth, circles, circle_members, posts, users
 from app.core.config import settings
-from app.core.db import engine
+from app.core.db import engine, Base
 from app.core.limiter import limiter
 from app.core.security_headers import SecurityHeadersMiddleware
+
 
 # -----------------------------
 # LOGGING CONFIG
@@ -29,11 +30,16 @@ logger = logging.getLogger("app")
 
 
 # -----------------------------
-# LIFESPAN HANDLER
+# LIFESPAN (startup + shutdown)
 # -----------------------------
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
+    # Create tables automatically for SQLite
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
+
     yield
+
     await engine.dispose()
 
 
@@ -43,7 +49,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 app = FastAPI(
     title=settings.PROJECT_NAME,
     version=settings.VERSION,
-    description="Social application backend with authentication and circles",
+    description="Social App backend (FastAPI + SQLite)",
     lifespan=lifespan
 )
 
@@ -51,7 +57,7 @@ app.state.limiter = limiter
 
 
 # -----------------------------
-# GLOBAL RATE LIMIT HANDLER
+# RATE LIMIT HANDLER
 # -----------------------------
 @app.exception_handler(RateLimitExceeded)
 async def rate_limit_handler(request: Request, exc: RateLimitExceeded) -> JSONResponse:
@@ -61,7 +67,7 @@ async def rate_limit_handler(request: Request, exc: RateLimitExceeded) -> JSONRe
         "ip": client_ip,
         "path": request.url.path
     })
-    print(f"⚠️  RATE LIMIT: {client_ip} - {request.url.path} - Too many requests")
+    print(f"⚠️ RATE LIMIT: {client_ip} - {request.url.path}")
     return JSONResponse(
         status_code=429,
         content={"detail": "Too many requests. Try again later."}
@@ -71,27 +77,23 @@ async def rate_limit_handler(request: Request, exc: RateLimitExceeded) -> JSONRe
 # -----------------------------
 # LOGGING MIDDLEWARE
 # -----------------------------
-
 @app.middleware("http")
 async def log_requests(request: Request, call_next: Callable[[Request], Awaitable[Response]]) -> Response:
-    start_time = time.time()
-
+    start = time.time()
     response = await call_next(request)
-
-    duration = (time.time() - start_time) * 1000
-    client_ip = request.client.host if request.client else "unknown"
+    duration = round((time.time() - start) * 1000, 2)
+    ip = request.client.host if request.client else "unknown"
 
     logger.info({
         "event": "http_request",
         "method": request.method,
         "url": request.url.path,
-        "status_code": response.status_code,
-        "duration_ms": round(duration, 2),
-        "ip": client_ip
+        "status": response.status_code,
+        "duration_ms": duration,
+        "ip": ip
     })
 
-    print(f"📡 {request.method} {request.url.path} - {response.status_code} - {round(duration, 2)}ms - {client_ip}")
-
+    print(f"📡 {request.method} {request.url.path} - {response.status_code} - {duration}ms - {ip}")
     return response
 
 
@@ -110,38 +112,28 @@ app.add_middleware(SecurityHeadersMiddleware)
 
 
 # -----------------------------
-# ROUTERS
+# ROUTERS 
 # -----------------------------
-app.include_router(auth.router, prefix=settings.API_V1_STR)
-app.include_router(circles.router, prefix=settings.API_V1_STR)
-app.include_router(posts.router, prefix=settings.API_V1_STR)
-app.include_router(users.router, prefix=settings.API_V1_STR)
-app.include_router(circle_members.router, prefix=settings.API_V1_STR)
+app.include_router(auth.router)
+app.include_router(users.router)
+app.include_router(circles.router)
+app.include_router(circle_members.router)
+app.include_router(posts.router)
 
 
 # -----------------------------
-# HEALTH ENDPOINTS
+# HEALTH ENDPOINTS 
 # -----------------------------
 @app.get("/")
 async def root() -> dict[str, Any]:
     return {
-        "message": "DevSecOps Social App API",
+        "message": "Social App API",
         "version": settings.VERSION,
         "status": "running",
-        "database": "PostgreSQL (Async)"
+        "database": "SQLite"
     }
 
 
 @app.get("/health")
-async def health_check() -> dict[str, str]:
-    return {"status": "healthy", "database": "PostgreSQL"}
-
-
-@app.get("/api/health")
-async def api_health() -> dict[str, str]:
-    return {"status": "healthy", "api_version": settings.VERSION}
-
-
-@app.get(f"{settings.API_V1_STR}/health")
-async def api_v1_health() -> dict[str, str]:
-    return {"status": "healthy", "api_version": settings.VERSION, "api": "v1"}
+async def health() -> dict[str, str]:
+    return {"status": "healthy", "database": "SQLite"}

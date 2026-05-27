@@ -1,87 +1,48 @@
 [project]
 name = "backend"
 version = "0.1.0"
-description = "Backend for DiscSecOps FastAPI + React Social Application"
+description = "Clean FastAPI backend for DiscSecOps"
 readme = "README.md"
 requires-python = ">=3.12"
+
 dependencies = [
-    "alembic>=1.18.4",
-    "argon2-cffi>=25.1.0",
-    "asyncpg>=0.31.0",
-    "email-validator>=2.3.0",
     "fastapi>=0.136.0",
-    "nest-asyncio>=1.6.0",
-    "pwdlib>=0.3.0",
+    "sqlalchemy>=2.0.49",
     "pydantic>=2.13.3",
     "pydantic-settings>=2.14.0",
-    "pyjwt>=2.12.1",
-    "pytest-bdd>=8.1.0",
-    "pytest-dotenv>=0.5.2",
-    "pytest-playwright>=0.7.2",
-    "python-dotenv>=1.2.2",
-    "python-multipart>=0.0.26",
-    "slowapi>=0.1.9",
-    "sqlalchemy>=2.0.49",
     "uvicorn[standard]>=0.45.0",
+    "argon2-cffi>=25.1.0",
+    "pyjwt>=2.12.1",
+    "email-validator>=2.3.0",
+    "python-multipart>=0.0.26",
+    "aiosqlite>=0.22.1",  # pentru SQLite async
+    "slowapi>=0.1.9",
 ]
 
 [dependency-groups]
 dev = [
-    "alembic>=1.18.4",
-    "aiosqlite>=0.22.1",
-    "argon2-cffi>=25.1.0",
-    "bandit>=1.9.4",
-    "email-validator>=2.3.0",
-    "fastapi>=0.136.0",
-    "greenlet>=3.4.0",
-    "httpx>=0.28.1",
-    "mypy>=1.20.1",
-    "pre-commit>=4.5.1",
-    "pwdlib>=0.3.0",
-    "pydantic>=2.13.3",
-    "pydantic-settings>=2.14.0",
-    "pyjwt>=2.12.1",
     "pytest>=9.0.3",
     "pytest-asyncio>=1.3.0",
-    "pytest-cov>=7.1.0",
-    "python-dotenv>=1.2.2",
-    "python-multipart>=0.0.26",
+    "httpx>=0.28.1",
     "ruff>=0.15.11",
-    "safety>=3.7.0",
-    "sqlalchemy>=2.0.49",
-    "uvicorn[standard]>=0.45.0",
+    "mypy>=1.20.1",
 ]
 
 [tool.ruff]
-# Target Python 3.12 (Matches your Dev Container)
 target-version = "py312"
-# Increase the line length to something more modern (standard was 88)
 line-length = 100
 
 [tool.ruff.lint]
-# Select the rules that replace your old tools:
-# E, W   = pycodestyle (standard pep8)
-# F      = pyflakes (catches bugs, unused imports)
-# I      = isort (sorts imports)
-# B      = flake8-bugbear (catches common bugs)
-# UP     = pyupgrade (automatically upgrades old syntax)
 select = ["E", "W", "F", "I", "B", "UP"]
-ignore = [
-    # E501: Ignore line length violations (let the formatter handle it)
-    "E501",
-]
+ignore = ["E501"]
 
 [tool.ruff.lint.extend-per-file-ignores]
-# FastAPI dependencies necessarily use function calls in argument defaults
 "**/api/**/*.py" = ["B008"]
-"alembic/versions/*.py" = ["E501"]
 
 [tool.ruff.lint.isort]
-# These settings ensure Ruff behaves exactly like your old isort "profile = black"
 known-first-party = ["app"]
 
 [tool.ruff.format]
-# These settings ensure Ruff behaves exactly like Black
 quote-style = "double"
 indent-style = "space"
 skip-magic-trailing-comma = false
@@ -89,44 +50,16 @@ line-ending = "auto"
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-# Tell pytest-bdd where the features folder is
-# Because pyproject.toml is in /backend, we go up one level (..) to the root, then into docs
-bdd_features_base_dir = "../docs/features"
-# Register our custom Gherkin tags so pytest doesn't throw warnings
-markers = [
-    "smoke: Mark a test as a smoke test",
-    "critical: Mark a test as critical path",
-    "security: Mark a test as a security/RBAC test",
-    "complex: Mark tests with complex state management",
-    "ui: Mark tests related to the User Interface",
-    "validation: Mark tests related to form validation"
-]
 python_files = ["test_*.py"]
 python_classes = ["Test*"]
 python_functions = ["test_*"]
-addopts = [
-    "-v",
-    "--strict-markers",
-    "--cov=app",
-    "--cov-report=term-missing",
-    "--cov-report=html",
-    "--browser", "chromium",
-    "--screenshot", "only-on-failure",
-]
-pythonpath = ["."]
 asyncio_mode = "auto"
 
 [tool.mypy]
-# Updated to 3.12 to match container
 python_version = "3.12"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = true
 exclude = [
-    'alembic/versions/.*\.py$',  # Ignor Alembic migration scripts (opțional)
-    'tests/',                    # Ignor test files (opțional)
+    "tests/",
 ]
-
-[tool.bandit]
-exclude_dirs = [".venv", "tests", ".mypy_cache", ".pytest_cache", "alembic"]
-targets = ["."]

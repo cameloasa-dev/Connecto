@@ -1,25 +1,32 @@
 // frontend/src/components/circles/MemberRow.jsx
-import { useState } from 'react';
-import { circleMemberService } from '../../services/circleMember.service';
-import './MemberRow.css';
+import { useState } from "react";
+import { circleMemberService } from "../../services/circleMember.service";
+import "./MemberRow.css";
 
-const MemberRow = ({ member, 
-                    circleId, 
-                    onRoleChange, 
-                    onRemove, 
-                    currentUserRole }) => {
+const MemberRow = ({
+  member,
+  circleId,
+  onRoleChange,
+  onRemove,
+  currentUserRole,
+}) => {
   const [isChanging, setIsChanging] = useState(false);
-  const isOwner = member.role === 'owner';
-  const canManage = currentUserRole === 'owner' || 
-                   (currentUserRole === 'moderator' && member.role === 'member');
+  const isOwner = member.role === "owner";
+  const canManage =
+    currentUserRole === "owner" ||
+    (currentUserRole === "moderator" && member.role === "member");
 
   const handleRoleChange = async (newRole) => {
     try {
       setIsChanging(true);
-      const updated = await circleMemberService.updateRole(circleId, member.user_id, newRole);
+      const updated = await circleMemberService.updateRole(
+        circleId,
+        member.user_id,
+        newRole,
+      );
       onRoleChange(updated);
     } catch (error) {
-      console.error('Failed to update role:', error);
+      console.error("Failed to update role:", error);
     } finally {
       setIsChanging(false);
     }
@@ -31,7 +38,7 @@ const MemberRow = ({ member,
         await circleMemberService.removeMember(circleId, member.user_id);
         onRemove(member.user_id);
       } catch (error) {
-        console.error('Failed to remove member:', error);
+        console.error("Failed to remove member:", error);
       }
     }
   };
@@ -56,7 +63,7 @@ const MemberRow = ({ member,
 
       {!isOwner && canManage && (
         <div className="member-actions">
-          <select 
+          <select
             value={member.role}
             onChange={(e) => handleRoleChange(e.target.value)}
             disabled={isChanging}
@@ -65,8 +72,8 @@ const MemberRow = ({ member,
             <option value="member">Member 👤</option>
             <option value="moderator">Moderator 🛡️</option>
           </select>
-          <button 
-            onClick={handleRemove} 
+          <button
+            onClick={handleRemove}
             className="remove-btn"
             disabled={isChanging}
             title="Remove member"

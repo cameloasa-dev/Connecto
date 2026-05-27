@@ -1,16 +1,18 @@
 // frontend/src/services/post.service.js
-import api from './api';
+import api from "./api";
 
-const BASE_URL = '/posts';
+const BASE_URL = "/posts";
 
 export const postService = {
   // Get feed (recent posts from user's circles)
   getFeed: async (limit = 20, offset = 0) => {
     try {
-      const response = await api.get(`${BASE_URL}/feed?limit=${limit}&offset=${offset}`);
+      const response = await api.get(
+        `${BASE_URL}/feed?limit=${limit}&offset=${offset}`,
+      );
       return response.data;
     } catch (error) {
-      console.error('Error fetching feed:', error);
+      console.error("Error fetching feed:", error);
       throw error;
     }
   },
@@ -19,10 +21,12 @@ export const postService = {
   getCirclePosts: async (circleId, limit = 50, offset = 0) => {
     try {
       // Note: The backend API should support pagination for circle posts to handle large circles efficiently.
-      const response = await api.get(`${BASE_URL}/circle/${circleId}?limit=${limit}&offset=${offset}`);
+      const response = await api.get(
+        `${BASE_URL}/circle/${circleId}?limit=${limit}&offset=${offset}`,
+      );
       return response.data;
     } catch (error) {
-      console.error('Error fetching circle posts:', error);
+      console.error("Error fetching circle posts:", error);
       throw error;
     }
   },
@@ -33,7 +37,7 @@ export const postService = {
       const response = await api.post(BASE_URL, postData);
       return response.data;
     } catch (error) {
-      console.error('Error creating post:', error);
+      console.error("Error creating post:", error);
       throw error;
     }
   },
@@ -44,7 +48,7 @@ export const postService = {
       const response = await api.get(`${BASE_URL}/${postId}`);
       return response.data;
     } catch (error) {
-      console.error('Error fetching post:', error);
+      console.error("Error fetching post:", error);
       throw error;
     }
   },
@@ -54,8 +58,8 @@ export const postService = {
     try {
       await api.delete(`${BASE_URL}/${postId}`);
     } catch (error) {
-      console.error('Error deleting post:', error);
+      console.error("Error deleting post:", error);
       throw error;
     }
-  }
+  },
 };

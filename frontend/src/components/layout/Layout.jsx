@@ -1,6 +1,6 @@
 // frontend/src/components/layout/Layout.jsx
-import Navbar from './Navbar';
-import UserSidebar from './UserSidebar';
+import Navbar from "./Navbar";
+import UserSidebar from "./UserSidebar";
 
 const Layout = ({ children }) => {
   return (
@@ -8,9 +8,7 @@ const Layout = ({ children }) => {
       <Navbar />
       <div className="dashboard-content">
         <UserSidebar />
-        <main className="dashboard-main">
-          {children}
-        </main>
+        <main className="dashboard-main">{children}</main>
       </div>
     </div>
   );

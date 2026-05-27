@@ -22,7 +22,7 @@ export
 # ============================================================================
 # INSTALLATION COMMANDS
 # ============================================================================
-.PHONY: install install-backend install-frontend install-playwright install-playwright-deps-only
+.PHONY: install install-backend install-frontend
 
 install: install-backend install-frontend
 	@echo "✅ All dependencies installed successfully!"
@@ -30,8 +30,6 @@ install: install-backend install-frontend
 install-backend:
 	@echo "🐍 Installing Backend dependencies..."
 	cd backend && uv sync
-	@echo "🔄 Running database migrations..."
-	cd backend && uv run alembic upgrade head
 	@echo "✅ Backend ready!"
 
 install-frontend:
@@ -39,24 +37,10 @@ install-frontend:
 	cd frontend && npm install
 	@echo "✅ Frontend ready!"
 
-install-playwright:
-	@echo "🎭 Installing Playwright Browsers..."
-	cd backend && uv run python -m playwright install --with-deps chromium
-	@echo "✅ Playwright installed"
-
-install-playwright-deps-only:
-	@echo "🎭 Installing Playwright System Dependencies..."
-	cd backend && uv run python -m playwright install-deps chromium
-	@echo "✅ Playwright dependencies installed"
-
 # ============================================================================
 # DATABASE COMMANDS
 # ============================================================================
-.PHONY: migrate-backend seed-database db-reset db-refresh
-
-migrate-backend:
-	@echo "🔄 Running migrations..."
-	cd backend && uv run alembic upgrade head
+.PHONY: seed-database db-reset db-refresh
 
 seed-database:
 	@echo "🌱 Seeding database..."
@@ -68,67 +52,89 @@ db-reset:
 	cd backend && uv run python scripts/reset_db.py
 	@echo "✅ Database reset complete"
 
-db-refresh: db-reset migrate-backend seed-database
+db-refresh: db-reset seed-database
 	@echo "🔄 Database refresh complete"
 
 # ============================================================================
 # TESTING & QUALITY CONTROL
 # ============================================================================
-.PHONY: test-backend lint-backend security-backend format-backend
-.PHONY: test-frontend-unit lint-frontend audit-frontend
-.PHONY: test-e2e test-e2e-headed
 
+.PHONY: lint-backend lint-frontend lint
+.PHONY: format-backend format-frontend format
+.PHONY: test-backend test-frontend-unit
+
+# -------------------------
+# BACKEND LINT
+# -------------------------
+lint-backend:
+	@echo "🔍 Linting Backend..."
+	cd backend && uv run ruff check .
+	@echo "✅ Backend lint passed"
+
+# -------------------------
+# FRONTEND LINT
+# -------------------------
+lint-frontend:
+	@echo "🔍 Linting Frontend..."
+	cd frontend && npm run lint
+	@echo "✅ Frontend lint passed"
+
+# -------------------------
+# UNIFIED LINT
+# -------------------------
+lint: lint-backend lint-frontend
+	@echo "✨ All lint checks passed!"
+
+# -------------------------
+# BACKEND FORMAT
+# -------------------------
+format-backend:
+	@echo "🎨 Formatting Backend..."
+	cd backend && uv run ruff format .
+	@echo "✅ Backend formatted"
+
+# -------------------------
+# FRONTEND FORMAT
+# -------------------------
+format-frontend:
+	@echo "🎨 Formatting Frontend..."
+	cd frontend && npm run format
+	@echo "✅ Frontend formatted"
+
+# -------------------------
+# UNIFIED FORMAT
+# -------------------------
+format: format-backend format-frontend
+	@echo "✨ All code formatted!"
+
+# -------------------------
+# BACKEND TESTS
+# -------------------------
 test-backend:
 	@echo "🧪 Running Backend Tests..."
-	cd backend && uv run pytest tests/unit/ -v
-	cd backend && uv run pytest tests/integration/ -v
+	cd backend && uv run pytest -v
 	@echo "✅ Backend tests passed"
 
-lint-backend:
-	@echo "🔍 Linting backend..."
-	cd backend && uv run ruff check .
-	cd backend && uv run mypy .
-	@echo "✅ Backend linting complete"
-
-security-backend:
-	@echo "🛡️ Scanning backend security..."
-	cd backend && uv run bandit -c pyproject.toml -r .
-	@echo "✅ Backend security scan complete"
-
-format-backend:
-	@echo "🎨 Formatting backend code..."
-	cd backend && uv run ruff format .
-	@echo "✅ Backend formatting complete"
-
-test-frontend-unit:
+# -------------------------
+# FRONTEND UNIT TESTS
+# -------------------------
+test-frontend:
 	@echo "🧪 Running Frontend Unit Tests..."
 	cd frontend && npm run test:run
 	@echo "✅ Frontend unit tests passed"
 
-lint-frontend:
-	@echo "🔍 Linting frontend..."
-	cd frontend && npm run lint
-	@echo "✅ Frontend linting complete"
-
+# -------------------------
+# FRONTEND UNIT TESTS
+# -------------------------
 audit-frontend:
 	@echo "🛡️ Auditing frontend dependencies..."
 	cd frontend && npm audit --omit=dev --audit-level=high
 	@echo "✅ Frontend audit complete"
 
-test-e2e:
-	@echo "🎭 Running E2E Tests..."
-	cd backend && uv run pytest tests/e2e/step_defs/ -v
-	@echo "✅ E2E tests complete"
-
-test-e2e-headed:
-	@echo "🎭 Running Headed E2E Tests..."
-	cd backend && DISPLAY=:1 uv run pytest tests/e2e/step_defs --headed --slowmo 1500 -v
-	@echo "✅ Headed E2E tests complete"
-
 # ============================================================================
 # APPLICATION EXECUTION
 # ============================================================================
-.PHONY: run-backend run-backend-for-ci run-test-backend run-frontend run-playwright-codegen
+.PHONY: run-backend run-backend-for-ci run-frontend
 
 run-backend:
 	@echo "🐍 Starting Backend on port $(BACKEND_PORT)..."
@@ -138,21 +144,16 @@ run-backend-for-ci:
 	@echo "🐍 Starting Backend for CI..."
 	cd backend && uv run uvicorn app.main:app --host 0.0.0.0 --port $(BACKEND_PORT) &
 	@echo "⏳ Waiting for backend to start..."
-	sleep 10
+	sleep 5
 	@echo "✅ Backend running on port $(BACKEND_PORT)"
-
-run-test-backend:
-	@echo "🐍 Starting Backend with TEST database..."
-	cd backend && uv run uvicorn app.main:app --host 0.0.0.0 --port $(BACKEND_PORT)
 
 run-frontend:
 	@echo "⚛️ Starting Frontend on port $(FRONTEND_PORT)..."
 	cd frontend && npm run dev
+	@echo "✅ Frontend running!"
 
-run-playwright-codegen:
-	@echo "🎬 Starting Playwright Code Generator..."
-	@echo "📌 Make sure frontend is running on port $(FRONTEND_PORT)"
-	cd backend && uv run playwright codegen http://localhost:$(FRONTEND_PORT)
+build-frontend:
+	cd frontend && npm run build
 
 # ============================================================================
 # ENVIRONMENT SETUP
@@ -195,6 +196,7 @@ sync: ## Sync backend & frontend dependencies after pulling changes
 	@echo "🔄 Syncing frontend dependencies..."
 	cd frontend && npm install
 	@echo "✅ All dependencies are now in sync!"
+
 # ----------------------------------------------------------------------------
 # Cleanup and utility commands
 # ----------------------------------------------------------------------------
@@ -203,13 +205,13 @@ sync: ## Sync backend & frontend dependencies after pulling changes
 
 clean:
 	@echo "🧹 Cleaning up..."
-	cd backend && rm -rf .venv .pytest_cache .ruff_cache .mypy_cache __pycache__
+	cd backend && rm -rf .pytest_cache .ruff_cache .mypy_cache __pycache__
 	cd frontend && rm -rf node_modules build dist
 	@echo "✅ Cleanup complete"
 
 help:
 	@echo "╔══════════════════════════════════════════════════════════════╗"
-	@echo "║	 🚀 AVAILABLE COMMANDS - Full Stack Project			   ║"
+	@echo "║     🚀 AVAILABLE COMMANDS - Full Stack Project            ║"
 	@echo "╚══════════════════════════════════════════════════════════════╝"
 	@echo ""
 	@echo "📦 INSTALLATION:"

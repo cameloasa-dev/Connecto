@@ -1,17 +1,18 @@
 // frontend/src/components/posts/PostCard.jsx
-import './PostCard.css';
-
+import "./PostCard.css";
 
 const PostCard = ({ post, showCircle = false }) => {
   return (
     <div className="post-card">
       <div className="post-header">
         <div className="post-author-avatar">
-          {post.author_name?.charAt(0).toUpperCase() || 'U'}
+          {post.author_name?.charAt(0).toUpperCase() || "U"}
         </div>
         <div className="post-author-info">
           <div className="post-author">{post.author_name}</div>
-          <div className="post-date">{new Date(post.created_at).toLocaleDateString()}</div>
+          <div className="post-date">
+            {new Date(post.created_at).toLocaleDateString()}
+          </div>
         </div>
       </div>
       <div className="post-content">

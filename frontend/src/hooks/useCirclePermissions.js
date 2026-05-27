@@ -1,10 +1,10 @@
 // frontend/src/hooks/useCirclePermissions.js
-import { useAuth } from '../contexts/useAuth';
+import { useAuth } from "../contexts/useAuth";
 
 // Custom hook to determine the current user's permissions within a circle
 export const useCirclePermissions = (circle) => {
   const { user } = useAuth();
-  
+
   if (!circle || !user) {
     return {
       isOwner: false,
@@ -14,21 +14,21 @@ export const useCirclePermissions = (circle) => {
       canManageMembers: false,
       canChangeRoles: false,
       canDeleteCircle: false,
-      canChangeSettings: false
+      canChangeSettings: false,
     };
   }
 
-  const currentMember = circle.members?.find(m => m.user_id === user.id);
+  const currentMember = circle.members?.find((m) => m.user_id === user.id);
   const role = currentMember?.role;
-  
+
   return {
-    isOwner: role === 'owner',
-    isModerator: role === 'moderator',
+    isOwner: role === "owner",
+    isModerator: role === "moderator",
     isMember: !!role,
-    canModerate: role === 'owner' || role === 'moderator',
-    canManageMembers: role === 'owner' || role === 'moderator',
-    canChangeRoles: role === 'owner',
-    canDeleteCircle: role === 'owner',
-    canChangeSettings: role === 'owner'
+    canModerate: role === "owner" || role === "moderator",
+    canManageMembers: role === "owner" || role === "moderator",
+    canChangeRoles: role === "owner",
+    canDeleteCircle: role === "owner",
+    canChangeSettings: role === "owner",
   };
 };

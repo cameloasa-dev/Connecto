@@ -1,49 +1,49 @@
 // frontend/src/pages/CirclePage.jsx
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { useAuth } from '../contexts/useAuth.js';
-import CreatePost from '../components/posts/CreatePost.jsx';
-import PostCard from '../components/posts/PostCard.jsx';
-import MemberManagement from '../components/circles/MemberManagement';
-import CircleSettings from '../components/circles/CircleSettings';
-import { circleService } from '../services/circle.service';
-import { postService } from '../services/post.service';
-import './CirclePage.css';
+import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { useAuth } from "../contexts/useAuth.js";
+import CreatePost from "../components/posts/CreatePost.jsx";
+import PostCard from "../components/posts/PostCard.jsx";
+import MemberManagement from "../components/circles/MemberManagement";
+import CircleSettings from "../components/circles/CircleSettings";
+import { circleService } from "../services/circle.service";
+import { postService } from "../services/post.service";
+import "./CirclePage.css";
 
 function CirclePage() {
   const { circleId } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
-  
+
   const [circle, setCircle] = useState(null);
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
+  const [error, setError] = useState("");
   const [showCreatePost, setShowCreatePost] = useState(false);
-  const [activeTab, setActiveTab] = useState('posts');
+  const [activeTab, setActiveTab] = useState("posts");
 
   // Load circle data
   useEffect(() => {
     const fetchCircleData = async () => {
       try {
         setLoading(true);
-        setError('');
-        
+        setError("");
+
         const [circleData, postsData] = await Promise.all([
           circleService.getCircle(circleId),
-          postService.getCirclePosts(circleId)
+          postService.getCirclePosts(circleId),
         ]);
-        
+
         setCircle(circleData);
         setPosts(postsData || []);
       } catch (err) {
-        console.error('Failed to load circle:', err);
+        console.error("Failed to load circle:", err);
         if (err.response?.status === 403) {
-          setError('You are not a member of this circle');
+          setError("You are not a member of this circle");
         } else if (err.response?.status === 404) {
-          setError('Circle not found');
+          setError("Circle not found");
         } else {
-          setError('Failed to load circle data');
+          setError("Failed to load circle data");
         }
       } finally {
         setLoading(false);
@@ -59,18 +59,18 @@ function CirclePage() {
   };
 
   const handleMemberUpdated = (updatedData) => {
-    if (updatedData.type === 'remove') {
-      setCircle(prev => ({
+    if (updatedData.type === "remove") {
+      setCircle((prev) => ({
         ...prev,
-        members: prev.members.filter(m => m.user_id !== updatedData.userId),
-        member_count: prev.member_count - 1
+        members: prev.members.filter((m) => m.user_id !== updatedData.userId),
+        member_count: prev.member_count - 1,
       }));
     } else if (updatedData.member) {
-      setCircle(prev => {
+      setCircle((prev) => {
         const existingIndex = prev.members.findIndex(
-          m => m.user_id === updatedData.member.user_id
+          (m) => m.user_id === updatedData.member.user_id,
         );
-        
+
         if (existingIndex >= 0) {
           const newMembers = [...prev.members];
           newMembers[existingIndex] = updatedData.member;
@@ -79,7 +79,7 @@ function CirclePage() {
           return {
             ...prev,
             members: [...prev.members, updatedData.member],
-            member_count: prev.member_count + 1
+            member_count: prev.member_count + 1,
           };
         }
       });
@@ -90,9 +90,11 @@ function CirclePage() {
     setCircle(updatedCircle);
   };
 
-  const currentUserRole = circle?.members?.find(m => m.user_id === user?.id)?.role;
-  const isOwner = currentUserRole === 'owner';
-  const isModerator = currentUserRole === 'moderator';
+  const currentUserRole = circle?.members?.find(
+    (m) => m.user_id === user?.id,
+  )?.role;
+  const isOwner = currentUserRole === "owner";
+  const isModerator = currentUserRole === "moderator";
   const canChangeSettings = isOwner;
 
   if (loading) {
@@ -104,7 +106,10 @@ function CirclePage() {
       <div className="error-container">
         <h2>Error</h2>
         <p>{error}</p>
-        <button className="primary-btn" onClick={() => navigate('/user-dashboard')}>
+        <button
+          className="primary-btn"
+          onClick={() => navigate("/user-dashboard")}
+        >
           Back to Dashboard
         </button>
       </div>
@@ -118,20 +123,25 @@ function CirclePage() {
       {/* Circle Header */}
       <div className="circle-header">
         <div className="circle-header-content">
-          <button className="back-btn" onClick={() => navigate('/user-dashboard')}>
+          <button
+            className="back-btn"
+            onClick={() => navigate("/user-dashboard")}
+          >
             ← Back to Dashboard
           </button>
-          
+
           <div className="circle-title-section">
             <h1>{circle.name}</h1>
             <div className="circle-badge">
-              {isOwner && '👑 Owner'}
-              {isModerator && '🛡️ Moderator'}
+              {isOwner && "👑 Owner"}
+              {isModerator && "🛡️ Moderator"}
             </div>
           </div>
-          
-          <p className="circle-description">{circle.description || 'No description'}</p>
-          
+
+          <p className="circle-description">
+            {circle.description || "No description"}
+          </p>
+
           <div className="circle-stats">
             <div className="stat">
               <span className="stat-value">{circle.member_count}</span>
@@ -150,17 +160,17 @@ function CirclePage() {
           </div>
 
           <div className="circle-actions">
-            <button 
+            <button
               className="primary-btn"
               onClick={() => setShowCreatePost(!showCreatePost)}
             >
-              {showCreatePost ? 'Cancel' : '+ Create Post'}
+              {showCreatePost ? "Cancel" : "+ Create Post"}
             </button>
           </div>
 
           {showCreatePost && (
             <div className="create-post-section">
-              <CreatePost 
+              <CreatePost
                 onPostCreated={handlePostCreated}
                 circles={[circle]}
                 selectedCircleId={circle.id}
@@ -171,31 +181,29 @@ function CirclePage() {
       </div>
 
       <div className="circle-tabs">
-        <button 
-          className={`tab ${activeTab === 'posts' ? 'active' : ''}`}
-          onClick={() => setActiveTab('posts')}
+        <button
+          className={`tab ${activeTab === "posts" ? "active" : ""}`}
+          onClick={() => setActiveTab("posts")}
         >
           Posts ({posts.length})
         </button>
-        <button 
-          className={`tab ${activeTab === 'members' ? 'active' : ''}`}
-          onClick={() => setActiveTab('members')}
+        <button
+          className={`tab ${activeTab === "members" ? "active" : ""}`}
+          onClick={() => setActiveTab("members")}
         >
           Members ({circle.member_count})
         </button>
       </div>
 
       <div className="tab-content">
-        {activeTab === 'posts' && (
+        {activeTab === "posts" && (
           <div className="posts-section">
             {posts.length > 0 ? (
-              posts.map(post => (
-                <PostCard key={post.id} post={post} />
-              ))
+              posts.map((post) => <PostCard key={post.id} post={post} />)
             ) : (
               <div className="empty-state">
                 <p>No posts in this circle yet.</p>
-                <button 
+                <button
                   className="primary-btn"
                   onClick={() => setShowCreatePost(true)}
                 >
@@ -206,17 +214,17 @@ function CirclePage() {
           </div>
         )}
 
-        {activeTab === 'members' && (
+        {activeTab === "members" && (
           <div className="members-section">
-            <MemberManagement 
+            <MemberManagement
               circle={circle}
               members={circle.members || []}
               onMemberUpdated={handleMemberUpdated}
               currentUserId={user?.id}
             />
-            
+
             {canChangeSettings && (
-              <CircleSettings 
+              <CircleSettings
                 circle={circle}
                 onCircleUpdated={handleCircleUpdated}
               />

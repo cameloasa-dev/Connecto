@@ -212,7 +212,7 @@
 }
 
 .loading-spinner::after {
-  content: '';
+  content: "";
   width: 2rem;
   height: 2rem;
   margin-left: 1rem;
@@ -223,7 +223,9 @@
 }
 
 @keyframes spinner {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 
 /* Error Message */
@@ -265,7 +267,7 @@
   .dashboard-main {
     padding: 1.5rem;
   }
-  
+
   .stats-grid {
     grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
     gap: 1rem;
@@ -276,19 +278,19 @@
   .dashboard-main {
     padding: 1rem;
   }
-  
+
   .welcome-section h1 {
     font-size: 1.5rem;
   }
-  
+
   .stats-grid {
     grid-template-columns: 1fr;
   }
-  
+
   .action-buttons {
     flex-direction: column;
   }
-  
+
   .action-buttons button {
     width: 100%;
   }
@@ -298,46 +300,44 @@
   .dashboard-main {
     padding: 0.75rem;
   }
-  
+
   .stat-card {
     padding: 1rem;
   }
-  
+
   .stat-number {
     font-size: 1.5rem;
   }
-  
+
   .empty-state {
     padding: 2rem 1rem;
   }
 }
-  .dashboard-main {
-    padding: 1rem;
-  }
-  
-  .circles-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .welcome-section h1 {
-    font-size: 1.5rem;
-  }
-  
-  .stats-grid {
-    grid-template-columns: 1fr;
-  }
-  
-  .action-buttons {
-    flex-direction: column;
-  }
-  
-  .action-buttons button {
-    width: 100%;
-  }
-  
-  .post-meta {
-    flex-direction: column;
-    gap: 0.5rem;
-  }
+.dashboard-main {
+  padding: 1rem;
+}
 
+.circles-grid {
+  grid-template-columns: 1fr;
+}
 
+.welcome-section h1 {
+  font-size: 1.5rem;
+}
+
+.stats-grid {
+  grid-template-columns: 1fr;
+}
+
+.action-buttons {
+  flex-direction: column;
+}
+
+.action-buttons button {
+  width: 100%;
+}
+
+.post-meta {
+  flex-direction: column;
+  gap: 0.5rem;
+}

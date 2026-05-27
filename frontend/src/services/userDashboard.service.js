@@ -1,8 +1,8 @@
 // frontend/src/services/userDashboard.service.js
-import axios from 'axios';
-import { API_BASE_URL } from '../config/index';
-import { circleService } from './circle.service';
-import { postService } from './post.service';
+import axios from "axios";
+import { API_BASE_URL } from "../config/index";
+import { circleService } from "./circle.service";
+import { postService } from "./post.service";
 
 export const userDashboardService = {
   async getUserDashboardData() {
@@ -11,16 +11,16 @@ export const userDashboardService = {
       const [userResponse, circlesResponse, feedResponse] = await Promise.all([
         // 1. User info (exists)
         axios.get(`${API_BASE_URL}/auth/me`, {
-          withCredentials: true
+          withCredentials: true,
         }),
-        
+
         // 2. User's circles with badges (new)
         circleService.getMyCircles(),
-        
+
         // 3. Recent feed posts (new)
-        postService.getFeed(10) // limit 10 posts
+        postService.getFeed(10), // limit 10 posts
       ]);
-      
+
       // Structure the dashboard data
       return {
         user: userResponse.data,
@@ -31,10 +31,9 @@ export const userDashboardService = {
         postsCount: feedResponse?.length || 0,
         notificationsCount: 0, // Add notification count logic if needed
       };
-      
     } catch (error) {
-      console.error('User Dashboard service error:', error);
+      console.error("User Dashboard service error:", error);
       throw error;
     }
-  }
+  },
 };

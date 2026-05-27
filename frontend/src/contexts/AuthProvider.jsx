@@ -1,12 +1,12 @@
 // frontend/src/contexts/AuthProvider.jsx
-import { useState, useEffect } from 'react';
-import AuthContext from './AuthContext';  
-import { authService } from '../services/auth.service';
+import { useState, useEffect } from "react";
+import AuthContext from "./AuthContext";
+import { authService } from "../services/auth.service";
 
 //AuthProvider component to manage authentication state and actions
 const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState(null); 
-  const [loading, setLoading] = useState(true); 
+  const [user, setUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const checkExistingAuth = async () => {
@@ -16,7 +16,7 @@ const AuthProvider = ({ children }) => {
           setUser(authResult.user);
         }
       } catch (error) {
-        console.warn('No existing auth session:', error);
+        console.warn("No existing auth session:", error);
       } finally {
         setLoading(false);
       }
@@ -33,7 +33,7 @@ const AuthProvider = ({ children }) => {
       }
       return result;
     } catch (error) {
-      console.error('Login failed:', error);
+      console.error("Login failed:", error);
       throw error;
     }
   };
@@ -44,7 +44,7 @@ const AuthProvider = ({ children }) => {
       const result = await authService.register(userData);
       return result;
     } catch (error) {
-      console.error('Registration failed:', error);
+      console.error("Registration failed:", error);
       throw error;
     }
   };
@@ -55,7 +55,7 @@ const AuthProvider = ({ children }) => {
       await authService.logout();
       setUser(null);
     } catch (error) {
-      console.warn('Logout error:', error);
+      console.warn("Logout error:", error);
       setUser(null);
     }
   };

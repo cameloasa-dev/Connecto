@@ -5,7 +5,9 @@
   border-radius: 12px;
   padding: 1.5rem;
   box-shadow: var(--shadow-sm);
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
 }
 
 .post-card:hover {
@@ -95,12 +97,12 @@
   .post-card {
     padding: 1rem;
   }
-  
+
   .post-actions {
     flex-wrap: wrap;
     gap: 0.5rem;
   }
-  
+
   .post-action-btn {
     padding: 0.5rem;
     flex: 1;

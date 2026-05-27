@@ -1,41 +1,41 @@
 // frontend/src/components/layout/CreateCircleModal.jsx
-import { useState } from 'react';
-import { circleService } from '../../services/circle.service';
-import './CreateCircleModal.css';
+import { useState } from "react";
+import { circleService } from "../../services/circle.service";
+import "./CreateCircleModal.css";
 
 const CreateCircleModal = ({ isOpen, onClose, onCircleCreated }) => {
-  console.log('📦 CreateCircleModal rendering - isOpen:', isOpen);
-  
+  console.log("📦 CreateCircleModal rendering - isOpen:", isOpen);
+
   const [formData, setFormData] = useState({
-    name: '',
-    description: ''
+    name: "",
+    description: "",
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   // If the modal is not open, don't render anything
   if (!isOpen) {
-    console.log('🚫 Modal not open - returning null');
+    console.log("🚫 Modal not open - returning null");
     return null;
   }
 
-  console.log('✅ Modal is open - rendering content');
+  console.log("✅ Modal is open - rendering content");
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log('📝 Form submitted:', formData);
-    
+    console.log("📝 Form submitted:", formData);
+
     try {
       setLoading(true);
       setError(null);
       const newCircle = await circleService.createCircle(formData);
-      console.log('✅ Circle created successfully:', newCircle);
+      console.log("✅ Circle created successfully:", newCircle);
       onCircleCreated(newCircle);
       onClose();
-      setFormData({ name: '', description: '' }); // Reset form
+      setFormData({ name: "", description: "" }); // Reset form
     } catch (err) {
-      console.error('❌ Error creating circle:', err);
-      setError(err.response?.data?.detail || 'Failed to create circle');
+      console.error("❌ Error creating circle:", err);
+      setError(err.response?.data?.detail || "Failed to create circle");
     } finally {
       setLoading(false);
     }
@@ -51,7 +51,9 @@ const CreateCircleModal = ({ isOpen, onClose, onCircleCreated }) => {
             <input
               type="text"
               value={formData.name}
-              onChange={(e) => setFormData({...formData, name: e.target.value})}
+              onChange={(e) =>
+                setFormData({ ...formData, name: e.target.value })
+              }
               required
               minLength={3}
               maxLength={50}
@@ -63,7 +65,9 @@ const CreateCircleModal = ({ isOpen, onClose, onCircleCreated }) => {
             <label>Description</label>
             <textarea
               value={formData.description}
-              onChange={(e) => setFormData({...formData, description: e.target.value})}
+              onChange={(e) =>
+                setFormData({ ...formData, description: e.target.value })
+              }
               maxLength={255}
               placeholder="What's this circle about? (optional)"
               rows="3"
@@ -77,7 +81,7 @@ const CreateCircleModal = ({ isOpen, onClose, onCircleCreated }) => {
               Cancel
             </button>
             <button type="submit" disabled={loading}>
-              {loading ? 'Creating...' : 'Create Circle'}
+              {loading ? "Creating..." : "Create Circle"}
             </button>
           </div>
         </form>

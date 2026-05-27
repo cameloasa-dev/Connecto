@@ -1,12 +1,12 @@
 // frontend/src/components/layout/CreatePost.jsx
-import { useState } from 'react';
-import { postService } from '../../services/post.service'; 
+import { useState } from "react";
+import { postService } from "../../services/post.service";
 
 const CreatePost = ({ onPostCreated, circles = [] }) => {
   const [formData, setFormData] = useState({
-    title: '',
-    content: '',
-    circle_id: null
+    title: "",
+    content: "",
+    circle_id: null,
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -19,10 +19,10 @@ const CreatePost = ({ onPostCreated, circles = [] }) => {
       const newPost = await postService.createPost(formData);
       onPostCreated(newPost);
       // Reset form
-      setFormData({ title: '', content: '', circle_id: null });
+      setFormData({ title: "", content: "", circle_id: null });
     } catch (err) {
-      console.error('Failed to create post:', err);
-      setError(err.response?.data?.detail || 'Failed to create post');
+      console.error("Failed to create post:", err);
+      setError(err.response?.data?.detail || "Failed to create post");
     } finally {
       setLoading(false);
     }
@@ -31,7 +31,7 @@ const CreatePost = ({ onPostCreated, circles = [] }) => {
   return (
     <form onSubmit={handleSubmit} className="create-post-form">
       <h3>Create New Post</h3>
-      
+
       {error && <div className="error-message">{error}</div>}
 
       <div className="form-group">
@@ -39,7 +39,7 @@ const CreatePost = ({ onPostCreated, circles = [] }) => {
           type="text"
           placeholder="Post title"
           value={formData.title}
-          onChange={(e) => setFormData({...formData, title: e.target.value})}
+          onChange={(e) => setFormData({ ...formData, title: e.target.value })}
           required
           minLength={1}
           maxLength={100}
@@ -50,7 +50,9 @@ const CreatePost = ({ onPostCreated, circles = [] }) => {
         <textarea
           placeholder="What's on your mind?"
           value={formData.content}
-          onChange={(e) => setFormData({...formData, content: e.target.value})}
+          onChange={(e) =>
+            setFormData({ ...formData, content: e.target.value })
+          }
           required
           minLength={1}
           rows="4"
@@ -59,16 +61,18 @@ const CreatePost = ({ onPostCreated, circles = [] }) => {
 
       <div className="form-group">
         <select
-          value={formData.circle_id || ''}
-          onChange={(e) => setFormData({
-            ...formData, 
-            circle_id: e.target.value ? parseInt(e.target.value) : null
-          })}
+          value={formData.circle_id || ""}
+          onChange={(e) =>
+            setFormData({
+              ...formData,
+              circle_id: e.target.value ? parseInt(e.target.value) : null,
+            })
+          }
         >
           <option value="">Public Post (not in a circle)</option>
-          {circles.map(circle => (
+          {circles.map((circle) => (
             <option key={circle.id} value={circle.id}>
-              {circle.name} {circle.badge || ''}
+              {circle.name} {circle.badge || ""}
             </option>
           ))}
         </select>
@@ -76,7 +80,7 @@ const CreatePost = ({ onPostCreated, circles = [] }) => {
 
       <div className="form-actions">
         <button type="submit" disabled={loading} className="primary-btn">
-          {loading ? 'Posting...' : 'Post'}
+          {loading ? "Posting..." : "Post"}
         </button>
       </div>
     </form>
