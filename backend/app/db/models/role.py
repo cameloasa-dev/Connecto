@@ -1,9 +1,11 @@
 """
 SQLAlchemy ORM models for the Social App (SQLite compatible)
 """
-from app.db.database import Base
-from sqlalchemy.orm import Mapped, mapped_column
 from sqlalchemy import String
+from sqlalchemy.orm import Mapped, mapped_column
+
+from app.db.database import Base
+
 
 class Role(Base):
     __tablename__ = "roles"

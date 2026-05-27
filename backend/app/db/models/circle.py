@@ -1,10 +1,13 @@
 """
 SQLAlchemy ORM models for the Social App (SQLite compatible)
 """
-from app.db.database import Base
-from sqlalchemy.orm import Mapped, mapped_column, relationship
-from sqlalchemy import String, DateTime, ForeignKey
 from datetime import datetime
+
+from sqlalchemy import DateTime, ForeignKey, String
+from sqlalchemy.orm import Mapped, mapped_column, relationship
+
+from app.db.database import Base
+
 
 class Circle(Base):
     __tablename__ = "circles"

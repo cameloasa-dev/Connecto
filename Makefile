@@ -44,7 +44,7 @@ install-frontend:
 
 seed-database:
 	@echo "🌱 Seeding database..."
-	cd backend && uv run python scripts/create_test_users.py
+	cd backend && uv run python scripts/seed.py
 	@echo "✅ Test data added"
 
 db-reset:

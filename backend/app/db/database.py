@@ -13,7 +13,6 @@ from sqlalchemy.orm import declarative_base
 
 from app.core.config import settings
 
-
 # -----------------------------
 # DATABASE CONFIG (SQLite)
 # -----------------------------

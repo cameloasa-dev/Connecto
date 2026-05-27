@@ -1,10 +1,12 @@
-f"""
+"""
 Security headers middleware for Connecto backend
 Adds CSP, HSTS, and modern security headers
 """
 
 from typing import Any
-from starlette.types import Scope, Receive, Send
+
+from starlette.types import Receive, Scope, Send
+
 from app.core.config import settings
 
 

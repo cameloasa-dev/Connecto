@@ -5,7 +5,7 @@ Production-ready version
 
 import logging
 import traceback
-from datetime import datetime, timedelta
+from datetime import datetime
 from typing import Any, Literal
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, status
@@ -15,18 +15,18 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import settings
 from app.core.limiter import limiter
 from app.core.security import (
+    create_session_expiry,
+    create_session_token,
     hash_password,
     verify_password,
-    create_session_token,
-    create_session_expiry,
 )
 from app.db.database import get_db
 from app.db.models import User, UserSession
 from app.schemas import (
+    SessionResponse,
     UserCreate,
     UserLogin,
     UserResponse,
-    SessionResponse,
 )
 
 # ---------------------------------------------------------
@@ -162,7 +162,10 @@ async def login(
             "error": str(e),
             "trace": traceback.format_exc()
         })
-        raise HTTPException(status_code=500, detail="Login failed due to server error")
+        raise HTTPException(
+            status_code=500,
+            detail="Login failed due to server error"
+            ) from e
 
 
 # =========================================================

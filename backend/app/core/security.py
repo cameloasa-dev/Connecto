@@ -5,7 +5,7 @@ Optional fallback: JWT tokens (for future mobile/API use)
 """
 
 import secrets
-from datetime import datetime, timedelta, UTC
+from datetime import UTC, datetime, timedelta
 from typing import Any
 
 import jwt
@@ -13,7 +13,6 @@ from pwdlib import PasswordHash
 from pwdlib.hashers.argon2 import Argon2Hasher
 
 from app.core.config import settings
-
 
 # ======================================================
 # PASSWORD HASHING (Argon2)

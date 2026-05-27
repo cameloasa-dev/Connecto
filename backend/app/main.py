@@ -15,12 +15,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from slowapi.errors import RateLimitExceeded
 
-from app.api.endpoints import auth, circles, circle_members, posts, users
+from app.api.endpoints import auth, circle_members, circles, posts, users
 from app.core.config import settings
-from app.core.db import engine, Base
+from app.core.db import Base, engine
 from app.core.limiter import limiter
 from app.core.security_headers import SecurityHeadersMiddleware
-
 
 # -----------------------------
 # LOGGING CONFIG
@@ -112,7 +111,7 @@ app.add_middleware(SecurityHeadersMiddleware)
 
 
 # -----------------------------
-# ROUTERS 
+# ROUTERS
 # -----------------------------
 app.include_router(auth.router)
 app.include_router(users.router)
@@ -122,7 +121,7 @@ app.include_router(posts.router)
 
 
 # -----------------------------
-# HEALTH ENDPOINTS 
+# HEALTH ENDPOINTS
 # -----------------------------
 @app.get("/")
 async def root() -> dict[str, Any]:
