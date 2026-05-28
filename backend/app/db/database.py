@@ -23,9 +23,11 @@ engine = create_async_engine(
     echo=True,  # set to False in production
 )
 
+
 # Base class for all ORM models
 class Base(DeclarativeBase):
     pass
+
 
 # Async session factory
 SessionLocal = async_sessionmaker(

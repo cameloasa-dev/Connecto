@@ -13,23 +13,21 @@ from app.db.database import Base
 class CircleMember(Base):
     __tablename__ = "circle_members"
 
-    circle_id: Mapped[int] = mapped_column(ForeignKey("circles.id",ondelete="CASCADE"),
-                                           primary_key=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id",ondelete="CASCADE"), 
-                                         primary_key=True)
+    circle_id: Mapped[int] = mapped_column(
+        ForeignKey("circles.id", ondelete="CASCADE"), primary_key=True
+    )
+    user_id: Mapped[int] = mapped_column(
+        ForeignKey("users.id", ondelete="CASCADE"), primary_key=True
+    )
 
     role: Mapped[str] = mapped_column(String(20), default="member")
 
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(),
-        server_default=func.now(),
-        nullable=False
+        DateTime(), server_default=func.now(), nullable=False
     )
 
     joined_at: Mapped[datetime] = mapped_column(
-        DateTime(),
-        server_default=func.now(),
-        nullable=False
+        DateTime(), server_default=func.now(), nullable=False
     )
 
     circle = relationship("Circle", back_populates="members")

@@ -33,11 +33,7 @@ async def test_full_negative_flow(client: AsyncClient):
     # ------------------------------------------------------
     await client.post(
         "/auth/register",
-        json={
-            "username": "neg_user",
-            "email": "neg@test.com",
-            "password": "Abc123!!"
-        },
+        json={"username": "neg_user", "email": "neg@test.com", "password": "Abc123!!"},
     )
 
     login = await client.post(
@@ -67,7 +63,7 @@ async def test_full_negative_flow(client: AsyncClient):
     # 6. ADD MEMBER THAT DOES NOT EXIST
     # ------------------------------------------------------
     add_fake_member = await client.post(
-        f"/circle-members/1/add",
+        "/circle-members/1/add",
         json={"username": "nu_exista", "role": "MEMBER"},
     )
     assert add_fake_member.status_code in (401, 403, 404)

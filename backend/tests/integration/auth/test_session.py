@@ -1,10 +1,10 @@
 import pytest
 from httpx import AsyncClient
 
-
 # ============================================================================
 # SESSION-BASED LOGIN
 # ============================================================================
+
 
 @pytest.mark.asyncio
 async def test_login_session_mode(client: AsyncClient) -> None:

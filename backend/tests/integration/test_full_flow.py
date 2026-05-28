@@ -10,11 +10,7 @@ async def test_full_integration_flow(client: AsyncClient, db_session: AsyncSessi
     # ------------------------------------------------------
     create_user = await client.post(
         "/auth/register",
-        json={
-            "username": "flow_user",
-            "email": "flow@test.com",
-            "password": "Abc123!!"
-        },
+        json={"username": "flow_user", "email": "flow@test.com", "password": "Abc123!!"},
     )
     assert create_user.status_code == 201
 

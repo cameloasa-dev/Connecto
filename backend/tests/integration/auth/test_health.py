@@ -19,4 +19,3 @@ async def test_health_endpoint(client: AsyncClient) -> None:
 
     data = response.json()
     assert data["status"] == "healthy"
-

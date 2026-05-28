@@ -27,5 +27,24 @@
     "react": {
       "version": "detect"
     }
-  }
+  },
+  "overrides": [
+    {
+      "files": ["tests/**/*.{js,jsx,ts,tsx}"],
+      "env": {
+        "node": true
+      },
+      "globals": {
+        "beforeAll": "readonly",
+        "afterAll": "readonly",
+        "afterEach": "readonly",
+        "describe": "readonly",
+        "it": "readonly",
+        "expect": "readonly"
+      },
+      "rules": {
+        "no-unused-vars": "off"
+      }
+    }
+  ]
 }

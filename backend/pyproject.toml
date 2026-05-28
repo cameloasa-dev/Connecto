@@ -38,6 +38,7 @@ ignore = ["E501"]
 
 [tool.ruff.lint.extend-per-file-ignores]
 "**/api/**/*.py" = ["B008"]
+"tests/**/*.py" = ["F401", "F841"]
 
 [tool.ruff.lint.isort]
 known-first-party = ["app"]

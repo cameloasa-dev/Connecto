@@ -28,7 +28,7 @@ describe("AddMemberModal (integration)", () => {
         }
 
         return HttpResponse.json([]);
-      })
+      }),
     );
 
     render(
@@ -37,12 +37,12 @@ describe("AddMemberModal (integration)", () => {
         onClose={() => {}}
         circleId={5}
         onMemberAdded={() => {}}
-      />
+      />,
     );
 
     await userEvent.type(
       screen.getByPlaceholderText(/search by username/i),
-      "Bob"
+      "Bob",
     );
 
     fireEvent.click(screen.getByRole("button", { name: /search/i }));

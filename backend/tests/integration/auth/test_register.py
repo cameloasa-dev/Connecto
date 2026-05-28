@@ -1,10 +1,10 @@
 import pytest
 from httpx import AsyncClient
 
-
 # ============================================================================
 # SUCCESSFUL REGISTRATION
 # ============================================================================
+
 
 @pytest.mark.asyncio
 async def test_register_user_success(client: AsyncClient) -> None:
@@ -29,6 +29,7 @@ async def test_register_user_success(client: AsyncClient) -> None:
 # MINIMAL REGISTRATION
 # ============================================================================
 
+
 @pytest.mark.asyncio
 async def test_register_minimal_data(client: AsyncClient) -> None:
     payload = {
@@ -48,6 +49,7 @@ async def test_register_minimal_data(client: AsyncClient) -> None:
 # ============================================================================
 # DUPLICATES
 # ============================================================================
+
 
 @pytest.mark.asyncio
 async def test_register_duplicate_username(client: AsyncClient) -> None:
@@ -90,6 +92,7 @@ async def test_register_duplicate_email(client: AsyncClient) -> None:
 # ============================================================================
 # INVALID DATA
 # ============================================================================
+
 
 @pytest.mark.asyncio
 async def test_register_invalid_data(client: AsyncClient) -> None:

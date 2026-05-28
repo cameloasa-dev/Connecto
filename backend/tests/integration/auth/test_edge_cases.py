@@ -1,10 +1,10 @@
 import pytest
 from httpx import AsyncClient
 
-
 # ============================================================================
 # USERNAME CASE SENSITIVITY
 # ============================================================================
+
 
 @pytest.mark.asyncio
 async def test_username_case_sensitivity(client: AsyncClient) -> None:
@@ -31,6 +31,7 @@ async def test_username_case_sensitivity(client: AsyncClient) -> None:
 # SPECIAL CHARACTERS IN USERNAME
 # ============================================================================
 
+
 @pytest.mark.asyncio
 async def test_special_characters_in_username(client: AsyncClient) -> None:
     response = await client.post(
@@ -49,6 +50,7 @@ async def test_special_characters_in_username(client: AsyncClient) -> None:
 # ============================================================================
 # USERNAME LENGTH LIMITS
 # ============================================================================
+
 
 @pytest.mark.asyncio
 async def test_username_length_limits(client: AsyncClient) -> None:

@@ -8,7 +8,7 @@ import pytest_asyncio
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.models import User, Circle, CircleMember, Post
+from app.db.models import Circle, CircleMember, User
 from app.schemas.social import CircleRole
 
 
@@ -54,6 +54,7 @@ async def circle(db_session: AsyncSession, owner: User) -> Circle:
     await db_session.refresh(c)
     return c
 
+
 # ------------------------------------------------------
 # FIXTURE: another user
 # ------------------------------------------------------
@@ -83,9 +84,7 @@ async def test_create_post_in_circle(client: AsyncClient, circle: Circle):
 
 
 @pytest.mark.asyncio
-async def test_create_post_not_member_forbidden(
-    client: AsyncClient, user2: User, circle: Circle
-):
+async def test_create_post_not_member_forbidden(client: AsyncClient, user2: User, circle: Circle):
     # Login user2 (not a member)
     login = await client.post(
         "/auth/login",
@@ -124,9 +123,7 @@ async def test_get_post(client: AsyncClient, circle: Circle):
 
 
 @pytest.mark.asyncio
-async def test_get_post_forbidden_not_member(
-    client: AsyncClient, user2: User, circle: Circle
-):
+async def test_get_post_forbidden_not_member(client: AsyncClient, user2: User, circle: Circle):
     # Create post as owner
     create = await client.post(
         "/posts/",

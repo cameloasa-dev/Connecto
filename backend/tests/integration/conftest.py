@@ -1,24 +1,24 @@
 import asyncio
+
 import pytest
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import (
     AsyncSession,
-    async_sessionmaker,
     create_async_engine,
 )
-from sqlalchemy.pool import NullPool, StaticPool
+from sqlalchemy.pool import StaticPool
 
-from app.db.database import Base, get_db
-from app.main import app
 from app.core.security import get_password_hash
+from app.db.database import Base, get_db
 from app.db.models import User
-
+from app.main import app
 
 # -----------------------------
 # Test database (SQLite in-memory)
 # -----------------------------
 TEST_DATABASE_URL = "sqlite+aiosqlite:///:memory:"
+
 
 # -----------------------------
 # Event loop for async tests
@@ -28,6 +28,7 @@ def event_loop():
     loop = asyncio.new_event_loop()
     yield loop
     loop.close()
+
 
 # -----------------------------
 # Async engine for tests
@@ -39,7 +40,6 @@ async def async_engine():
         echo=False,
         connect_args={"check_same_thread": False},
         poolclass=StaticPool,
-
     )
 
     async with engine.begin() as conn:
@@ -49,6 +49,7 @@ async def async_engine():
 
     await engine.dispose()
 
+
 # -----------------------------
 # Prepare DB before tests
 # -----------------------------
@@ -57,6 +58,7 @@ async def prepare_database(async_engine):
     async with async_engine.begin() as conn:
         await conn.run_sync(Base.metadata.drop_all)
         await conn.run_sync(Base.metadata.create_all)
+
 
 # -----------------------------
 # Database session per test
@@ -81,6 +83,7 @@ async def db_session(async_engine):
             await trans.rollback()
             await session.close()
 
+
 # -----------------------------
 # FastAPI test client
 # -----------------------------
@@ -91,13 +94,11 @@ async def client(db_session):
 
     app.dependency_overrides[get_db] = override_get_db
 
-    async with AsyncClient(
-        transport=ASGITransport(app=app),
-        base_url="http://test"
-    ) as ac:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
         yield ac
 
     app.dependency_overrides.clear()
+
 
 # -----------------------------
 # Helper: create test user
@@ -113,7 +114,7 @@ async def create_test_user(db_session):
             is_active=True,
         )
         db_session.add(user)
-        await db_session.flush()  
+        await db_session.flush()
         await db_session.refresh(user)
         return user
 

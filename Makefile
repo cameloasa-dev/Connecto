@@ -135,18 +135,11 @@ audit-frontend:
 # ============================================================================
 # APPLICATION EXECUTION
 # ============================================================================
-.PHONY: run-backend run-backend-for-ci run-frontend
+.PHONY: run-backend run-frontend
 
 run-backend:
 	@echo "🐍 Starting Backend on port $(BACKEND_PORT)..."
 	cd backend && uv run uvicorn app.main:app --reload --host 0.0.0.0 --port $(BACKEND_PORT)
-
-run-backend-for-ci:
-	@echo "🐍 Starting Backend for CI..."
-	cd backend && uv run uvicorn app.main:app --host 0.0.0.0 --port $(BACKEND_PORT) &
-	@echo "⏳ Waiting for backend to start..."
-	sleep 5
-	@echo "✅ Backend running on port $(BACKEND_PORT)"
 
 run-frontend:
 	@echo "⚛️ Starting Frontend on port $(FRONTEND_PORT)..."

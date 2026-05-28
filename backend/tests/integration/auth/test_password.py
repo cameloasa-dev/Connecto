@@ -1,7 +1,7 @@
 import pytest
 from httpx import AsyncClient
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models import User
 
@@ -19,9 +19,7 @@ async def test_password_hashing(client: AsyncClient, db_session: AsyncSession) -
     )
 
     # Fetch user from DB
-    result = await db_session.execute(
-        select(User).where(User.username == "hashtest")
-    )
+    result = await db_session.execute(select(User).where(User.username == "hashtest"))
     user = result.scalar_one()
 
     # Password must be hashed

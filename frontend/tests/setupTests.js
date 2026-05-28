@@ -9,4 +9,3 @@ afterEach(() => server.resetHandlers());
 
 // Stop MSW after all tests
 afterAll(() => server.close());
-

@@ -101,9 +101,7 @@ async def test_remove_member(client: AsyncClient, circle: Circle, user2: User):
     # Add member first
     await client.post(f"/circles/{circle.id}/members", json={"user_id": user2.id})
 
-    response = await client.delete(
-        f"/circles/{circle.id}/members/{user2.id}"
-    )
+    response = await client.delete(f"/circles/{circle.id}/members/{user2.id}")
 
     assert response.status_code == 200
     assert response.json()["success"] is True
@@ -111,9 +109,7 @@ async def test_remove_member(client: AsyncClient, circle: Circle, user2: User):
 
 @pytest.mark.asyncio
 async def test_remove_owner_forbidden(client: AsyncClient, circle: Circle, owner: User):
-    response = await client.delete(
-        f"/circles/{circle.id}/members/{owner.id}"
-    )
+    response = await client.delete(f"/circles/{circle.id}/members/{owner.id}")
     assert response.status_code == 403
 
 

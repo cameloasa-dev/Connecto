@@ -1,15 +1,14 @@
 import pytest
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
 
-from app.db.models import User
 from app.core.security import get_password_hash
-
+from app.db.models import User
 
 # ============================================================================
 # SUCCESSFUL LOGIN
 # ============================================================================
+
 
 @pytest.mark.asyncio
 async def test_login_success(client: AsyncClient) -> None:
@@ -41,6 +40,7 @@ async def test_login_success(client: AsyncClient) -> None:
 # WRONG PASSWORD
 # ============================================================================
 
+
 @pytest.mark.asyncio
 async def test_login_wrong_password(client: AsyncClient) -> None:
     # Register user
@@ -67,6 +67,7 @@ async def test_login_wrong_password(client: AsyncClient) -> None:
 # NONEXISTENT USER
 # ============================================================================
 
+
 @pytest.mark.asyncio
 async def test_login_nonexistent_user(client: AsyncClient) -> None:
     response = await client.post(
@@ -81,6 +82,7 @@ async def test_login_nonexistent_user(client: AsyncClient) -> None:
 # ============================================================================
 # INACTIVE USER
 # ============================================================================
+
 
 @pytest.mark.asyncio
 async def test_login_inactive_user(client: AsyncClient, db_session: AsyncSession) -> None:

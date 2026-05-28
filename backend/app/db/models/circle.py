@@ -19,20 +19,16 @@ class Circle(Base):
     owner_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
 
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(),
-        server_default=func.now(),
-        nullable=False
+        DateTime(), server_default=func.now(), nullable=False
     )
 
     owner = relationship("User", back_populates="owned_circles")
-    members = relationship("CircleMember", 
-                           back_populates="circle",
-                           cascade="all, delete-orphan",
-                           passive_deletes=True)
-    posts = relationship("Post", 
-                         back_populates="circle",
-                         cascade="all, delete-orphan",
-                         passive_deletes=True)
+    members = relationship(
+        "CircleMember", back_populates="circle", cascade="all, delete-orphan", passive_deletes=True
+    )
+    posts = relationship(
+        "Post", back_populates="circle", cascade="all, delete-orphan", passive_deletes=True
+    )
 
 
 print("CIRCLE LOADED FROM:", __file__)

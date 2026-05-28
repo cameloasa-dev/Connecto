@@ -94,9 +94,7 @@ async def test_search_users_by_username(
     test_circle: Circle,
     test_owner: User,
 ):
-    response = await client.get(
-        f"/users/search?query=user&circle_id={test_circle.id}"
-    )
+    response = await client.get(f"/users/search?query=user&circle_id={test_circle.id}")
 
     assert response.status_code == 200
     results = response.json()
@@ -119,9 +117,7 @@ async def test_search_users_empty_query(
     test_circle: Circle,
     test_owner: User,
 ):
-    response = await client.get(
-        f"/users/search?query=&circle_id={test_circle.id}"
-    )
+    response = await client.get(f"/users/search?query=&circle_id={test_circle.id}")
 
     assert response.status_code == 200
     assert response.json() == []
@@ -136,9 +132,7 @@ async def test_search_users_no_results(
     test_circle: Circle,
     test_owner: User,
 ):
-    response = await client.get(
-        f"/users/search?query=nonexistent&circle_id={test_circle.id}"
-    )
+    response = await client.get(f"/users/search?query=nonexistent&circle_id={test_circle.id}")
 
     assert response.status_code == 200
     assert response.json() == []
@@ -153,8 +147,6 @@ async def test_search_users_circle_not_found(
     test_owner: User,
 ):
     # cookie already set by test_owner fixture
-    response = await client.get(
-        "/users/search?query=user&circle_id=99999"
-    )
+    response = await client.get("/users/search?query=user&circle_id=99999")
 
     assert response.status_code == 403

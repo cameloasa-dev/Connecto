@@ -27,6 +27,7 @@ from app.schemas.auth import (
 # 1. USERCREATE SCHEMA TESTS
 # ============================================================
 
+
 def test_usercreate_valid():
     """UserCreate: valid payload should pass."""
     user = UserCreate(
@@ -39,25 +40,31 @@ def test_usercreate_valid():
     assert user.full_name == "John Doe"
 
 
-@pytest.mark.parametrize("email", [
-    "notanemail",
-    "missing@domain",
-    "@nodomain.com",
-    "spaces in@email.com",
-    "double@@domain.com",
-])
+@pytest.mark.parametrize(
+    "email",
+    [
+        "notanemail",
+        "missing@domain",
+        "@nodomain.com",
+        "spaces in@email.com",
+        "double@@domain.com",
+    ],
+)
 def test_usercreate_invalid_email(email):
     """UserCreate: invalid email formats should fail."""
     with pytest.raises(ValidationError):
         UserCreate(username="john", email=email, password="ValidPass123!")
 
 
-@pytest.mark.parametrize("email", [
-    "user@example.com",
-    "user.name@example.com",
-    "user+tag@example.co.uk",
-    "user_123@sub.example.com",
-])
+@pytest.mark.parametrize(
+    "email",
+    [
+        "user@example.com",
+        "user.name@example.com",
+        "user+tag@example.co.uk",
+        "user_123@sub.example.com",
+    ],
+)
 def test_usercreate_valid_email(email):
     """UserCreate: valid email formats should pass."""
     user = UserCreate(username="john", email=email, password="ValidPass123!")
@@ -94,44 +101,59 @@ def test_usercreate_password_too_short(password):
         UserCreate(username="john", email="a@a.com", password=password)
 
 
-@pytest.mark.parametrize("password", [
-    "lowercase123!",   # no uppercase
-])
+@pytest.mark.parametrize(
+    "password",
+    [
+        "lowercase123!",  # no uppercase
+    ],
+)
 def test_usercreate_password_missing_uppercase(password):
     with pytest.raises(ValidationError):
         UserCreate(username="john", email="a@a.com", password=password)
 
 
-@pytest.mark.parametrize("password", [
-    "UPPERCASE123!",   # no lowercase
-])
+@pytest.mark.parametrize(
+    "password",
+    [
+        "UPPERCASE123!",  # no lowercase
+    ],
+)
 def test_usercreate_password_missing_lowercase(password):
     with pytest.raises(ValidationError):
         UserCreate(username="john", email="a@a.com", password=password)
 
 
-@pytest.mark.parametrize("password", [
-    "NoNumbers!",      # no digits
-])
+@pytest.mark.parametrize(
+    "password",
+    [
+        "NoNumbers!",  # no digits
+    ],
+)
 def test_usercreate_password_missing_number(password):
     with pytest.raises(ValidationError):
         UserCreate(username="john", email="a@a.com", password=password)
 
 
-@pytest.mark.parametrize("password", [
-    "NoSpecial123",    # no special char
-])
+@pytest.mark.parametrize(
+    "password",
+    [
+        "NoSpecial123",  # no special char
+    ],
+)
 def test_usercreate_password_missing_special(password):
     with pytest.raises(ValidationError):
         UserCreate(username="john", email="a@a.com", password=password)
 
 
-@pytest.mark.parametrize("password", [
-    "SecurePass123!",
-    "MyP@ssw0rd",
-    "C0mpl3x#Pass",
-    "Valid$Password1",
-])
+@pytest.mark.parametrize(
+    "password",
+    [
+        "SecurePass123!",
+        "MyP@ssw0rd",
+        "C0mpl3x#Pass",
+        "Valid$Password1",
+    ],
+)
 def test_usercreate_password_valid(password):
     """UserCreate: valid complex passwords should pass."""
     user = UserCreate(username="john", email="a@a.com", password=password)
@@ -152,6 +174,7 @@ def test_usercreate_fullname_max_length():
 # 2. USERLOGIN SCHEMA TESTS
 # ============================================================
 
+
 def test_userlogin_valid():
     login = UserLogin(username="john", password="pass")
     assert login.username == "john"
@@ -170,6 +193,7 @@ def test_userlogin_missing_password():
 # ============================================================
 # 3. USERRESPONSE SCHEMA TESTS
 # ============================================================
+
 
 def test_userresponse_valid():
     now = datetime.now()
@@ -223,6 +247,7 @@ def test_userresponse_missing_required(missing_field):
 # 4. TOKEN SCHEMA TESTS
 # ============================================================
 
+
 def test_token_valid():
     token = Token(access_token="abc", token_type="bearer")
     assert token.token_type == "bearer"
@@ -241,6 +266,7 @@ def test_token_missing_access_token():
 # ============================================================
 # 5. SESSIONRESPONSE SCHEMA TESTS
 # ============================================================
+
 
 def test_sessionresponse_valid():
     session = SessionResponse(success=True, username="john", session_token="xyz")

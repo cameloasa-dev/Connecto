@@ -29,6 +29,7 @@ from app.db.models import (
 # 1. USER MODEL
 # ============================================================
 
+
 def test_user_tablename():
     assert User.__tablename__ == "users"
 
@@ -38,8 +39,14 @@ def test_user_columns():
     cols = mapper.columns.keys()
 
     expected = {
-        "id", "username", "email", "hashed_password",
-        "full_name", "is_active", "created_at", "updated_at"
+        "id",
+        "username",
+        "email",
+        "hashed_password",
+        "full_name",
+        "is_active",
+        "created_at",
+        "updated_at",
     }
     assert expected.issubset(cols)
 
@@ -72,6 +79,7 @@ def test_user_relationships():
 # 2. CIRCLE MODEL
 # ============================================================
 
+
 def test_circle_tablename():
     assert Circle.__tablename__ == "circles"
 
@@ -102,6 +110,7 @@ def test_circle_description_nullable():
 # ============================================================
 # 3. CIRCLEMEMBER MODEL
 # ============================================================
+
 
 def test_circlemember_tablename():
     assert CircleMember.__tablename__ == "circle_members"
@@ -134,6 +143,7 @@ def test_circlemember_relationships():
 # ============================================================
 # 4. POST MODEL
 # ============================================================
+
 
 def test_post_tablename():
     assert Post.__tablename__ == "posts"
@@ -175,6 +185,7 @@ def test_post_required_fields():
 # 5. ROLE MODEL
 # ============================================================
 
+
 def test_role_tablename():
     assert Role.__tablename__ == "roles"
 
@@ -195,6 +206,7 @@ def test_role_constraints():
 # 6. USERSESSION MODEL
 # ============================================================
 
+
 def test_usersession_tablename():
     assert UserSession.__tablename__ == "user_sessions"
 
@@ -203,8 +215,13 @@ def test_usersession_columns():
     mapper = inspect(UserSession)
     cols = mapper.columns.keys()
     expected = {
-        "id", "session_token", "user_id",
-        "created_at", "expires_at", "ip_address", "user_agent"
+        "id",
+        "session_token",
+        "user_id",
+        "created_at",
+        "expires_at",
+        "ip_address",
+        "user_agent",
     }
     assert expected.issubset(cols)
 
@@ -232,6 +249,7 @@ def test_usersession_required_fields():
 # 7. SHARED MODEL CONSTRAINTS
 # ============================================================
 
+
 @pytest.mark.parametrize("model", [User, Circle, CircleMember, Post, Role, UserSession])
 def test_all_models_inherit_base(model):
     assert issubclass(model, Base)
@@ -239,6 +257,7 @@ def test_all_models_inherit_base(model):
 
 def test_base_is_declarative():
     from sqlalchemy.orm import DeclarativeBase
+
     assert issubclass(Base, DeclarativeBase)
 
 
@@ -251,4 +270,7 @@ def test_timestamp_fields():
     # updated_at exists only on some models
     for model in [User, Post]:
         mapper = inspect(model)
-        assert mapper.columns["updated_at"].onupdate is not None or mapper.columns["updated_at"].server_onupdate is not None
+        assert (
+            mapper.columns["updated_at"].onupdate is not None
+            or mapper.columns["updated_at"].server_onupdate is not None
+        )

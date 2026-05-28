@@ -9,7 +9,7 @@ export default defineConfig({
     environment: "jsdom",
     globals: true,
     setupFiles: ["./tests/setupTests.js"],
-    test:{
+    test: {
       root: "./tests", // Set the root directory for tests
     },
     include: ["**/*.{test,spec}.{js,jsx}"], // Only include unit test files

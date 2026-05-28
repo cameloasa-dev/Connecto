@@ -1,6 +1,7 @@
 """
 SQLAlchemy ORM models for the Social App (SQLite compatible)
 """
+
 from datetime import datetime
 
 from sqlalchemy import Boolean, DateTime, String, func
@@ -20,16 +21,11 @@ class User(Base):
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
 
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(),
-        server_default=func.now(),
-        nullable=False
+        DateTime(), server_default=func.now(), nullable=False
     )
 
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime(),
-        server_default=func.now(),
-        onupdate=func.now(),
-        nullable=True
+        DateTime(), server_default=func.now(), onupdate=func.now(), nullable=True
     )
 
     owned_circles = relationship("Circle", back_populates="owner")

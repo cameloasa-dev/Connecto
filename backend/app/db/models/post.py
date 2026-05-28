@@ -20,16 +20,11 @@ class Post(Base):
     circle_id: Mapped[int | None] = mapped_column(ForeignKey("circles.id"))
 
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(),
-        server_default=func.now(),
-        nullable=False
+        DateTime(), server_default=func.now(), nullable=False
     )
 
     updated_at: Mapped[datetime] = mapped_column(
-        DateTime(),
-        server_default=func.now(),
-        onupdate=func.now(),
-        nullable=False
+        DateTime(), server_default=func.now(), onupdate=func.now(), nullable=False
     )
 
     author = relationship("User", back_populates="posts")

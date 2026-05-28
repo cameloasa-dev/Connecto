@@ -29,6 +29,7 @@ from app.core.security import (
 # 1. PASSWORD HASHING & VERIFICATION
 # ============================================================
 
+
 def test_password_hash_and_verify():
     """Hash-ul trebuie să verifice parola corectă."""
     pw = "SecurePassword123!"
@@ -58,12 +59,15 @@ def test_password_hash_format():
     assert hashed.startswith("$argon2")
 
 
-@pytest.mark.parametrize("password", [
-    "P@ssw0rd!#$%^&*()",
-    "Пароль123🔒",
-    "",
-    "a" * 1000,
-])
+@pytest.mark.parametrize(
+    "password",
+    [
+        "P@ssw0rd!#$%^&*()",
+        "Пароль123🔒",
+        "",
+        "a" * 1000,
+    ],
+)
 def test_password_edge_cases(password):
     """Hashing funcționează pentru caractere speciale, unicode, gol, foarte lung."""
     hashed = get_password_hash(password)
@@ -83,6 +87,7 @@ def test_password_case_sensitive():
 # 2. JWT TOKEN CREATION & DECODING
 # ============================================================
 
+
 def test_jwt_custom_expiry():
     """Token cu expirare custom."""
     token = create_access_token({"sub": "test"}, timedelta(minutes=10))
@@ -100,7 +105,11 @@ def test_jwt_default_expiry():
     now = datetime.now(UTC)
     delta = (exp - now).total_seconds() / 60
 
-    assert settings.ACCESS_TOKEN_EXPIRE_MINUTES - 1 <= delta <= settings.ACCESS_TOKEN_EXPIRE_MINUTES + 1
+    assert (
+        settings.ACCESS_TOKEN_EXPIRE_MINUTES - 1
+        <= delta
+        <= settings.ACCESS_TOKEN_EXPIRE_MINUTES + 1
+    )
 
 
 def test_jwt_payload_preserved():
@@ -165,6 +174,7 @@ def test_jwt_empty_payload():
 # 3. SESSION TOKEN & EXPIRY
 # ============================================================
 
+
 def test_session_token_format():
     """Token-ul de sesiune trebuie să fie hex de 64 caractere."""
     token = create_session_token()
@@ -200,6 +210,7 @@ def test_session_expiry_utc():
 # ============================================================
 # 4. SECURITY INTEGRATION TESTS
 # ============================================================
+
 
 def test_password_and_token_flow():
     """Workflow complet: hash → verify → token → decode."""

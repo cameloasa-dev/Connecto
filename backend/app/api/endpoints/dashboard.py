@@ -2,8 +2,11 @@
 Dashboard management endpoints
 Session-based authentication
 """
+
+from typing import Any
+
 from fastapi import APIRouter, Depends
-from sqlalchemy import select, desc
+from sqlalchemy import desc, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.api.endpoints.auth import get_current_user_from_session
@@ -12,11 +15,12 @@ from app.db.models import Circle, CircleMember, Post, User
 
 router = APIRouter(prefix="/dashboard", tags=["dashboard"])
 
+
 @router.get("", response_model=dict)
 async def get_dashboard(
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user_from_session),
-):
+) -> dict[str, Any]:
     # 1. USER INFO
     user_info = {
         "id": current_user.id,
@@ -36,12 +40,14 @@ async def get_dashboard(
     circle_ids = []
 
     for circle, role in circles_result:
-        circles.append({
-            "id": circle.id,
-            "name": circle.name,
-            "description": circle.description,
-            "role": role,
-        })
+        circles.append(
+            {
+                "id": circle.id,
+                "name": circle.name,
+                "description": circle.description,
+                "role": role,
+            }
+        )
         circle_ids.append(circle.id)
 
     # 3. FEED
@@ -57,17 +63,19 @@ async def get_dashboard(
         )
 
         for post, author_name, circle_name in posts_result:
-            feed.append({
-                "id": post.id,
-                "title": post.title,
-                "content": post.content,
-                "author_id": post.author_id,
-                "author_name": author_name,
-                "circle_id": post.circle_id,
-                "circle_name": circle_name,
-                "created_at": post.created_at,
-                "updated_at": post.updated_at,
-            })
+            feed.append(
+                {
+                    "id": post.id,
+                    "title": post.title,
+                    "content": post.content,
+                    "author_id": post.author_id,
+                    "author_name": author_name,
+                    "circle_id": post.circle_id,
+                    "circle_name": circle_name,
+                    "created_at": post.created_at,
+                    "updated_at": post.updated_at,
+                }
+            )
 
     # 4. STATS
     stats = {

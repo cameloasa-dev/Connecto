@@ -1,6 +1,7 @@
 """
 SQLAlchemy ORM models for the Social App (SQLite compatible)
 """
+
 from datetime import datetime
 
 from sqlalchemy import DateTime, ForeignKey, String, func
@@ -14,28 +15,15 @@ class UserSession(Base):
 
     id: Mapped[int] = mapped_column(primary_key=True)
 
-    session_token: Mapped[str] = mapped_column(
-        String(255),
-        unique=True,
-        index=True,
-        nullable=False
-    )
+    session_token: Mapped[str] = mapped_column(String(255), unique=True, index=True, nullable=False)
 
-    user_id: Mapped[int] = mapped_column(
-        ForeignKey("users.id"),
-        nullable=False
-    )
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), nullable=False)
 
     created_at: Mapped[datetime] = mapped_column(
-        DateTime(),
-        server_default=func.now(),
-        nullable=False
+        DateTime(), server_default=func.now(), nullable=False
     )
 
-    expires_at: Mapped[datetime] = mapped_column(
-        DateTime(),
-        nullable=False
-    )
+    expires_at: Mapped[datetime] = mapped_column(DateTime(), nullable=False)
 
     ip_address: Mapped[str | None] = mapped_column(String(45))
     user_agent: Mapped[str | None] = mapped_column(String(255))
