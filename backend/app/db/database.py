@@ -9,14 +9,14 @@ from sqlalchemy.ext.asyncio import (
     async_sessionmaker,
     create_async_engine,
 )
-from sqlalchemy.orm import declarative_base
+from sqlalchemy.orm import DeclarativeBase
 
 from app.core.config import settings
 
 # -----------------------------
 # DATABASE CONFIG (SQLite)
 # -----------------------------
-DATABASE_URL = settings.DATABASE_URL  # should be sqlite+aiosqlite:///./dev.db
+DATABASE_URL = settings.DATABASE_URL  #  sqlite+aiosqlite:///./dev.db
 
 engine = create_async_engine(
     DATABASE_URL,
@@ -24,7 +24,8 @@ engine = create_async_engine(
 )
 
 # Base class for all ORM models
-Base = declarative_base()
+class Base(DeclarativeBase):
+    pass
 
 # Async session factory
 SessionLocal = async_sessionmaker(

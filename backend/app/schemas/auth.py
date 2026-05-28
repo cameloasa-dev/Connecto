@@ -78,7 +78,7 @@ class SessionResponse(BaseModel):
     """
 
     success: bool = True
-    username: str
+    username: str | None = None
     session_token: str | None = Field(None, description="Session token stored in HTTP-only cookie")
     user: UserResponse | None = None
 

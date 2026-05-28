@@ -1,10 +1,9 @@
 """
 SQLAlchemy ORM models for the Social App (SQLite compatible)
 """
-
 from datetime import datetime
 
-from sqlalchemy import Boolean, DateTime, String
+from sqlalchemy import Boolean, DateTime, String, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.db.database import Base
@@ -20,8 +19,18 @@ class User(Base):
     full_name: Mapped[str | None] = mapped_column(String(100))
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
 
-    created_at: Mapped[datetime] = mapped_column(DateTime(), default=datetime.utcnow)
-    updated_at: Mapped[datetime | None] = mapped_column(DateTime(), onupdate=datetime.utcnow)
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(),
+        server_default=func.now(),
+        nullable=False
+    )
+
+    updated_at: Mapped[datetime] = mapped_column(
+        DateTime(),
+        server_default=func.now(),
+        onupdate=func.now(),
+        nullable=True
+    )
 
     owned_circles = relationship("Circle", back_populates="owner")
     circle_memberships = relationship("CircleMember", back_populates="user")

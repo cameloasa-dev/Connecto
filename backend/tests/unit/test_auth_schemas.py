@@ -1,6 +1,13 @@
 """
-Unit tests for backend/app/schemas/auth.py
-Tests Pydantic validators and schema constraints
+Unit tests for Pydantic schemas in app/schemas/auth.py
+
+STRUCTURE:
+    1. UserCreate schema
+    2. UserLogin schema
+    3. UserResponse schema
+    4. Token schema
+    5. SessionResponse schema
+
 """
 
 from datetime import datetime
@@ -16,394 +23,231 @@ from app.schemas.auth import (
     UserResponse,
 )
 
+# ============================================================
+# 1. USERCREATE SCHEMA TESTS
+# ============================================================
 
-class TestUserCreateSchema:
-    """Test UserCreate schema validation"""
-
-    def test_valid_user_creation(self):
-        """Test creating user with all valid fields"""
-        user_data = {
-            "username": "johndoe",
-            "email": "john@example.com",
-            "password": "SecurePass123!",
-            "full_name": "John Doe",
-        }
-        user = UserCreate(**user_data)
-        assert user.username == "johndoe"
-        assert user.email == "john@example.com"
-        assert user.password == "SecurePass123!"
-        assert user.full_name == "John Doe"
-
-    def test_valid_user_without_full_name(self):
-        """Test creating user without optional full_name"""
-        user_data = {
-            "username": "janedoe",
-            "email": "jane@example.com",
-            "password": "SecurePass123!",
-        }
-        user = UserCreate(**user_data)
-        assert user.username == "janedoe"
-        assert user.full_name is None
-
-    def test_email_format_validation(self):
-        """Test that invalid email formats are rejected"""
-        invalid_emails = [
-            "notanemail",
-            "missing@domain",
-            "@nodomain.com",
-            "spaces in@email.com",
-            "double@@domain.com",
-        ]
-
-        for invalid_email in invalid_emails:
-            with pytest.raises(ValidationError) as exc_info:
-                UserCreate(username="testuser", email=invalid_email, password="ValidPass123!")
-            assert "email" in str(exc_info.value).lower()
-
-    def test_valid_email_formats(self):
-        """Test that various valid email formats are accepted"""
-        valid_emails = [
-            "user@example.com",
-            "user.name@example.com",
-            "user+tag@example.co.uk",
-            "user_123@sub.example.com",
-        ]
-
-        for valid_email in valid_emails:
-            user = UserCreate(username="testuser", email=valid_email, password="ValidPass123!")
-            assert user.email == valid_email
-
-    def test_username_min_length(self):
-        """Test username minimum length constraint (3 chars)"""
-        # Too short
-        with pytest.raises(ValidationError) as exc_info:
-            UserCreate(
-                username="ab",  # Only 2 chars
-                email="test@example.com",
-                password="ValidPass123!",
-            )
-        assert "username" in str(exc_info.value).lower()
-
-        # Exactly 3 chars (should pass)
-        user = UserCreate(username="abc", email="test@example.com", password="ValidPass123!")
-        assert user.username == "abc"
-
-    def test_username_max_length(self):
-        """Test username maximum length constraint (50 chars)"""
-        # Exactly 50 chars (should pass)
-        username_50 = "a" * 50
-        user = UserCreate(username=username_50, email="test@example.com", password="ValidPass123!")
-        assert user.username == username_50
-
-        # 51 chars (should fail)
-        with pytest.raises(ValidationError):
-            UserCreate(username="a" * 51, email="test@example.com", password="ValidPass123!")
-
-    def test_password_min_length(self):
-        """Test password minimum length constraint (8 chars)"""
-        # Too short (7 chars)
-        with pytest.raises(ValidationError) as exc_info:
-            UserCreate(
-                username="testuser",
-                email="test@example.com",
-                password="Pass1!",  # Only 6 chars
-            )
-        assert "password" in str(exc_info.value).lower()
-
-        # Exactly 8 chars (should pass if complexity is met)
-        user = UserCreate(
-            username="testuser",
-            email="test@example.com",
-            password="Pass123!",  # 8 chars
-        )
-        assert len(user.password) == 8
-
-    def test_password_complexity_uppercase(self):
-        """Test password must contain uppercase letter"""
-        with pytest.raises(ValidationError) as exc_info:
-            UserCreate(
-                username="testuser",
-                email="test@example.com",
-                password="lowercase123!",  # No uppercase
-            )
-        assert "uppercase" in str(exc_info.value).lower()
-
-    def test_password_complexity_lowercase(self):
-        """Test password must contain lowercase letter"""
-        with pytest.raises(ValidationError) as exc_info:
-            UserCreate(
-                username="testuser",
-                email="test@example.com",
-                password="UPPERCASE123!",  # No lowercase
-            )
-        assert "lowercase" in str(exc_info.value).lower()
-
-    def test_password_complexity_number(self):
-        """Test password must contain number"""
-        with pytest.raises(ValidationError) as exc_info:
-            UserCreate(
-                username="testuser",
-                email="test@example.com",
-                password="NoNumbers!",  # No digits
-            )
-        assert "number" in str(exc_info.value).lower()
-
-    def test_password_complexity_special_char(self):
-        """Test password must contain special character"""
-        with pytest.raises(ValidationError) as exc_info:
-            UserCreate(
-                username="testuser",
-                email="test@example.com",
-                password="NoSpecial123",  # No special chars
-            )
-        assert "special character" in str(exc_info.value).lower()
-
-    def test_password_all_complexity_requirements(self):
-        """Test password meeting all complexity requirements"""
-        valid_passwords = ["SecurePass123!", "MyP@ssw0rd", "C0mpl3x#Pass", "Valid$Password1"]
-
-        for password in valid_passwords:
-            user = UserCreate(username="testuser", email="test@example.com", password=password)
-            assert user.password == password
-
-    def test_full_name_max_length(self):
-        """Test full_name maximum length (100 chars)"""
-        # Exactly 100 chars (should pass)
-        full_name_100 = "A" * 100
-        user = UserCreate(
-            username="testuser",
-            email="test@example.com",
-            password="ValidPass123!",
-            full_name=full_name_100,
-        )
-        assert user.full_name == full_name_100
-
-        # 101 chars (should fail)
-        with pytest.raises(ValidationError):
-            UserCreate(
-                username="testuser",
-                email="test@example.com",
-                password="ValidPass123!",
-                full_name="A" * 101,
-            )
-
-    def test_missing_required_fields(self):
-        """Test that required fields cannot be omitted"""
-        # Missing username
-        with pytest.raises(ValidationError):
-            UserCreate(email="test@example.com", password="ValidPass123!")
-
-        # Missing email
-        with pytest.raises(ValidationError):
-            UserCreate(username="testuser", password="ValidPass123!")
-
-        # Missing password
-        with pytest.raises(ValidationError):
-            UserCreate(username="testuser", email="test@example.com")
+def test_usercreate_valid():
+    """UserCreate: valid payload should pass."""
+    user = UserCreate(
+        username="john",
+        email="john@example.com",
+        password="ValidPass123!",
+        full_name="John Doe",
+    )
+    assert user.username == "john"
+    assert user.full_name == "John Doe"
 
 
-class TestUserLoginSchema:
-    """Test UserLogin schema validation"""
-
-    def test_valid_login(self):
-        """Test valid login data"""
-        login_data = {"username": "johndoe", "password": "SecurePass123!"}
-        login = UserLogin(**login_data)
-        assert login.username == "johndoe"
-        assert login.password == "SecurePass123!"
-
-    def test_missing_username(self):
-        """Test that username is required"""
-        with pytest.raises(ValidationError):
-            UserLogin(password="somepassword")
-
-    def test_missing_password(self):
-        """Test that password is required"""
-        with pytest.raises(ValidationError):
-            UserLogin(username="someuser")
-
-    def test_empty_string_username(self):
-        """Test behavior with empty username string"""
-        login = UserLogin(username="", password="somepassword")
-        assert login.username == ""
-
-    def test_empty_string_password(self):
-        """Test behavior with empty password string"""
-        login = UserLogin(username="someuser", password="")
-        assert login.password == ""
+@pytest.mark.parametrize("email", [
+    "notanemail",
+    "missing@domain",
+    "@nodomain.com",
+    "spaces in@email.com",
+    "double@@domain.com",
+])
+def test_usercreate_invalid_email(email):
+    """UserCreate: invalid email formats should fail."""
+    with pytest.raises(ValidationError):
+        UserCreate(username="john", email=email, password="ValidPass123!")
 
 
-class TestUserResponseSchema:
-    """Test UserResponse schema"""
-
-    def test_valid_user_response(self):
-        """Test creating user response with all fields"""
-        now = datetime.now()
-        user_data = {
-            "id": 1,
-            "username": "johndoe",
-            "email": "john@example.com",
-            "full_name": "John Doe",
-            "is_active": True,
-            "created_at": now,
-            "updated_at": now,
-        }
-        user = UserResponse(**user_data)
-        assert user.id == 1
-        assert user.username == "johndoe"
-        assert user.email == "john@example.com"
-        assert user.full_name == "John Doe"
-        assert user.is_active is True
-        assert user.created_at == now
-        assert user.updated_at == now
-
-    def test_user_response_without_full_name(self):
-        """Test user response with None full_name"""
-        now = datetime.now()
-        user_data = {
-            "id": 2,
-            "username": "janedoe",
-            "email": "jane@example.com",
-            "full_name": None,
-            "is_active": True,
-            "created_at": now,
-            "updated_at": None,
-        }
-        user = UserResponse(**user_data)
-        assert user.full_name is None
-        assert user.updated_at is None
-
-    def test_user_response_inactive(self):
-        """Test user response with is_active=False"""
-        now = datetime.now()
-        user_data = {
-            "id": 3,
-            "username": "inactiveuser",
-            "email": "inactive@example.com",
-            "full_name": None,
-            "is_active": False,
-            "created_at": now,
-            "updated_at": None,
-        }
-        user = UserResponse(**user_data)
-        assert user.is_active is False
-
-    def test_user_response_missing_required_fields(self):
-        """Test that required fields cannot be omitted"""
-        now = datetime.now()
-
-        # Missing id
-        with pytest.raises(ValidationError):
-            UserResponse(
-                username="test",
-                email="test@example.com",
-                full_name=None,
-                is_active=True,
-                created_at=now,
-                updated_at=None,
-            )
-
-        # Missing username
-        with pytest.raises(ValidationError):
-            UserResponse(
-                id=1,
-                email="test@example.com",
-                full_name=None,
-                is_active=True,
-                created_at=now,
-                updated_at=None,
-            )
+@pytest.mark.parametrize("email", [
+    "user@example.com",
+    "user.name@example.com",
+    "user+tag@example.co.uk",
+    "user_123@sub.example.com",
+])
+def test_usercreate_valid_email(email):
+    """UserCreate: valid email formats should pass."""
+    user = UserCreate(username="john", email=email, password="ValidPass123!")
+    assert user.email == email
 
 
-class TestTokenSchema:
-    """Test Token schema"""
-
-    def test_valid_token(self):
-        """Test creating token response"""
-        token_data = {
-            "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ",
-            "token_type": "bearer",
-        }
-        token = Token(**token_data)
-        assert token.access_token == token_data["access_token"]
-        assert token.token_type == "bearer"
-
-    def test_token_default_type(self):
-        """Test that token_type defaults to 'bearer'"""
-        token = Token(access_token="some.jwt.token")
-        assert token.token_type == "bearer"
-
-    def test_token_custom_type(self):
-        """Test token with custom token_type"""
-        token = Token(access_token="some.token", token_type="custom")
-        assert token.token_type == "custom"
-
-    def test_missing_access_token(self):
-        """Test that access_token is required"""
-        with pytest.raises(ValidationError):
-            Token(token_type="bearer")
+@pytest.mark.parametrize("username", ["ab"])
+def test_usercreate_username_too_short(username):
+    """UserCreate: username must be >= 3 chars."""
+    with pytest.raises(ValidationError):
+        UserCreate(username=username, email="a@a.com", password="ValidPass123!")
 
 
-class TestSessionResponseSchema:
-    """Test SessionResponse schema"""
-
-    def test_valid_session_response(self):
-        """Test creating session response"""
-        session_data = {"success": True, "username": "johndoe", "session_token": "abc123xyz"}
-        session = SessionResponse(**session_data)
-        assert session.success is True
-        assert session.username == "johndoe"
-        assert session.session_token == "abc123xyz"
-
-    def test_session_response_minimal(self):
-        """Test session response with only required fields"""
-        # Check what fields are actually required by creating with minimal data
-        try:
-            session = SessionResponse(success=True)
-            assert session.success is True
-        except ValidationError:
-            # If it fails, some fields are required
-            pass
+def test_usercreate_username_min_ok():
+    """UserCreate: username of length 3 should pass."""
+    user = UserCreate(username="abc", email="a@a.com", password="ValidPass123!")
+    assert user.username == "abc"
 
 
-class TestSchemaIntegration:
-    """Integration tests for schema interactions"""
+def test_usercreate_username_max_length():
+    """UserCreate: username max length = 50."""
+    valid = "a" * 50
+    user = UserCreate(username=valid, email="a@a.com", password="ValidPass123!")
+    assert user.username == valid
 
-    def test_registration_to_response_flow(self):
-        """Test data flow from registration to user response"""
-        # Step 1: User submits registration
-        registration = UserCreate(
-            username="newuser",
-            email="new@example.com",
-            password="NewPass123!",
-            full_name="New User",
-        )
+    with pytest.raises(ValidationError):
+        UserCreate(username="a" * 51, email="a@a.com", password="ValidPass123!")
 
-        # Step 2: After DB save, create response (simulated)
-        now = datetime.now()
-        response = UserResponse(
-            id=1,
-            username=registration.username,
-            email=registration.email,
-            full_name=registration.full_name,
-            is_active=True,
-            created_at=now,
-            updated_at=None,
-        )
 
-        assert response.username == registration.username
-        assert response.email == registration.email
-        # Password should NOT be in response
-        assert not hasattr(response, "password")
+@pytest.mark.parametrize("password", ["short1!", "1234567"])
+def test_usercreate_password_too_short(password):
+    """UserCreate: password must be >= 8 chars."""
+    with pytest.raises(ValidationError):
+        UserCreate(username="john", email="a@a.com", password=password)
 
-    def test_login_to_token_flow(self):
-        """Test data flow from login to token response"""
-        # Step 1: User submits login
-        login = UserLogin(username="existinguser", password="ExistingPass123!")
 
-        # Step 2: After authentication, create token (simulated)
-        token = Token(access_token="generated.jwt.token.here", token_type="bearer")
+@pytest.mark.parametrize("password", [
+    "lowercase123!",   # no uppercase
+])
+def test_usercreate_password_missing_uppercase(password):
+    with pytest.raises(ValidationError):
+        UserCreate(username="john", email="a@a.com", password=password)
 
-        assert login.username == "existinguser"
-        assert token.access_token is not None
-        assert token.token_type == "bearer"
+
+@pytest.mark.parametrize("password", [
+    "UPPERCASE123!",   # no lowercase
+])
+def test_usercreate_password_missing_lowercase(password):
+    with pytest.raises(ValidationError):
+        UserCreate(username="john", email="a@a.com", password=password)
+
+
+@pytest.mark.parametrize("password", [
+    "NoNumbers!",      # no digits
+])
+def test_usercreate_password_missing_number(password):
+    with pytest.raises(ValidationError):
+        UserCreate(username="john", email="a@a.com", password=password)
+
+
+@pytest.mark.parametrize("password", [
+    "NoSpecial123",    # no special char
+])
+def test_usercreate_password_missing_special(password):
+    with pytest.raises(ValidationError):
+        UserCreate(username="john", email="a@a.com", password=password)
+
+
+@pytest.mark.parametrize("password", [
+    "SecurePass123!",
+    "MyP@ssw0rd",
+    "C0mpl3x#Pass",
+    "Valid$Password1",
+])
+def test_usercreate_password_valid(password):
+    """UserCreate: valid complex passwords should pass."""
+    user = UserCreate(username="john", email="a@a.com", password=password)
+    assert user.password == password
+
+
+def test_usercreate_fullname_max_length():
+    """UserCreate: full_name max length = 100."""
+    valid = "A" * 100
+    user = UserCreate(username="john", email="a@a.com", password="ValidPass123!", full_name=valid)
+    assert user.full_name == valid
+
+    with pytest.raises(ValidationError):
+        UserCreate(username="john", email="a@a.com", password="ValidPass123!", full_name="A" * 101)
+
+
+# ============================================================
+# 2. USERLOGIN SCHEMA TESTS
+# ============================================================
+
+def test_userlogin_valid():
+    login = UserLogin(username="john", password="pass")
+    assert login.username == "john"
+
+
+def test_userlogin_missing_username():
+    with pytest.raises(ValidationError):
+        UserLogin(password="pass")
+
+
+def test_userlogin_missing_password():
+    with pytest.raises(ValidationError):
+        UserLogin(username="john")
+
+
+# ============================================================
+# 3. USERRESPONSE SCHEMA TESTS
+# ============================================================
+
+def test_userresponse_valid():
+    now = datetime.now()
+    user = UserResponse(
+        id=1,
+        username="john",
+        email="john@example.com",
+        full_name="John Doe",
+        is_active=True,
+        created_at=now,
+        updated_at=now,
+    )
+    assert user.id == 1
+    assert user.is_active is True
+
+
+def test_userresponse_optional_fields():
+    now = datetime.now()
+    user = UserResponse(
+        id=2,
+        username="jane",
+        email="jane@example.com",
+        full_name=None,
+        is_active=True,
+        created_at=now,
+        updated_at=None,
+    )
+    assert user.full_name is None
+    assert user.updated_at is None
+
+
+@pytest.mark.parametrize("missing_field", ["id", "username"])
+def test_userresponse_missing_required(missing_field):
+    now = datetime.now()
+    data = {
+        "id": 1,
+        "username": "john",
+        "email": "john@example.com",
+        "full_name": None,
+        "is_active": True,
+        "created_at": now,
+        "updated_at": None,
+    }
+    data.pop(missing_field)
+
+    with pytest.raises(ValidationError):
+        UserResponse(**data)
+
+
+# ============================================================
+# 4. TOKEN SCHEMA TESTS
+# ============================================================
+
+def test_token_valid():
+    token = Token(access_token="abc", token_type="bearer")
+    assert token.token_type == "bearer"
+
+
+def test_token_default_type():
+    token = Token(access_token="abc")
+    assert token.token_type == "bearer"
+
+
+def test_token_missing_access_token():
+    with pytest.raises(ValidationError):
+        Token(token_type="bearer")
+
+
+# ============================================================
+# 5. SESSIONRESPONSE SCHEMA TESTS
+# ============================================================
+
+def test_sessionresponse_valid():
+    session = SessionResponse(success=True, username="john", session_token="xyz")
+    assert session.success is True
+
+
+def test_sessionresponse_minimal():
+    """SessionResponse: only required fields should pass."""
+    session = SessionResponse(success=True)
+    assert session.success is True

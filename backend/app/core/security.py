@@ -28,6 +28,8 @@ def hash_password(password: str) -> str:
     hashed: str = pwd_context.hash(password)
     return hashed
 
+def get_password_hash(password: str) -> str:
+    return hash_password(password)
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """
