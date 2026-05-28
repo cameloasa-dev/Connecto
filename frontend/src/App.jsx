@@ -18,7 +18,7 @@ function App() {
   return (
     <AuthProvider>
       <DarkModeProvider>
-        <Router basename="/DiscSecOps/">
+        <Router basename="/Connecto/">
           <Routes>
             {/* Public routes */}
             <Route index element={<LoginPage />} />

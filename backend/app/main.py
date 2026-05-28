@@ -48,8 +48,11 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 app = FastAPI(
     title=settings.PROJECT_NAME,
     version=settings.VERSION,
-    description="Social App backend (FastAPI + SQLite)",
+    description="Connecto API (FastAPI + SQLite)",
     lifespan=lifespan,
+    docs_url="/docs",
+    redoc_url="/redoc",
+    openapi_url="/openapi.json",
 )
 
 app.state.limiter = limiter
@@ -124,7 +127,7 @@ app.include_router(dashboard.router)
 @app.get("/")
 async def root() -> dict[str, Any]:
     return {
-        "message": "Social App API",
+        "message": "Connecto API is running! Visit /docs for API documentation.",
         "version": settings.VERSION,
         "status": "running",
         "database": "SQLite",

@@ -18,7 +18,7 @@ class Settings(BaseSettings):
     )
 
     # API Configuration
-    PROJECT_NAME: str = "Social App API"
+    PROJECT_NAME: str = "Connecto API"
     VERSION: str = "0.1.0"
 
     # Database (SQLite by default)
