@@ -13,8 +13,10 @@ from app.db.database import Base
 class CircleMember(Base):
     __tablename__ = "circle_members"
 
-    circle_id: Mapped[int] = mapped_column(ForeignKey("circles.id"), primary_key=True)
-    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), primary_key=True)
+    circle_id: Mapped[int] = mapped_column(ForeignKey("circles.id",ondelete="CASCADE"),
+                                           primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id",ondelete="CASCADE"), 
+                                         primary_key=True)
 
     role: Mapped[str] = mapped_column(String(20), default="member")
 

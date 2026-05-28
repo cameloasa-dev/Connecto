@@ -15,9 +15,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from slowapi.errors import RateLimitExceeded
 
-from app.api.endpoints import auth, circle_members, circles, posts, users
+from app.api.endpoints import auth, circle_members, circles, posts, users, dashboard
 from app.core.config import settings
-from app.core.db import Base, engine
+from app.db.database import Base, engine
 from app.core.limiter import limiter
 from app.core.security_headers import SecurityHeadersMiddleware
 
@@ -115,6 +115,7 @@ app.include_router(users.router)
 app.include_router(circles.router)
 app.include_router(circle_members.router)
 app.include_router(posts.router)
+app.include_router(dashboard.router)
 
 
 # -----------------------------

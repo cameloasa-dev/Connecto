@@ -25,8 +25,14 @@ class Circle(Base):
     )
 
     owner = relationship("User", back_populates="owned_circles")
-    members = relationship("CircleMember", back_populates="circle")
-    posts = relationship("Post", back_populates="circle")
+    members = relationship("CircleMember", 
+                           back_populates="circle",
+                           cascade="all, delete-orphan",
+                           passive_deletes=True)
+    posts = relationship("Post", 
+                         back_populates="circle",
+                         cascade="all, delete-orphan",
+                         passive_deletes=True)
 
 
 print("CIRCLE LOADED FROM:", __file__)

@@ -1,7 +1,4 @@
 # backend/tests/integration/test_users.py
-"""
-Tests for searching users to add to circles.
-"""
 
 import pytest
 import pytest_asyncio
@@ -12,29 +9,35 @@ from app.db.models import Circle, CircleMember, User
 from app.schemas.social import CircleRole
 
 
+# ------------------------------------------------------
+# FIXTURE: create owner + login + attach session cookie
+# ------------------------------------------------------
 @pytest_asyncio.fixture
 async def test_owner(create_test_user, client: AsyncClient) -> User:
-    """Create circle owner and login to get session token"""
-    # Create user
     user = await create_test_user("owner", "password123")
 
-    # Login to get session token
+    # Login
     login_response = await client.post(
-        "/api/v1/auth/login", json={"username": "owner", "password": "password123"}
+        "/auth/login",
+        json={"username": "owner", "password": "password123"},
     )
-
     assert login_response.status_code == 200
-    login_data = login_response.json()
-    session_token = login_data.get("session_token")
+
+    session_token = login_response.json().get("session_token")
     assert session_token is not None
+
+    # Set cookie on client
+    client.cookies.set("session_token", session_token)
 
     user.session_token = session_token
     return user
 
 
+# ------------------------------------------------------
+# FIXTURE: create 3 users (user0, user1, user2)
+# ------------------------------------------------------
 @pytest_asyncio.fixture
 async def test_users(create_test_user) -> list[User]:
-    """Create test users for searching (3 users)"""
     users = []
     for i in range(3):
         user = await create_test_user(f"user{i}", "password123")
@@ -42,83 +45,116 @@ async def test_users(create_test_user) -> list[User]:
     return users
 
 
+# ------------------------------------------------------
+# FIXTURE: create circle with owner + user0 as member
+# ------------------------------------------------------
 @pytest_asyncio.fixture
-async def test_circle(db_session: AsyncSession, test_owner: User, test_users: list[User]) -> Circle:
-    """Create a circle with owner and one member"""
-    # Create circle
-    circle = Circle(name="Test Circle", description="For testing", owner_id=test_owner.id)
+async def test_circle(
+    db_session: AsyncSession,
+    test_owner: User,
+    test_users: list[User],
+) -> Circle:
+    circle = Circle(
+        name="Test Circle",
+        description="For testing",
+        owner_id=test_owner.id,
+    )
     db_session.add(circle)
     await db_session.flush()
 
-    # Add owner as member
-    owner_member = CircleMember(circle_id=circle.id, user_id=test_owner.id, role=CircleRole.OWNER)
-    db_session.add(owner_member)
+    # Owner as OWNER
+    db_session.add(
+        CircleMember(
+            circle_id=circle.id,
+            user_id=test_owner.id,
+            role=CircleRole.OWNER,
+        )
+    )
 
-    # Add first user as member (user0)
-    member = CircleMember(circle_id=circle.id, user_id=test_users[0].id, role=CircleRole.MEMBER)
-    db_session.add(member)
+    # user0 as MEMBER
+    db_session.add(
+        CircleMember(
+            circle_id=circle.id,
+            user_id=test_users[0].id,
+            role=CircleRole.MEMBER,
+        )
+    )
 
     await db_session.commit()
     await db_session.refresh(circle)
     return circle
 
 
+# ------------------------------------------------------
+# TEST: search by username
+# ------------------------------------------------------
 @pytest.mark.asyncio
 async def test_search_users_by_username(
-    client: AsyncClient, test_circle: Circle, test_owner: User
-) -> None:
-    """Test searching users by username"""
+    client: AsyncClient,
+    test_circle: Circle,
+    test_owner: User,
+):
     response = await client.get(
-        f"/api/v1/users/search?query=user&circle_id={test_circle.id}",
-        cookies={"session_token": test_owner.session_token},
+        f"/users/search?query=user&circle_id={test_circle.id}"
     )
 
     assert response.status_code == 200
     results = response.json()
 
-    # Should find users 1 and 2 (user0 is already member)
+    # user0 is member → must be excluded
+    # user1 and user2 → must be returned
     assert len(results) == 2
+
     for result in results:
         assert result["is_already_member"] is False
         assert "user" in result["username"]
 
 
+# ------------------------------------------------------
+# TEST: empty query → empty list
+# ------------------------------------------------------
 @pytest.mark.asyncio
 async def test_search_users_empty_query(
-    client: AsyncClient, test_circle: Circle, test_owner: User
-) -> None:
-    """Test search with empty query"""
+    client: AsyncClient,
+    test_circle: Circle,
+    test_owner: User,
+):
     response = await client.get(
-        f"/api/v1/users/search?query=&circle_id={test_circle.id}",
-        cookies={"session_token": test_owner.session_token},
+        f"/users/search?query=&circle_id={test_circle.id}"
     )
 
     assert response.status_code == 200
-    results = response.json()
-    assert len(results) == 0
+    assert response.json() == []
 
 
+# ------------------------------------------------------
+# TEST: no results
+# ------------------------------------------------------
 @pytest.mark.asyncio
 async def test_search_users_no_results(
-    client: AsyncClient, test_circle: Circle, test_owner: User
-) -> None:
-    """Test search with query that returns nothing"""
+    client: AsyncClient,
+    test_circle: Circle,
+    test_owner: User,
+):
     response = await client.get(
-        f"/api/v1/users/search?query=nonexistent&circle_id={test_circle.id}",
-        cookies={"session_token": test_owner.session_token},
+        f"/users/search?query=nonexistent&circle_id={test_circle.id}"
     )
 
     assert response.status_code == 200
-    results = response.json()
-    assert len(results) == 0
+    assert response.json() == []
 
 
+# ------------------------------------------------------
+# TEST: invalid circle → 403
+# ------------------------------------------------------
 @pytest.mark.asyncio
-async def test_search_users_circle_not_found(client: AsyncClient, test_owner: User) -> None:
-    """Test search with invalid circle ID"""
-    client.cookies.set("session_token", test_owner.session_token)
+async def test_search_users_circle_not_found(
+    client: AsyncClient,
+    test_owner: User,
+):
+    # cookie already set by test_owner fixture
+    response = await client.get(
+        "/users/search?query=user&circle_id=99999"
+    )
 
-    response = await client.get("/api/v1/users/search?query=user&circle_id=99999")
-
-    # User not in circle -> 403
     assert response.status_code == 403

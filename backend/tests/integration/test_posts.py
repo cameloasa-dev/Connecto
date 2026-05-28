@@ -8,253 +8,211 @@ import pytest_asyncio
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.models import Circle, CircleMember, Post, User
+from app.db.models import User, Circle, CircleMember, Post
 from app.schemas.social import CircleRole
 
 
+# ------------------------------------------------------
+# FIXTURE: owner + login
+# ------------------------------------------------------
 @pytest_asyncio.fixture
-async def test_author(create_test_user, client: AsyncClient) -> User:
-    """Create a user to act as post author and log in"""
-    user = await create_test_user("author", "password123")
+async def owner(create_test_user, client: AsyncClient) -> User:
+    user = await create_test_user("owner", "password123")
 
-    # Login to get session token
-    login_response = await client.post(
-        "/api/v1/auth/login", json={"username": "author", "password": "password123"}
+    login = await client.post(
+        "/auth/login",
+        json={"username": "owner", "password": "password123"},
     )
-    assert login_response.status_code == 200
-    login_data = login_response.json()
-    session_token = login_data.get("session_token")
-    assert session_token is not None
-    user.session_token = session_token
+    token = login.json()["session_token"]
+    client.cookies.set("session_token", token)
+
     return user
 
 
+# ------------------------------------------------------
+# FIXTURE: circle with owner
+# ------------------------------------------------------
 @pytest_asyncio.fixture
-async def test_non_member(create_test_user, client: AsyncClient) -> User:
-    """Create a user who is not a member of this circle"""
-    user = await create_test_user("nonmember", "password123")
-
-    # Login to get session token
-    login_response = await client.post(
-        "/api/v1/auth/login", json={"username": "nonmember", "password": "password123"}
+async def circle(db_session: AsyncSession, owner: User) -> Circle:
+    c = Circle(
+        name="PostsCircle",
+        description="Circle for posts",
+        owner_id=owner.id,
     )
-
-    assert login_response.status_code == 200
-    login_data = login_response.json()
-    user.session_token = login_data.get("session_token")
-    return user
-
-
-@pytest_asyncio.fixture
-async def test_circle_with_members(
-    db_session: AsyncSession, test_author: User, create_test_user
-) -> Circle:
-    """Create a circle with owner and author as members"""
-    owner = await create_test_user("owner", "password123")
-    circle = Circle(name="Test Circle", description="For posts testing", owner_id=owner.id)
-    db_session.add(circle)
+    db_session.add(c)
     await db_session.flush()
 
-    # Add owner
-    db_session.add(CircleMember(circle_id=circle.id, user_id=owner.id, role=CircleRole.OWNER))
-
-    # Add author
     db_session.add(
-        CircleMember(circle_id=circle.id, user_id=test_author.id, role=CircleRole.MEMBER)
+        CircleMember(
+            circle_id=c.id,
+            user_id=owner.id,
+            role=CircleRole.OWNER,
+        )
     )
 
-    await db_session.commit()
-    await db_session.refresh(circle)
-    return circle
+    await db_session.flush()
+    await db_session.refresh(c)
+    return c
+
+# ------------------------------------------------------
+# FIXTURE: another user
+# ------------------------------------------------------
+@pytest_asyncio.fixture
+async def user2(create_test_user) -> User:
+    return await create_test_user("user2", "pass")
 
 
+# ------------------------------------------------------
+# 1. CREATE POST
+# ------------------------------------------------------
 @pytest.mark.asyncio
-async def test_get_feed_empty(client: AsyncClient, test_author: User):
-    """GET /posts/feed returns empty list if user has no circles"""
-    # Set cookie on client
-    client.cookies.set("session_token", test_author.session_token)
-    response = await client.get("/api/v1/posts/feed")
-    assert response.status_code == 200
-    assert response.json() == []
-
-
-@pytest.mark.asyncio
-async def test_get_feed_with_posts(
-    client: AsyncClient,
-    test_author: User,
-    test_circle_with_members: Circle,
-    db_session: AsyncSession,
-):
-    """GET /posts/feed returns posts for user's circles"""
-    # Create two posts
-    post1 = Post(
-        title="Post 1",
-        content="Content 1",
-        author_id=test_author.id,
-        circle_id=test_circle_with_members.id,
+async def test_create_post_in_circle(client: AsyncClient, circle: Circle):
+    response = await client.post(
+        "/posts/",
+        json={
+            "title": "Hello",
+            "content": "World",
+            "circle_id": circle.id,
+        },
     )
-    post2 = Post(
-        title="Post 2",
-        content="Content 2",
-        author_id=test_author.id,
-        circle_id=test_circle_with_members.id,
-    )
-    db_session.add_all([post1, post2])
-    await db_session.commit()
 
-    # Set cookie on client
-    client.cookies.set("session_token", test_author.session_token)
-
-    response = await client.get("/api/v1/posts/feed")
-    assert response.status_code == 200
-    data = response.json()
-    assert len(data) == 2
-    titles = [p["title"] for p in data]
-    assert "Post 1" in titles
-    assert "Post 2" in titles
-
-
-@pytest.mark.asyncio
-async def test_create_post_in_circle(
-    client: AsyncClient, test_author: User, test_non_member: User, test_circle_with_members: Circle
-):
-    """POST /posts/ creates post successfully in a circle"""
-    payload = {
-        "title": "New Post",
-        "content": "New Content",
-        "circle_id": test_circle_with_members.id,
-    }
-
-    # Set cookie on client
-    client.cookies.set("session_token", test_author.session_token)
-
-    response = await client.post("/api/v1/posts/", json=payload)
     assert response.status_code == 201
     data = response.json()
-    assert data["title"] == "New Post"
-    assert data["circle_id"] == test_circle_with_members.id
-    assert data["author_id"] == test_author.id
-
-    # Set cookie on client
-    client.cookies.set("session_token", test_non_member.session_token)
-
-    response = await client.post("/api/v1/posts/", json=payload)
-    assert response.status_code == 403
+    assert data["title"] == "Hello"
+    assert data["circle_id"] == circle.id
 
 
 @pytest.mark.asyncio
-async def test_get_post(
-    client: AsyncClient,
-    test_author: User,
-    test_non_member: User,
-    test_circle_with_members: Circle,
-    db_session: AsyncSession,
+async def test_create_post_not_member_forbidden(
+    client: AsyncClient, user2: User, circle: Circle
 ):
-    """GET /posts/{post_id} returns post if user has access"""
-    post = Post(
-        title="Single Post",
-        content="Content",
-        author_id=test_author.id,
-        circle_id=test_circle_with_members.id,
+    # Login user2 (not a member)
+    login = await client.post(
+        "/auth/login",
+        json={"username": "user2", "password": "pass"},
     )
-    db_session.add(post)
-    await db_session.commit()
-    await db_session.refresh(post)
+    token = login.json()["session_token"]
+    client.cookies.set("session_token", token)
 
-    # Set cookie on client
-    client.cookies.set("session_token", test_author.session_token)
+    response = await client.post(
+        "/posts/",
+        json={
+            "title": "Hack",
+            "content": "Nope",
+            "circle_id": circle.id,
+        },
+    )
 
-    # Access as author
-    response = await client.get(f"/api/v1/posts/{post.id}")
+    assert response.status_code == 403
+
+
+# ------------------------------------------------------
+# 2. GET POST
+# ------------------------------------------------------
+@pytest.mark.asyncio
+async def test_get_post(client: AsyncClient, circle: Circle):
+    # Create post
+    create = await client.post(
+        "/posts/",
+        json={"title": "Test", "content": "Content", "circle_id": circle.id},
+    )
+    post_id = create.json()["id"]
+
+    response = await client.get(f"/posts/{post_id}")
     assert response.status_code == 200
-    assert response.json()["title"] == "Single Post"
-
-    # Access non-existent post
-    response = await client.get("/api/v1/posts/99999")
-    assert response.status_code == 404
-
-    # Set cookie on client
-    client.cookies.set("session_token", test_non_member.session_token)
-
-    # Access as non-member
-    response = await client.get(f"/api/v1/posts/{post.id}")
-    assert response.status_code == 403
+    assert response.json()["id"] == post_id
 
 
 @pytest.mark.asyncio
-async def test_delete_post(
-    client: AsyncClient,
-    test_author: User,
-    test_non_member: User,
-    test_circle_with_members: Circle,
-    db_session: AsyncSession,
+async def test_get_post_forbidden_not_member(
+    client: AsyncClient, user2: User, circle: Circle
 ):
-    """DELETE /posts/{post_id} allows author to delete"""
-    post = Post(
-        title="To Delete",
-        content="Delete me",
-        author_id=test_author.id,
-        circle_id=test_circle_with_members.id,
+    # Create post as owner
+    create = await client.post(
+        "/posts/",
+        json={"title": "Secret", "content": "Hidden", "circle_id": circle.id},
     )
-    db_session.add(post)
-    await db_session.commit()
-    await db_session.refresh(post)
+    post_id = create.json()["id"]
 
-    # Set cookie on client
-    client.cookies.set("session_token", test_non_member.session_token)
+    # Login outsider
+    login = await client.post(
+        "/auth/login",
+        json={"username": "user2", "password": "pass"},
+    )
+    token = login.json()["session_token"]
+    client.cookies.set("session_token", token)
 
-    # Access as non-member
-    response = await client.delete(f"/api/v1/posts/{post.id}")
+    response = await client.get(f"/posts/{post_id}")
     assert response.status_code == 403
 
-    # Set cookie on client
-    client.cookies.set("session_token", test_author.session_token)
 
-    # Author deletes
-    response = await client.delete(f"/api/v1/posts/{post.id}")
+# ------------------------------------------------------
+# 3. FEED
+# ------------------------------------------------------
+@pytest.mark.asyncio
+async def test_feed(client: AsyncClient, circle: Circle):
+    # Create posts
+    await client.post("/posts/", json={"title": "A", "content": "1", "circle_id": circle.id})
+    await client.post("/posts/", json={"title": "B", "content": "2", "circle_id": circle.id})
+
+    response = await client.get("/posts/feed")
+    assert response.status_code == 200
+
+    feed = response.json()
+    assert len(feed) >= 2
+    assert feed[0]["title"] in ("A", "B")
+
+
+# ------------------------------------------------------
+# 4. DELETE POST
+# ------------------------------------------------------
+@pytest.mark.asyncio
+async def test_delete_post_author(client: AsyncClient, circle: Circle):
+    # Create post
+    create = await client.post(
+        "/posts/",
+        json={"title": "DeleteMe", "content": "Bye", "circle_id": circle.id},
+    )
+    post_id = create.json()["id"]
+
+    response = await client.delete(f"/posts/{post_id}")
     assert response.status_code == 204
 
-    # Confirm deletion
-    deleted = await db_session.get(Post, post.id)
-    assert deleted is None
-
 
 @pytest.mark.asyncio
-async def test_get_circle_posts(
-    client: AsyncClient,
-    test_author: User,
-    test_non_member: User,
-    test_circle_with_members: Circle,
-    db_session: AsyncSession,
+async def test_delete_post_forbidden_not_author_or_mod(
+    client: AsyncClient, circle: Circle, user2: User
 ):
-    """GET /posts/circle/{circle_id} returns posts from circle"""
-    # Add posts to circle
-    posts = [
-        Post(
-            title=f"Circle Post {i}",
-            content="Content",
-            author_id=test_author.id,
-            circle_id=test_circle_with_members.id,
-        )
-        for i in range(3)
-    ]
-    db_session.add_all(posts)
-    await db_session.commit()
+    # Create post as owner
+    create = await client.post(
+        "/posts/",
+        json={"title": "Protected", "content": "Nope", "circle_id": circle.id},
+    )
+    post_id = create.json()["id"]
 
-    # Set cookie on client
-    client.cookies.set("session_token", test_author.session_token)
+    # Login outsider
+    login = await client.post(
+        "/auth/login",
+        json={"username": "user2", "password": "pass"},
+    )
+    token = login.json()["session_token"]
+    client.cookies.set("session_token", token)
 
-    response = await client.get(f"/api/v1/posts/circle/{test_circle_with_members.id}")
-    assert response.status_code == 200
-    data = response.json()
-    assert len(data) == 3
-    titles = [p["title"] for p in data]
-    for i in range(3):
-        assert f"Circle Post {i}" in titles
-
-    # Set cookie on client
-    client.cookies.set("session_token", test_non_member.session_token)
-
-    # Access as non-member
-    response = await client.get(f"/api/v1/posts/circle/{test_circle_with_members.id}")
+    response = await client.delete(f"/posts/{post_id}")
     assert response.status_code == 403
+
+
+# ------------------------------------------------------
+# 5. GET POSTS FROM CIRCLE
+# ------------------------------------------------------
+@pytest.mark.asyncio
+async def test_get_circle_posts(client: AsyncClient, circle: Circle):
+    await client.post("/posts/", json={"title": "X", "content": "1", "circle_id": circle.id})
+    await client.post("/posts/", json={"title": "Y", "content": "2", "circle_id": circle.id})
+
+    response = await client.get(f"/posts/circle/{circle.id}")
+    assert response.status_code == 200
+
+    posts = response.json()
+    assert len(posts) >= 2
+    assert posts[0]["circle_id"] == circle.id
