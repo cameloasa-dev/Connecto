@@ -1,4 +1,4 @@
-# backend/scripts/create_test_users.py
+# backend/scripts/seed.py
 
 import asyncio
 
@@ -6,7 +6,7 @@ from sqlalchemy import select
 
 from app.core.config import settings
 from app.core.security import hash_password
-from app.db.database import AsyncSessionLocal
+from app.db.database import SessionLocal
 from app.db.models import Circle, CircleMember, Post, User
 from app.schemas.social import CircleRole
 
@@ -14,7 +14,7 @@ from app.schemas.social import CircleRole
 async def create_test_data() -> None:
     """Create test users, circles, and posts for development ."""
 
-    async with AsyncSessionLocal() as session:
+    async with SessionLocal() as session:
         # Load test user data from .env
         email = settings.TEST_USER_EMAIL
         username = settings.TEST_USER_USERNAME

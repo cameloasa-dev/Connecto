@@ -11,7 +11,11 @@ class Settings(BaseSettings):
     Application settings loaded from environment variables.
     """
 
-    model_config = SettingsConfigDict(env_file=".env", env_ignore_empty=True, extra="ignore")
+    model_config = SettingsConfigDict(
+        env_file=".env.development",  # Load from .env.development by default
+        env_ignore_empty=True,
+        extra="ignore",
+    )
 
     # API Configuration
     PROJECT_NAME: str = "Social App API"
@@ -33,6 +37,7 @@ class Settings(BaseSettings):
     # Security - Sessions
     SESSION_SECRET_KEY: str = ""
     SESSION_EXPIRE_MINUTES: int = 60 * 24  # 24 hours
+    SESSION_EXPIRE_HOURS: int = 24
 
     # CORS
     ALLOWED_ORIGINS: list[str] = [
@@ -45,6 +50,15 @@ class Settings(BaseSettings):
     # Environment
     ENVIRONMENT: str = "development"  # "production" on deploy
     FRONTEND_URL: str = "http://localhost:3000"  # used for CSP
+
+    # Test user data (for seeding)
+    TEST_USER_EMAIL: str = ""
+    TEST_USER_USERNAME: str = ""
+    TEST_USER_PASSWORD: str = ""
+
+    TEST_USER2_EMAIL: str = ""
+    TEST_USER2_USERNAME: str = ""
+    TEST_USER2_PASSWORD: str = ""
 
 
 # Global settings instance

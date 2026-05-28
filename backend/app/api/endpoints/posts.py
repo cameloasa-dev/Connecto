@@ -20,7 +20,7 @@ router = APIRouter(prefix="/posts", tags=["posts"])
 # ======================================================
 
 
-async def ensure_circle_member(db: AsyncSession, circle_id: int, user_id: int):
+async def ensure_circle_member(db: AsyncSession, circle_id: int, user_id: int) -> None:
     """Ensure user is a member of the circle."""
     membership = await db.execute(
         select(CircleMember).where(
@@ -28,8 +28,10 @@ async def ensure_circle_member(db: AsyncSession, circle_id: int, user_id: int):
             CircleMember.user_id == user_id,
         )
     )
-    if not membership.scalar_one_or_none():
-        raise HTTPException(403, "You are not a member of this circle")
+    member = membership.scalar_one_or_none()
+
+    if member is None:
+        raise HTTPException(status_code=403, detail="Not a member of this circle")
 
 
 def build_post_response(

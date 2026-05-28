@@ -5,6 +5,7 @@ Posts, Circles, Circle Members
 
 from datetime import datetime
 from enum import StrEnum
+from typing import Self
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
@@ -69,7 +70,7 @@ class CircleMemberResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
     @model_validator(mode="after")
-    def assign_badge(self):
+    def assign_badge(self) -> Self:
         badge_map = {CircleRole.OWNER: "👑", CircleRole.MODERATOR: "🛡️", CircleRole.MEMBER: "👤"}
         self.badge = badge_map.get(self.role, "👤")
         return self

@@ -9,8 +9,8 @@ from datetime import UTC, datetime, timedelta
 from typing import Any
 
 import jwt
-from pwdlib import PasswordHash
-from pwdlib.hashers.argon2 import Argon2Hasher
+from pwdlib import PasswordHash  # type: ignore[import-not-found]
+from pwdlib.hashers.argon2 import Argon2Hasher  # type: ignore[import-not-found]
 
 from app.core.config import settings
 
@@ -18,21 +18,23 @@ from app.core.config import settings
 # PASSWORD HASHING (Argon2)
 # ======================================================
 
-pwd_context = PasswordHash((Argon2Hasher(),))
+pwd_context: PasswordHash = PasswordHash((Argon2Hasher(),))
 
 
 def hash_password(password: str) -> str:
     """
     Hash a password using Argon2.
     """
-    return pwd_context.hash(password)
+    hashed: str = pwd_context.hash(password)
+    return hashed
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """
     Verify a password against its Argon2 hash.
     """
-    return pwd_context.verify(plain_password, hashed_password)
+    is_valid: bool = pwd_context.verify(plain_password, hashed_password)
+    return is_valid
 
 
 # ======================================================

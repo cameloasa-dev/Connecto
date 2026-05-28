@@ -28,29 +28,35 @@ router = APIRouter(prefix="/circles", tags=["circle-members"])
 # ======================================================
 
 
-def ensure_circle_exists(circle: Circle | None):
-    if not circle:
-        raise HTTPException(404, "Circle not found")
+def ensure_circle_exists(circle: Circle | None) -> Circle:
+    if circle is None:
+        raise HTTPException(status_code=404, detail="Circle not found")
+    return circle
 
 
-def ensure_member_exists(member: CircleMember | None):
-    if not member:
-        raise HTTPException(404, "Member not found in this circle")
+def ensure_member_exists(member: CircleMember | None) -> CircleMember:
+    if member is None:
+        raise HTTPException(status_code=404, detail="Member not found in this circle")
+    return member
 
 
-def ensure_user_exists(user: User | None):
-    if not user:
-        raise HTTPException(404, "User not found")
+def ensure_user_exists(user: User | None) -> User:
+    if user is None:
+        raise HTTPException(status_code=404, detail="User not found")
+    return user
 
 
-def ensure_owner_or_moderator(role: CircleRole):
+def ensure_owner_or_moderator(role: CircleRole) -> None:
     if role not in (CircleRole.OWNER, CircleRole.MODERATOR):
-        raise HTTPException(403, "Only owners and moderators can perform this action")
+        raise HTTPException(
+            status_code=403, detail="Only owners and moderators can perform this action"
+        )
 
 
-def ensure_owner(role: CircleRole):
+def ensure_owner(role: CircleRole) -> CircleRole:
     if role != CircleRole.OWNER:
-        raise HTTPException(403, "Only the circle owner can perform this action")
+        raise HTTPException(status_code=403, detail="Only the circle owner can perform this action")
+    return role
 
 
 def build_member_response(member: CircleMember, username: str) -> CircleMemberResponse:
@@ -58,7 +64,7 @@ def build_member_response(member: CircleMember, username: str) -> CircleMemberRe
         circle_id=member.circle_id,
         user_id=member.user_id,
         username=username,
-        role=member.role,
+        role=CircleRole(member.role),
         joined_at=member.joined_at,
     )
 
@@ -74,6 +80,7 @@ async def add_member(
     current_user: User = Depends(get_current_user_from_session),
 ) -> MemberActionResponse:
 
+    # Validate circle
     circle = await db.get(Circle, circle_id)
     ensure_circle_exists(circle)
 
@@ -84,12 +91,21 @@ async def add_member(
             CircleMember.user_id == current_user.id,
         )
     )
-    role = current_role.scalar_one_or_none()
+    role_str = current_role.scalar_one_or_none()
+    if role_str is None:
+        raise HTTPException(
+            status_code=403,
+            detail="Role not found. You must be a member of the circle to add members.",
+        )
+
+    # Permission check
+    role = CircleRole(role_str)
     ensure_owner_or_moderator(role)
 
     # Check user to add
     user_to_add = await db.get(User, request.user_id)
-    ensure_user_exists(user_to_add)
+    user_to_add = ensure_user_exists(user_to_add)
+    assert user_to_add is not None  # for type checker
 
     # Check if already member
     existing = await db.execute(
@@ -141,11 +157,11 @@ async def remove_member(
         )
     )
     member = member_result.scalar_one_or_none()
-    ensure_member_exists(member)
+    member = ensure_member_exists(member)
 
     # Cannot remove owner
     if member.role == CircleRole.OWNER:
-        raise HTTPException(403, "Cannot remove the circle owner")
+        raise HTTPException(status_code=403, detail="Cannot remove the circle owner")
 
     # Current user's role
     current_role_result = await db.execute(
@@ -157,20 +173,20 @@ async def remove_member(
     current_role = current_role_result.scalar_one_or_none()
 
     if not current_role:
-        raise HTTPException(403, "You are not a member of this circle")
+        raise HTTPException(status_code=403, detail="You are not a member of this circle")
 
     # Permission logic
     if current_role == CircleRole.OWNER:
         pass  # owner can remove anyone except owner
     elif current_role == CircleRole.MODERATOR:
         if member.role == CircleRole.MODERATOR:
-            raise HTTPException(403, "Moderators cannot remove other moderators")
+            raise HTTPException(status_code=403, detail="Moderators cannot remove other moderators")
     else:
-        raise HTTPException(403, "Only owners and moderators can remove members")
+        raise HTTPException(status_code=403, detail="Only owners and moderators can remove members")
 
     # Remove member
     user = await db.get(User, user_id)
-    ensure_user_exists(user)
+    user = ensure_user_exists(user)
 
     await db.delete(member)
     await db.commit()
@@ -201,7 +217,11 @@ async def update_member_role(
             CircleMember.user_id == current_user.id,
         )
     )
-    role = owner_check.scalar_one_or_none()
+
+    role_str = owner_check.scalar_one_or_none()
+    if role_str is None:
+        raise HTTPException(status_code=403, detail="You are not a member of this circle")
+    role = CircleRole(role_str)
     ensure_owner(role)
 
     # Member to update
@@ -212,11 +232,11 @@ async def update_member_role(
         )
     )
     member = member_result.scalar_one_or_none()
-    ensure_member_exists(member)
+    member = ensure_member_exists(member)
 
     # Cannot change owner's role
     if member.role == CircleRole.OWNER:
-        raise HTTPException(403, "Cannot change the circle owner's role")
+        raise HTTPException(status_code=403, detail="Cannot change the circle owner's role")
 
     # Update role
     old_role = member.role
@@ -226,7 +246,7 @@ async def update_member_role(
     await db.refresh(member)
 
     user = await db.get(User, user_id)
-    ensure_user_exists(user)
+    user = ensure_user_exists(user)
 
     return MemberActionResponse(
         success=True,
