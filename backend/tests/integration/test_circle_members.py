@@ -2,6 +2,7 @@
 """
 Comprehensive tests for circle_members covering all CRUD operations and role-based permissions.
 """
+
 import pytest
 import pytest_asyncio
 from httpx import AsyncClient
@@ -15,16 +16,16 @@ from app.schemas.social import CircleRole
 # FIXTURES (test data setup)
 # ======================================================
 
+
 @pytest_asyncio.fixture
 async def test_owner(create_test_user, client: AsyncClient) -> User:
     """Create circle owner and login"""
     user = await create_test_user("owner", "password123")
 
     # Login to get session token
-    login_response = await client.post("/api/v1/auth/login", json={
-        "username": "owner",
-        "password": "password123"
-    })
+    login_response = await client.post(
+        "/api/v1/auth/login", json={"username": "owner", "password": "password123"}
+    )
 
     assert login_response.status_code == 200
     login_data = login_response.json()
@@ -37,10 +38,9 @@ async def test_moderator(create_test_user, client: AsyncClient) -> User:
     """Create a moderator user"""
     user = await create_test_user("moderator", "password123")
 
-    login_response = await client.post("/api/v1/auth/login", json={
-        "username": "moderator",
-        "password": "password123"
-    })
+    login_response = await client.post(
+        "/api/v1/auth/login", json={"username": "moderator", "password": "password123"}
+    )
 
     assert login_response.status_code == 200
     login_data = login_response.json()
@@ -53,10 +53,9 @@ async def test_member(create_test_user, client: AsyncClient) -> User:
     """Create a regular member user"""
     user = await create_test_user("member", "password123")
 
-    login_response = await client.post("/api/v1/auth/login", json={
-        "username": "member",
-        "password": "password123"
-    })
+    login_response = await client.post(
+        "/api/v1/auth/login", json={"username": "member", "password": "password123"}
+    )
 
     assert login_response.status_code == 200
     login_data = login_response.json()
@@ -65,16 +64,9 @@ async def test_member(create_test_user, client: AsyncClient) -> User:
 
 
 @pytest_asyncio.fixture
-async def test_circle(
-    db_session: AsyncSession,
-    test_owner: User
-) -> Circle:
+async def test_circle(db_session: AsyncSession, test_owner: User) -> Circle:
     """Create a test circle owned by test_owner"""
-    circle = Circle(
-        name="Test Circle",
-        description="For testing",
-        owner_id=test_owner.id
-    )
+    circle = Circle(name="Test Circle", description="For testing", owner_id=test_owner.id)
     db_session.add(circle)
     await db_session.commit()
     await db_session.refresh(circle)
@@ -87,30 +79,24 @@ async def setup_circle_members(
     test_circle: Circle,
     test_owner: User,
     test_moderator: User,
-    test_member: User
+    test_member: User,
 ) -> dict:
     """Setup complete circle with owner, moderator, and member"""
     # Add owner as member
     owner_member = CircleMember(
-        circle_id=test_circle.id,
-        user_id=test_owner.id,
-        role=CircleRole.OWNER
+        circle_id=test_circle.id, user_id=test_owner.id, role=CircleRole.OWNER
     )
     db_session.add(owner_member)
 
     # Add moderator
     mod_member = CircleMember(
-        circle_id=test_circle.id,
-        user_id=test_moderator.id,
-        role=CircleRole.MODERATOR
+        circle_id=test_circle.id, user_id=test_moderator.id, role=CircleRole.MODERATOR
     )
     db_session.add(mod_member)
 
     # Add regular member
     reg_member = CircleMember(
-        circle_id=test_circle.id,
-        user_id=test_member.id,
-        role=CircleRole.MEMBER
+        circle_id=test_circle.id, user_id=test_member.id, role=CircleRole.MEMBER
     )
     db_session.add(reg_member)
 
@@ -120,7 +106,7 @@ async def setup_circle_members(
         "circle": test_circle,
         "owner": test_owner,
         "moderator": test_moderator,
-        "member": test_member
+        "member": test_member,
     }
 
 
@@ -128,11 +114,10 @@ async def setup_circle_members(
 # TESTS FOR REMOVE MEMBER
 # ======================================================
 
+
 @pytest.mark.asyncio
 async def test_remove_member_by_owner_success(
-    client: AsyncClient,
-    setup_circle_members: dict,
-    db_session: AsyncSession
+    client: AsyncClient, setup_circle_members: dict, db_session: AsyncSession
 ) -> None:
     """Test owner can remove a regular member"""
     data = setup_circle_members
@@ -141,9 +126,7 @@ async def test_remove_member_by_owner_success(
     # Set cookie on client
     client.cookies.set("session_token", data["owner"].session_token)
 
-    response = await client.delete(
-        f"/api/v1/circles/{data['circle'].id}/members/{member.id}"
-    )
+    response = await client.delete(f"/api/v1/circles/{data['circle'].id}/members/{member.id}")
 
     assert response.status_code == 200
     result = response.json()
@@ -153,8 +136,7 @@ async def test_remove_member_by_owner_success(
     # Verify member is gone from database
     member_check = await db_session.execute(
         select(CircleMember).where(
-            CircleMember.circle_id == data["circle"].id,
-            CircleMember.user_id == member.id
+            CircleMember.circle_id == data["circle"].id, CircleMember.user_id == member.id
         )
     )
     assert member_check.scalar_one_or_none() is None
@@ -162,8 +144,7 @@ async def test_remove_member_by_owner_success(
 
 @pytest.mark.asyncio
 async def test_remove_member_by_moderator_success(
-    client: AsyncClient,
-    setup_circle_members: dict
+    client: AsyncClient, setup_circle_members: dict
 ) -> None:
     """Test moderator can remove a regular member"""
     data = setup_circle_members
@@ -171,9 +152,7 @@ async def test_remove_member_by_moderator_success(
 
     client.cookies.set("session_token", data["moderator"].session_token)
 
-    response = await client.delete(
-        f"/api/v1/circles/{data['circle'].id}/members/{member.id}"
-    )
+    response = await client.delete(f"/api/v1/circles/{data['circle'].id}/members/{member.id}")
 
     assert response.status_code == 200
     result = response.json()
@@ -182,8 +161,7 @@ async def test_remove_member_by_moderator_success(
 
 @pytest.mark.asyncio
 async def test_moderator_cannot_remove_another_moderator(
-    client: AsyncClient,
-    setup_circle_members: dict
+    client: AsyncClient, setup_circle_members: dict
 ) -> None:
     """Test moderator cannot remove another moderator"""
     data = setup_circle_members
@@ -192,9 +170,7 @@ async def test_moderator_cannot_remove_another_moderator(
 
     client.cookies.set("session_token", moderator.session_token)
 
-    response = await client.delete(
-        f"/api/v1/circles/{data['circle'].id}/members/{another_mod.id}"
-    )
+    response = await client.delete(f"/api/v1/circles/{data['circle'].id}/members/{another_mod.id}")
 
     assert response.status_code == 403
     result = response.json()
@@ -203,8 +179,7 @@ async def test_moderator_cannot_remove_another_moderator(
 
 @pytest.mark.asyncio
 async def test_moderator_cannot_remove_owner(
-    client: AsyncClient,
-    setup_circle_members: dict
+    client: AsyncClient, setup_circle_members: dict
 ) -> None:
     """Test moderator cannot remove the circle owner"""
     data = setup_circle_members
@@ -213,9 +188,7 @@ async def test_moderator_cannot_remove_owner(
 
     client.cookies.set("session_token", moderator.session_token)
 
-    response = await client.delete(
-        f"/api/v1/circles/{data['circle'].id}/members/{owner.id}"
-    )
+    response = await client.delete(f"/api/v1/circles/{data['circle'].id}/members/{owner.id}")
 
     assert response.status_code == 403
     result = response.json()
@@ -223,10 +196,7 @@ async def test_moderator_cannot_remove_owner(
 
 
 @pytest.mark.asyncio
-async def test_member_cannot_remove_anyone(
-    client: AsyncClient,
-    setup_circle_members: dict
-) -> None:
+async def test_member_cannot_remove_anyone(client: AsyncClient, setup_circle_members: dict) -> None:
     """Test regular member cannot remove anyone"""
     data = setup_circle_members
     member = data["member"]
@@ -244,10 +214,7 @@ async def test_member_cannot_remove_anyone(
 
 
 @pytest.mark.asyncio
-async def test_remove_nonexistent_member(
-    client: AsyncClient,
-    setup_circle_members: dict
-) -> None:
+async def test_remove_nonexistent_member(client: AsyncClient, setup_circle_members: dict) -> None:
     """Test removing a user who is not a member"""
     data = setup_circle_members
     owner = data["owner"]
@@ -255,23 +222,21 @@ async def test_remove_nonexistent_member(
 
     client.cookies.set("session_token", owner.session_token)
 
-    response = await client.delete(
-        f"/api/v1/circles/{data['circle'].id}/members/{non_member_id}"
-    )
+    response = await client.delete(f"/api/v1/circles/{data['circle'].id}/members/{non_member_id}")
 
     assert response.status_code == 404
     result = response.json()
     assert "not found" in result["detail"].lower()
 
+
 # ======================================================
 # TESTS FOR ADD MEMBER
 # ======================================================
 
+
 @pytest.mark.asyncio
 async def test_add_member_by_owner_success(
-    client: AsyncClient,
-    setup_circle_members: dict,
-    create_test_user
+    client: AsyncClient, setup_circle_members: dict, create_test_user
 ) -> None:
     """Test owner can add a new member"""
     data = setup_circle_members
@@ -282,8 +247,7 @@ async def test_add_member_by_owner_success(
     client.cookies.set("session_token", data["owner"].session_token)
 
     response = await client.post(
-        f"/api/v1/circles/{data['circle'].id}/members",
-        json={"user_id": new_user.id}
+        f"/api/v1/circles/{data['circle'].id}/members", json={"user_id": new_user.id}
     )
 
     assert response.status_code == 201
@@ -295,9 +259,7 @@ async def test_add_member_by_owner_success(
 
 @pytest.mark.asyncio
 async def test_add_member_by_moderator_success(
-    client: AsyncClient,
-    setup_circle_members: dict,
-    create_test_user
+    client: AsyncClient, setup_circle_members: dict, create_test_user
 ) -> None:
     """Test moderator can add a new member"""
     data = setup_circle_members
@@ -307,8 +269,7 @@ async def test_add_member_by_moderator_success(
     client.cookies.set("session_token", data["moderator"].session_token)
 
     response = await client.post(
-        f"/api/v1/circles/{data['circle'].id}/members",
-        json={"user_id": new_user.id}
+        f"/api/v1/circles/{data['circle'].id}/members", json={"user_id": new_user.id}
     )
 
     assert response.status_code == 201
@@ -317,10 +278,7 @@ async def test_add_member_by_moderator_success(
 
 
 @pytest.mark.asyncio
-async def test_add_existing_member_fails(
-    client: AsyncClient,
-    setup_circle_members: dict
-) -> None:
+async def test_add_existing_member_fails(client: AsyncClient, setup_circle_members: dict) -> None:
     """Test adding a user who is already a member fails"""
     data = setup_circle_members
     existing_member = data["member"]
@@ -328,8 +286,7 @@ async def test_add_existing_member_fails(
     client.cookies.set("session_token", data["owner"].session_token)
 
     response = await client.post(
-        f"/api/v1/circles/{data['circle'].id}/members",
-        json={"user_id": existing_member.id}
+        f"/api/v1/circles/{data['circle'].id}/members", json={"user_id": existing_member.id}
     )
 
     assert response.status_code == 400
@@ -341,10 +298,10 @@ async def test_add_existing_member_fails(
 # TESTS FOR UPDATE ROLE
 # ======================================================
 
+
 @pytest.mark.asyncio
 async def test_owner_promotes_member_to_moderator(
-    client: AsyncClient,
-    setup_circle_members: dict
+    client: AsyncClient, setup_circle_members: dict
 ) -> None:
     """Test owner can promote a member to moderator"""
     data = setup_circle_members
@@ -353,8 +310,7 @@ async def test_owner_promotes_member_to_moderator(
     client.cookies.set("session_token", data["owner"].session_token)
 
     response = await client.put(
-        f"/api/v1/circles/{data['circle'].id}/members/{member.id}/role",
-        json={"role": "moderator"}
+        f"/api/v1/circles/{data['circle'].id}/members/{member.id}/role", json={"role": "moderator"}
     )
 
     assert response.status_code == 200
@@ -363,14 +319,12 @@ async def test_owner_promotes_member_to_moderator(
     assert result["member"]["role"] == "moderator"
     assert result["member"]["badge"] == "🛡️"
 
+
 # ======================================================
 # TESTS FOR ROLE-BASED PERMISSIONS
 # ======================================================
 @pytest.mark.asyncio
-async def test_moderator_cannot_promote(
-    client: AsyncClient,
-    setup_circle_members: dict
-) -> None:
+async def test_moderator_cannot_promote(client: AsyncClient, setup_circle_members: dict) -> None:
     """Test moderator cannot promote another member"""
     data = setup_circle_members
     member = data["member"]
@@ -378,59 +332,44 @@ async def test_moderator_cannot_promote(
     client.cookies.set("session_token", data["moderator"].session_token)
 
     response = await client.put(
-        f"/api/v1/circles/{data['circle'].id}/members/{member.id}/role",
-        json={"role": "moderator"}
+        f"/api/v1/circles/{data['circle'].id}/members/{member.id}/role", json={"role": "moderator"}
     )
 
     assert response.status_code == 403
     result = response.json()
     assert "Only the circle owner" in result["detail"]
 
+
 @pytest.mark.asyncio
-async def test_remove_member_circle_not_found(
-    client: AsyncClient,
-    test_owner: User
-) -> None:
+async def test_remove_member_circle_not_found(client: AsyncClient, test_owner: User) -> None:
     """Test removing member from non-existent circle"""
     client.cookies.set("session_token", test_owner.session_token)
 
-    response = await client.delete(
-        "/api/v1/circles/99999/members/1"
-    )
+    response = await client.delete("/api/v1/circles/99999/members/1")
 
     assert response.status_code == 404
     assert "Circle not found" in response.json()["detail"]
 
 
 @pytest.mark.asyncio
-async def test_add_member_circle_not_found(
-    client: AsyncClient,
-    test_owner: User
-) -> None:
+async def test_add_member_circle_not_found(client: AsyncClient, test_owner: User) -> None:
     """Test adding member to non-existent circle"""
     client.cookies.set("session_token", test_owner.session_token)
 
-    response = await client.post(
-        "/api/v1/circles/99999/members",
-        json={"user_id": 1}
-    )
+    response = await client.post("/api/v1/circles/99999/members", json={"user_id": 1})
 
     assert response.status_code == 404
     assert "Circle not found" in response.json()["detail"]
 
 
 @pytest.mark.asyncio
-async def test_add_member_user_not_found(
-    client: AsyncClient,
-    setup_circle_members: dict
-) -> None:
+async def test_add_member_user_not_found(client: AsyncClient, setup_circle_members: dict) -> None:
     """Test adding non-existent user to circle"""
     data = setup_circle_members
     client.cookies.set("session_token", data["owner"].session_token)
 
     response = await client.post(
-        f"/api/v1/circles/{data['circle'].id}/members",
-        json={"user_id": 99999}
+        f"/api/v1/circles/{data['circle'].id}/members", json={"user_id": 99999}
     )
 
     assert response.status_code == 404
@@ -438,17 +377,13 @@ async def test_add_member_user_not_found(
 
 
 @pytest.mark.asyncio
-async def test_update_role_user_not_found(
-    client: AsyncClient,
-    setup_circle_members: dict
-) -> None:
+async def test_update_role_user_not_found(client: AsyncClient, setup_circle_members: dict) -> None:
     """Test updating role for non-existent user"""
     data = setup_circle_members
     client.cookies.set("session_token", data["owner"].session_token)
 
     response = await client.put(
-        f"/api/v1/circles/{data['circle'].id}/members/99999/role",
-        json={"role": "moderator"}
+        f"/api/v1/circles/{data['circle'].id}/members/99999/role", json={"role": "moderator"}
     )
 
     assert response.status_code == 404
@@ -456,16 +391,10 @@ async def test_update_role_user_not_found(
 
 
 @pytest.mark.asyncio
-async def test_update_role_circle_not_found(
-    client: AsyncClient,
-    test_owner: User
-) -> None:
+async def test_update_role_circle_not_found(client: AsyncClient, test_owner: User) -> None:
     """Test updating role in non-existent circle"""
     client.cookies.set("session_token", test_owner.session_token)
 
-    response = await client.put(
-        "/api/v1/circles/99999/members/1/role",
-        json={"role": "moderator"}
-    )
+    response = await client.put("/api/v1/circles/99999/members/1/role", json={"role": "moderator"})
 
     assert response.status_code == 403

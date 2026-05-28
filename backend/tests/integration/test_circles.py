@@ -2,6 +2,7 @@
 """
 Integration tests for Circle endpoints.
 """
+
 import pytest
 import pytest_asyncio
 from httpx import AsyncClient
@@ -17,10 +18,9 @@ async def test_owner(create_test_user, client: AsyncClient) -> User:
     user = await create_test_user("owner", "password123")
 
     # Login to get session token
-    login_response = await client.post("/api/v1/auth/login", json={
-        "username": "owner",
-        "password": "password123"
-    })
+    login_response = await client.post(
+        "/api/v1/auth/login", json={"username": "owner", "password": "password123"}
+    )
     assert login_response.status_code == 200
     login_data = login_response.json()
     session_token = login_data.get("session_token")
@@ -36,10 +36,9 @@ async def test_non_owner(create_test_user, client: AsyncClient) -> User:
     user = await create_test_user("not_owner", "password123")
 
     # Login to get session token
-    login_response = await client.post("/api/v1/auth/login", json={
-        "username": "not_owner",
-        "password": "password123"
-    })
+    login_response = await client.post(
+        "/api/v1/auth/login", json={"username": "not_owner", "password": "password123"}
+    )
     assert login_response.status_code == 200
     login_data = login_response.json()
     session_token = login_data.get("session_token")
@@ -60,30 +59,22 @@ async def test_members(create_test_user) -> list[User]:
 
 
 @pytest_asyncio.fixture
-async def test_circle(db_session: AsyncSession, test_owner: User, test_members: list[User]) -> Circle:
+async def test_circle(
+    db_session: AsyncSession, test_owner: User, test_members: list[User]
+) -> Circle:
     """Create a circle with owner and members"""
     circle = Circle(
-        name="Test Circle",
-        description="Circle for integration tests",
-        owner_id=test_owner.id
+        name="Test Circle", description="Circle for integration tests", owner_id=test_owner.id
     )
     db_session.add(circle)
     await db_session.flush()
 
     # Add owner as member
-    db_session.add(CircleMember(
-        circle_id=circle.id,
-        user_id=test_owner.id,
-        role=CircleRole.OWNER
-    ))
+    db_session.add(CircleMember(circle_id=circle.id, user_id=test_owner.id, role=CircleRole.OWNER))
 
     # Add additional members
     for member in test_members:
-        db_session.add(CircleMember(
-            circle_id=circle.id,
-            user_id=member.id,
-            role=CircleRole.MEMBER
-        ))
+        db_session.add(CircleMember(circle_id=circle.id, user_id=member.id, role=CircleRole.MEMBER))
 
     await db_session.commit()
     await db_session.refresh(circle)
@@ -91,22 +82,18 @@ async def test_circle(db_session: AsyncSession, test_owner: User, test_members: 
 
 
 @pytest_asyncio.fixture
-async def test_circle2(db_session: AsyncSession, test_owner: User, test_members: list[User]) -> Circle:
+async def test_circle2(
+    db_session: AsyncSession, test_owner: User, test_members: list[User]
+) -> Circle:
     """Create a second circle with owner"""
     circle = Circle(
-        name="Test Circle 2",
-        description="Circle for integration tests 2",
-        owner_id=test_owner.id
+        name="Test Circle 2", description="Circle for integration tests 2", owner_id=test_owner.id
     )
     db_session.add(circle)
     await db_session.flush()
 
     # Add owner as member
-    db_session.add(CircleMember(
-        circle_id=circle.id,
-        user_id=test_owner.id,
-        role=CircleRole.OWNER
-    ))
+    db_session.add(CircleMember(circle_id=circle.id, user_id=test_owner.id, role=CircleRole.OWNER))
 
     await db_session.commit()
     await db_session.refresh(circle)
@@ -144,10 +131,7 @@ async def test_create_circle(client: AsyncClient, test_owner: User):
     - Should create a new circle
     - Should return 400 if circle name already exists
     """
-    payload = {
-        "name": "New Test Circle",
-        "description": "Created via test"
-    }
+    payload = {"name": "New Test Circle", "description": "Created via test"}
     client.cookies.set("session_token", test_owner.session_token)
     response = await client.post("/api/v1/circles/", json=payload)
     # Assert status_code 201 and validate returned circle data
@@ -171,7 +155,9 @@ async def test_create_circle(client: AsyncClient, test_owner: User):
 
 
 @pytest.mark.asyncio
-async def test_get_circle(client: AsyncClient, test_owner: User, test_circle: Circle, test_members: list[User]):
+async def test_get_circle(
+    client: AsyncClient, test_owner: User, test_circle: Circle, test_members: list[User]
+):
     """
     GET /circles/{circle_id}
     - Should return circle details if user is member
@@ -186,17 +172,16 @@ async def test_get_circle(client: AsyncClient, test_owner: User, test_circle: Ci
 
 
 @pytest.mark.asyncio
-async def test_update_circle(client: AsyncClient, test_owner: User, test_non_owner: User, test_circle: Circle):
+async def test_update_circle(
+    client: AsyncClient, test_owner: User, test_non_owner: User, test_circle: Circle
+):
     """
     PUT /circles/{circle_id}
     - Only owner can update circle details
     - Should return 403 if non-owner tries
     - Should return 404 if circle does not exist
     """
-    payload = {
-        "name": "Updated Circle Name",
-        "description": "Updated description"
-    }
+    payload = {"name": "Updated Circle Name", "description": "Updated description"}
     # Test update as owner (expect 200)
     client.cookies.set("session_token", test_owner.session_token)
 
@@ -218,7 +203,9 @@ async def test_update_circle(client: AsyncClient, test_owner: User, test_non_own
 
 @pytest.mark.xfail(reason="Delete endpoint not implemented in frontend yet")
 @pytest.mark.asyncio
-async def test_delete_circle(client: AsyncClient, test_owner: User, test_non_owner: User, test_circle: Circle):
+async def test_delete_circle(
+    client: AsyncClient, test_owner: User, test_non_owner: User, test_circle: Circle
+):
     # This will run, but failure won’t break CI
     """
     DELETE /circles/{circle_id}
@@ -242,7 +229,13 @@ async def test_delete_circle(client: AsyncClient, test_owner: User, test_non_own
 
 
 @pytest.mark.asyncio
-async def test_update_circle_name(client: AsyncClient, test_owner: User, test_non_owner: User, test_circle: Circle, test_circle2: Circle):
+async def test_update_circle_name(
+    client: AsyncClient,
+    test_owner: User,
+    test_non_owner: User,
+    test_circle: Circle,
+    test_circle2: Circle,
+):
     """
     PUT /circles/{circle_id}/name
     - Only owner can update circle name
@@ -251,9 +244,9 @@ async def test_update_circle_name(client: AsyncClient, test_owner: User, test_no
     - Should return 403 if non-owner tries
     """
     # Test update as owner with valid name
-    payload = { "name": "Renamed Circle" }
-    invalid_payload = { "name": "Re" }
-    duplicate_payload = { "name": test_circle2.name }
+    payload = {"name": "Renamed Circle"}
+    invalid_payload = {"name": "Re"}
+    duplicate_payload = {"name": test_circle2.name}
 
     client.cookies.set("session_token", test_owner.session_token)
     response = await client.put(f"/api/v1/circles/{test_circle.id}/name", json=payload)
@@ -267,17 +260,16 @@ async def test_update_circle_name(client: AsyncClient, test_owner: User, test_no
     response = await client.put(f"/api/v1/circles/{test_circle.id}/name", json=duplicate_payload)
     assert response.status_code == 400
 
-
     # Test update non-existent circle (expect 404)
     client.cookies.set("session_token", test_owner.session_token)
 
-    payload4 = { "name": "Non-existing circle" }
+    payload4 = {"name": "Non-existing circle"}
     response = await client.put("/api/v1/circles/99999/name", json=payload4)
     assert response.status_code == 404
 
     # Test update as non-owner (expect 403)
     client.cookies.set("session_token", test_non_owner.session_token)
 
-    payload5 = { "name": "Renamed Circle" }
+    payload5 = {"name": "Renamed Circle"}
     response = await client.put(f"/api/v1/circles/{test_circle.id}/name", json=payload5)
     assert response.status_code == 403

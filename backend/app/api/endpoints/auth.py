@@ -47,9 +47,7 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 async def register(user_data: UserCreate, db: AsyncSession = Depends(get_db)) -> SessionResponse:
 
     # Check username
-    existing_username = await db.execute(
-        select(User).where(User.username == user_data.username)
-    )
+    existing_username = await db.execute(select(User).where(User.username == user_data.username))
     if existing_username.scalar_one_or_none():
         raise HTTPException(status_code=400, detail="Username already taken")
 
@@ -73,17 +71,13 @@ async def register(user_data: UserCreate, db: AsyncSession = Depends(get_db)) ->
     await db.commit()
     await db.refresh(new_user)
 
-    logger.info({
-        "event": "user_registered",
-        "username": new_user.username,
-        "user_id": new_user.id
-    })
+    logger.info({"event": "user_registered", "username": new_user.username, "user_id": new_user.id})
 
     return SessionResponse(
         success=True,
         username=new_user.username,
         session_token=None,
-        user=UserResponse.model_validate(new_user)
+        user=UserResponse.model_validate(new_user),
     )
 
 
@@ -93,25 +87,22 @@ async def register(user_data: UserCreate, db: AsyncSession = Depends(get_db)) ->
 @router.post("/login", response_model=SessionResponse)
 @limiter.limit("5/minute")
 async def login(
-    credentials: UserLogin,
-    request: Request,
-    response: Response,
-    db: AsyncSession = Depends(get_db)
+    credentials: UserLogin, request: Request, response: Response, db: AsyncSession = Depends(get_db)
 ) -> SessionResponse:
 
     try:
         # Find user
-        result = await db.execute(
-            select(User).where(User.username == credentials.username)
-        )
+        result = await db.execute(select(User).where(User.username == credentials.username))
         user = result.scalar_one_or_none()
 
         if not user or not verify_password(credentials.password, user.hashed_password):
-            logger.warning({
-                "event": "auth_failed",
-                "username": credentials.username,
-                "ip": request.client.host if request.client else "unknown",
-            })
+            logger.warning(
+                {
+                    "event": "auth_failed",
+                    "username": credentials.username,
+                    "ip": request.client.host if request.client else "unknown",
+                }
+            )
             raise HTTPException(status_code=401, detail="Invalid username or password")
 
         if not user.is_active:
@@ -151,29 +142,21 @@ async def login(
             success=True,
             username=user.username,
             session_token=session_token,
-            user=UserResponse.model_validate(user)
+            user=UserResponse.model_validate(user),
         )
 
     except HTTPException:
         raise
     except Exception as e:
-        logger.error({
-            "event": "auth_error",
-            "error": str(e),
-            "trace": traceback.format_exc()
-        })
-        raise HTTPException(
-            status_code=500,
-            detail="Login failed due to server error"
-            ) from e
+        logger.error({"event": "auth_error", "error": str(e), "trace": traceback.format_exc()})
+        raise HTTPException(status_code=500, detail="Login failed due to server error") from e
 
 
 # =========================================================
 # CURRENT USER
 # =========================================================
 async def get_current_user_from_session(
-    request: Request,
-    db: AsyncSession = Depends(get_db)
+    request: Request, db: AsyncSession = Depends(get_db)
 ) -> User:
 
     session_token = request.cookies.get("session_token")
@@ -201,7 +184,7 @@ async def get_current_user_from_session(
 
 @router.get("/me", response_model=UserResponse)
 async def get_current_user_endpoint(
-    current_user: User = Depends(get_current_user_from_session)
+    current_user: User = Depends(get_current_user_from_session),
 ) -> UserResponse:
     return UserResponse.model_validate(current_user)
 
@@ -211,9 +194,7 @@ async def get_current_user_endpoint(
 # =========================================================
 @router.post("/logout")
 async def logout(
-    request: Request,
-    response: Response,
-    db: AsyncSession = Depends(get_db)
+    request: Request, response: Response, db: AsyncSession = Depends(get_db)
 ) -> dict[str, Any]:
 
     session_token = request.cookies.get("session_token")
@@ -232,10 +213,7 @@ async def logout(
         samesite_value: Literal["lax", "none"] = "none" if secure_flag else "lax"
 
         response.delete_cookie(
-            "session_token",
-            path="/",
-            secure=secure_flag,
-            samesite=samesite_value
+            "session_token", path="/", secure=secure_flag, samesite=samesite_value
         )
 
     return {"success": True, "message": "Logged out successfully"}

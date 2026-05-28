@@ -31,17 +31,11 @@ async def get_all_users(
     """
 
     result = await db.execute(
-        select(User)
-        .where(User.id != current_user.id)
-        .offset(skip)
-        .limit(limit)
+        select(User).where(User.id != current_user.id).offset(skip).limit(limit)
     )
     users = result.scalars().all()
 
-    return [
-        UserResponse.model_validate(user)
-        for user in users
-    ]
+    return [UserResponse.model_validate(user) for user in users]
 
 
 # ======================================================
@@ -64,8 +58,7 @@ async def search_users(
 
     # 1. Permission check
     permission = await db.execute(
-        select(CircleMember)
-        .where(
+        select(CircleMember).where(
             CircleMember.circle_id == circle_id,
             CircleMember.user_id == current_user.id,
             CircleMember.role.in_(["owner", "moderator"]),

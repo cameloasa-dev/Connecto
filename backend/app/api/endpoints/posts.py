@@ -19,11 +19,11 @@ router = APIRouter(prefix="/posts", tags=["posts"])
 # HELPERS
 # ======================================================
 
+
 async def ensure_circle_member(db: AsyncSession, circle_id: int, user_id: int):
     """Ensure user is a member of the circle."""
     membership = await db.execute(
-        select(CircleMember)
-        .where(
+        select(CircleMember).where(
             CircleMember.circle_id == circle_id,
             CircleMember.user_id == user_id,
         )
@@ -172,8 +172,7 @@ async def delete_post(
         can_delete = True
     elif post.circle_id:
         membership = await db.execute(
-            select(CircleMember)
-            .where(
+            select(CircleMember).where(
                 CircleMember.circle_id == post.circle_id,
                 CircleMember.user_id == current_user.id,
             )

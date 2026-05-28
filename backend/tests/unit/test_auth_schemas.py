@@ -2,6 +2,7 @@
 Unit tests for backend/app/schemas/auth.py
 Tests Pydantic validators and schema constraints
 """
+
 from datetime import datetime
 
 import pytest
@@ -25,7 +26,7 @@ class TestUserCreateSchema:
             "username": "johndoe",
             "email": "john@example.com",
             "password": "SecurePass123!",
-            "full_name": "John Doe"
+            "full_name": "John Doe",
         }
         user = UserCreate(**user_data)
         assert user.username == "johndoe"
@@ -38,7 +39,7 @@ class TestUserCreateSchema:
         user_data = {
             "username": "janedoe",
             "email": "jane@example.com",
-            "password": "SecurePass123!"
+            "password": "SecurePass123!",
         }
         user = UserCreate(**user_data)
         assert user.username == "janedoe"
@@ -51,16 +52,12 @@ class TestUserCreateSchema:
             "missing@domain",
             "@nodomain.com",
             "spaces in@email.com",
-            "double@@domain.com"
+            "double@@domain.com",
         ]
 
         for invalid_email in invalid_emails:
             with pytest.raises(ValidationError) as exc_info:
-                UserCreate(
-                    username="testuser",
-                    email=invalid_email,
-                    password="ValidPass123!"
-                )
+                UserCreate(username="testuser", email=invalid_email, password="ValidPass123!")
             assert "email" in str(exc_info.value).lower()
 
     def test_valid_email_formats(self):
@@ -69,15 +66,11 @@ class TestUserCreateSchema:
             "user@example.com",
             "user.name@example.com",
             "user+tag@example.co.uk",
-            "user_123@sub.example.com"
+            "user_123@sub.example.com",
         ]
 
         for valid_email in valid_emails:
-            user = UserCreate(
-                username="testuser",
-                email=valid_email,
-                password="ValidPass123!"
-            )
+            user = UserCreate(username="testuser", email=valid_email, password="ValidPass123!")
             assert user.email == valid_email
 
     def test_username_min_length(self):
@@ -87,36 +80,24 @@ class TestUserCreateSchema:
             UserCreate(
                 username="ab",  # Only 2 chars
                 email="test@example.com",
-                password="ValidPass123!"
+                password="ValidPass123!",
             )
         assert "username" in str(exc_info.value).lower()
 
         # Exactly 3 chars (should pass)
-        user = UserCreate(
-            username="abc",
-            email="test@example.com",
-            password="ValidPass123!"
-        )
+        user = UserCreate(username="abc", email="test@example.com", password="ValidPass123!")
         assert user.username == "abc"
 
     def test_username_max_length(self):
         """Test username maximum length constraint (50 chars)"""
         # Exactly 50 chars (should pass)
         username_50 = "a" * 50
-        user = UserCreate(
-            username=username_50,
-            email="test@example.com",
-            password="ValidPass123!"
-        )
+        user = UserCreate(username=username_50, email="test@example.com", password="ValidPass123!")
         assert user.username == username_50
 
         # 51 chars (should fail)
         with pytest.raises(ValidationError):
-            UserCreate(
-                username="a" * 51,
-                email="test@example.com",
-                password="ValidPass123!"
-            )
+            UserCreate(username="a" * 51, email="test@example.com", password="ValidPass123!")
 
     def test_password_min_length(self):
         """Test password minimum length constraint (8 chars)"""
@@ -125,7 +106,7 @@ class TestUserCreateSchema:
             UserCreate(
                 username="testuser",
                 email="test@example.com",
-                password="Pass1!"  # Only 6 chars
+                password="Pass1!",  # Only 6 chars
             )
         assert "password" in str(exc_info.value).lower()
 
@@ -133,7 +114,7 @@ class TestUserCreateSchema:
         user = UserCreate(
             username="testuser",
             email="test@example.com",
-            password="Pass123!"  # 8 chars
+            password="Pass123!",  # 8 chars
         )
         assert len(user.password) == 8
 
@@ -143,7 +124,7 @@ class TestUserCreateSchema:
             UserCreate(
                 username="testuser",
                 email="test@example.com",
-                password="lowercase123!"  # No uppercase
+                password="lowercase123!",  # No uppercase
             )
         assert "uppercase" in str(exc_info.value).lower()
 
@@ -153,7 +134,7 @@ class TestUserCreateSchema:
             UserCreate(
                 username="testuser",
                 email="test@example.com",
-                password="UPPERCASE123!"  # No lowercase
+                password="UPPERCASE123!",  # No lowercase
             )
         assert "lowercase" in str(exc_info.value).lower()
 
@@ -163,7 +144,7 @@ class TestUserCreateSchema:
             UserCreate(
                 username="testuser",
                 email="test@example.com",
-                password="NoNumbers!"  # No digits
+                password="NoNumbers!",  # No digits
             )
         assert "number" in str(exc_info.value).lower()
 
@@ -173,25 +154,16 @@ class TestUserCreateSchema:
             UserCreate(
                 username="testuser",
                 email="test@example.com",
-                password="NoSpecial123"  # No special chars
+                password="NoSpecial123",  # No special chars
             )
         assert "special character" in str(exc_info.value).lower()
 
     def test_password_all_complexity_requirements(self):
         """Test password meeting all complexity requirements"""
-        valid_passwords = [
-            "SecurePass123!",
-            "MyP@ssw0rd",
-            "C0mpl3x#Pass",
-            "Valid$Password1"
-        ]
+        valid_passwords = ["SecurePass123!", "MyP@ssw0rd", "C0mpl3x#Pass", "Valid$Password1"]
 
         for password in valid_passwords:
-            user = UserCreate(
-                username="testuser",
-                email="test@example.com",
-                password=password
-            )
+            user = UserCreate(username="testuser", email="test@example.com", password=password)
             assert user.password == password
 
     def test_full_name_max_length(self):
@@ -202,7 +174,7 @@ class TestUserCreateSchema:
             username="testuser",
             email="test@example.com",
             password="ValidPass123!",
-            full_name=full_name_100
+            full_name=full_name_100,
         )
         assert user.full_name == full_name_100
 
@@ -212,31 +184,22 @@ class TestUserCreateSchema:
                 username="testuser",
                 email="test@example.com",
                 password="ValidPass123!",
-                full_name="A" * 101
+                full_name="A" * 101,
             )
 
     def test_missing_required_fields(self):
         """Test that required fields cannot be omitted"""
         # Missing username
         with pytest.raises(ValidationError):
-            UserCreate(
-                email="test@example.com",
-                password="ValidPass123!"
-            )
+            UserCreate(email="test@example.com", password="ValidPass123!")
 
         # Missing email
         with pytest.raises(ValidationError):
-            UserCreate(
-                username="testuser",
-                password="ValidPass123!"
-            )
+            UserCreate(username="testuser", password="ValidPass123!")
 
         # Missing password
         with pytest.raises(ValidationError):
-            UserCreate(
-                username="testuser",
-                email="test@example.com"
-            )
+            UserCreate(username="testuser", email="test@example.com")
 
 
 class TestUserLoginSchema:
@@ -244,10 +207,7 @@ class TestUserLoginSchema:
 
     def test_valid_login(self):
         """Test valid login data"""
-        login_data = {
-            "username": "johndoe",
-            "password": "SecurePass123!"
-        }
+        login_data = {"username": "johndoe", "password": "SecurePass123!"}
         login = UserLogin(**login_data)
         assert login.username == "johndoe"
         assert login.password == "SecurePass123!"
@@ -286,7 +246,7 @@ class TestUserResponseSchema:
             "full_name": "John Doe",
             "is_active": True,
             "created_at": now,
-            "updated_at": now
+            "updated_at": now,
         }
         user = UserResponse(**user_data)
         assert user.id == 1
@@ -307,7 +267,7 @@ class TestUserResponseSchema:
             "full_name": None,
             "is_active": True,
             "created_at": now,
-            "updated_at": None
+            "updated_at": None,
         }
         user = UserResponse(**user_data)
         assert user.full_name is None
@@ -323,7 +283,7 @@ class TestUserResponseSchema:
             "full_name": None,
             "is_active": False,
             "created_at": now,
-            "updated_at": None
+            "updated_at": None,
         }
         user = UserResponse(**user_data)
         assert user.is_active is False
@@ -340,7 +300,7 @@ class TestUserResponseSchema:
                 full_name=None,
                 is_active=True,
                 created_at=now,
-                updated_at=None
+                updated_at=None,
             )
 
         # Missing username
@@ -351,7 +311,7 @@ class TestUserResponseSchema:
                 full_name=None,
                 is_active=True,
                 created_at=now,
-                updated_at=None
+                updated_at=None,
             )
 
 
@@ -362,7 +322,7 @@ class TestTokenSchema:
         """Test creating token response"""
         token_data = {
             "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ",
-            "token_type": "bearer"
+            "token_type": "bearer",
         }
         token = Token(**token_data)
         assert token.access_token == token_data["access_token"]
@@ -389,11 +349,7 @@ class TestSessionResponseSchema:
 
     def test_valid_session_response(self):
         """Test creating session response"""
-        session_data = {
-            "success": True,
-            "username": "johndoe",
-            "session_token": "abc123xyz"
-        }
+        session_data = {"success": True, "username": "johndoe", "session_token": "abc123xyz"}
         session = SessionResponse(**session_data)
         assert session.success is True
         assert session.username == "johndoe"
@@ -420,7 +376,7 @@ class TestSchemaIntegration:
             username="newuser",
             email="new@example.com",
             password="NewPass123!",
-            full_name="New User"
+            full_name="New User",
         )
 
         # Step 2: After DB save, create response (simulated)
@@ -432,27 +388,21 @@ class TestSchemaIntegration:
             full_name=registration.full_name,
             is_active=True,
             created_at=now,
-            updated_at=None
+            updated_at=None,
         )
 
         assert response.username == registration.username
         assert response.email == registration.email
         # Password should NOT be in response
-        assert not hasattr(response, 'password')
+        assert not hasattr(response, "password")
 
     def test_login_to_token_flow(self):
         """Test data flow from login to token response"""
         # Step 1: User submits login
-        login = UserLogin(
-            username="existinguser",
-            password="ExistingPass123!"
-        )
+        login = UserLogin(username="existinguser", password="ExistingPass123!")
 
         # Step 2: After authentication, create token (simulated)
-        token = Token(
-            access_token="generated.jwt.token.here",
-            token_type="bearer"
-        )
+        token = Token(access_token="generated.jwt.token.here", token_type="bearer")
 
         assert login.username == "existinguser"
         assert token.access_token is not None

@@ -106,9 +106,7 @@ async def create_circle(
     current_user: User = Depends(get_current_user_from_session),
 ) -> CircleResponse:
 
-    existing = await db.execute(
-        select(Circle).where(Circle.name == circle_data.name)
-    )
+    existing = await db.execute(select(Circle).where(Circle.name == circle_data.name))
     if existing.scalar_one_or_none():
         raise HTTPException(400, "A circle with this name already exists")
 
@@ -136,9 +134,7 @@ async def create_circle(
         description=new_circle.description,
         owner_id=new_circle.owner_id,
         owner_name=current_user.username,
-        members=[
-            build_member_response(owner_member, current_user.username)
-        ],
+        members=[build_member_response(owner_member, current_user.username)],
         member_count=1,
         created_at=new_circle.created_at,
     )
@@ -155,9 +151,7 @@ async def get_circle(
 ) -> CircleResponse:
 
     circle_result = await db.execute(
-        select(Circle)
-        .where(Circle.id == circle_id)
-        .options(selectinload(Circle.members))
+        select(Circle).where(Circle.id == circle_id).options(selectinload(Circle.members))
     )
     circle = circle_result.scalar_one_or_none()
 

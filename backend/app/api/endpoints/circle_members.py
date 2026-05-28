@@ -27,6 +27,7 @@ router = APIRouter(prefix="/circles", tags=["circle-members"])
 # HELPERS
 # ======================================================
 
+
 def ensure_circle_exists(circle: Circle | None):
     if not circle:
         raise HTTPException(404, "Circle not found")
@@ -78,8 +79,7 @@ async def add_member(
 
     # Check current user's role
     current_role = await db.execute(
-        select(CircleMember.role)
-        .where(
+        select(CircleMember.role).where(
             CircleMember.circle_id == circle_id,
             CircleMember.user_id == current_user.id,
         )
@@ -93,8 +93,7 @@ async def add_member(
 
     # Check if already member
     existing = await db.execute(
-        select(CircleMember)
-        .where(
+        select(CircleMember).where(
             CircleMember.circle_id == circle_id,
             CircleMember.user_id == request.user_id,
         )
@@ -136,8 +135,7 @@ async def remove_member(
 
     # Member to remove
     member_result = await db.execute(
-        select(CircleMember)
-        .where(
+        select(CircleMember).where(
             CircleMember.circle_id == circle_id,
             CircleMember.user_id == user_id,
         )
@@ -151,8 +149,7 @@ async def remove_member(
 
     # Current user's role
     current_role_result = await db.execute(
-        select(CircleMember.role)
-        .where(
+        select(CircleMember.role).where(
             CircleMember.circle_id == circle_id,
             CircleMember.user_id == current_user.id,
         )
@@ -199,8 +196,7 @@ async def update_member_role(
 
     # Only owner can change roles
     owner_check = await db.execute(
-        select(CircleMember.role)
-        .where(
+        select(CircleMember.role).where(
             CircleMember.circle_id == circle_id,
             CircleMember.user_id == current_user.id,
         )
@@ -210,8 +206,7 @@ async def update_member_role(
 
     # Member to update
     member_result = await db.execute(
-        select(CircleMember)
-        .where(
+        select(CircleMember).where(
             CircleMember.circle_id == circle_id,
             CircleMember.user_id == user_id,
         )

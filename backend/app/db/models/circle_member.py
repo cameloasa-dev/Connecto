@@ -1,6 +1,7 @@
 """
 SQLAlchemy ORM models for the Social App (SQLite compatible)
 """
+
 from datetime import datetime
 
 from sqlalchemy import DateTime, ForeignKey, String

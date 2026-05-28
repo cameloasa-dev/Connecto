@@ -69,6 +69,7 @@ db-refresh: db-reset seed-database
 lint-backend:
 	@echo "🔍 Linting Backend..."
 	cd backend && uv run ruff check .
+	cd backend && uv run mypy .
 	@echo "✅ Backend lint passed"
 
 # -------------------------
@@ -91,7 +92,7 @@ lint: lint-backend lint-frontend
 format-backend:
 	@echo "🎨 Formatting Backend..."
 	cd backend && uv run ruff format .
-	@echo "✅ Backend formatted"
+	@echo "✨ Backend formatted"
 
 # -------------------------
 # FRONTEND FORMAT
@@ -116,7 +117,7 @@ test-backend:
 	@echo "✅ Backend tests passed"
 
 # -------------------------
-# FRONTEND UNIT TESTS
+# FRONTEND TESTS
 # -------------------------
 test-frontend:
 	@echo "🧪 Running Frontend Unit Tests..."
@@ -124,7 +125,7 @@ test-frontend:
 	@echo "✅ Frontend unit tests passed"
 
 # -------------------------
-# FRONTEND UNIT TESTS
+# FRONTEND AUDIT
 # -------------------------
 audit-frontend:
 	@echo "🛡️ Auditing frontend dependencies..."

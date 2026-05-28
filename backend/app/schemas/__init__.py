@@ -40,7 +40,6 @@ __all__ = [
     "SessionResponse",
     "Token",
     "TokenData",
-
     # social
     "PostBase",
     "PostCreate",
@@ -61,4 +60,3 @@ __all__ = [
     "CircleJoinRequest",
     "CircleJoinResponse",
 ]
-

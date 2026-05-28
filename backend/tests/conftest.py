@@ -3,6 +3,7 @@
 Shared fixtures for both API and E2E tests,
 including async database setup and a test client for FastAPI.
 """
+
 import asyncio
 import os
 from collections.abc import AsyncGenerator, Callable, Coroutine, Generator
@@ -36,9 +37,9 @@ load_dotenv()
 
 # Point to the new Docker test_db (Port 5434)
 TEST_DATABASE_URL = os.getenv(
-    "TEST_DATABASE_URL",
-    "postgresql+asyncpg://user:password@test_db:5432/test_db"
+    "TEST_DATABASE_URL", "postgresql+asyncpg://user:password@test_db:5432/test_db"
 )
+
 
 # ==========================================
 # 1. PLAYWRIGHT CONFIGURATION (For E2E Tests)
@@ -55,6 +56,7 @@ def browser_context_args(browser_context_args: dict) -> dict:
         "base_url": os.getenv("FRONTEND_URL", "http://localhost:3000"),
         "viewport": {"width": 1280, "height": 720},
     }
+
 
 # ==========================================
 # 2.ASYNC DATABASE CONFIGURATION (Shared by API & E2E)
@@ -81,8 +83,9 @@ def event_loop() -> Generator[asyncio.AbstractEventLoop, None, None]:
     # Note: We purposely DO NOT close the loop here anymore (loop.close()).
     # If Playwright started the loop, closing it will crash the browser teardown!
 
+
 @pytest_asyncio.fixture(scope="session")
-async def async_engine()-> AsyncGenerator[AsyncEngine, None]:
+async def async_engine() -> AsyncGenerator[AsyncEngine, None]:
     """Creates the SQLAlchemy async engine once per test run."""
     # NullPool is great for tests to prevent connection state issues
     engine = create_async_engine(TEST_DATABASE_URL, poolclass=NullPool)
@@ -94,6 +97,7 @@ async def async_engine()-> AsyncGenerator[AsyncEngine, None]:
 
     yield engine
     await engine.dispose()
+
 
 @pytest_asyncio.fixture
 async def db_session(async_engine: AsyncEngine) -> AsyncGenerator[AsyncSession, None]:
@@ -110,7 +114,7 @@ async def db_session(async_engine: AsyncEngine) -> AsyncGenerator[AsyncSession, 
             connection,
             class_=AsyncSession,
             expire_on_commit=False,
-            join_transaction_mode="create_savepoint"
+            join_transaction_mode="create_savepoint",
         )
         session = async_session_maker()
 
@@ -125,24 +129,24 @@ async def db_session(async_engine: AsyncEngine) -> AsyncGenerator[AsyncSession, 
             except Exception as teardown_err:
                 print(f"Failed to cleanly rollback DB: {teardown_err}")
 
+
 # ==========================================
 # 3. FASTAPI TEST CLIENT (For API Tests)
 # ==========================================
 @pytest_asyncio.fixture
 async def client(db_session: AsyncSession) -> AsyncGenerator[AsyncClient, None]:
     """Test client with overridden database dependency."""
+
     async def override_get_db() -> AsyncGenerator[AsyncSession, None]:
         yield db_session
 
     app.dependency_overrides[get_db] = override_get_db
 
-    async with AsyncClient(
-        transport=ASGITransport(app=app),
-        base_url="http://test"
-    ) as ac:
+    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
         yield ac
 
     app.dependency_overrides.clear()
+
 
 @pytest.fixture
 def create_test_user_synchronous():
@@ -150,17 +154,20 @@ def create_test_user_synchronous():
     Bulletproof Synchronous Factory.
     No teardown needed because `clean_database_before_test` handles it!
     """
+
     def _create_user(username: str, plain_password: str):
         async def _insert():
             engine = create_async_engine(TEST_DATABASE_URL)
-            async_session_maker = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+            async_session_maker = async_sessionmaker(
+                engine, class_=AsyncSession, expire_on_commit=False
+            )
 
             async with async_session_maker() as session:
                 hashed_pw = get_password_hash(plain_password)
                 new_user = User(
                     username=username,
                     email=f"{username.lower()}@example.com",
-                    hashed_password=hashed_pw
+                    hashed_password=hashed_pw,
                 )
                 session.add(new_user)
                 await session.commit()
@@ -171,14 +178,16 @@ def create_test_user_synchronous():
     # We just yield the function. No try/finally block needed anymore!
     yield _create_user
 
+
 @pytest_asyncio.fixture
 async def create_test_user(
-    db_session: AsyncSession
+    db_session: AsyncSession,
 ) -> AsyncGenerator[Callable[[str, str], Coroutine[Any, Any, User]], None]:
     """
     Async factory to create a user.
     Takes username and password, returns User object.
     """
+
     async def _create_user(username: str, plain_password: str) -> User:
         hashed_pw = get_password_hash(plain_password)
         new_user = User(
@@ -186,7 +195,7 @@ async def create_test_user(
             email=f"{username}@test.com",
             hashed_password=hashed_pw,
             full_name=f"Test User {username}",
-            is_active=True
+            is_active=True,
         )
         db_session.add(new_user)
         await db_session.commit()
@@ -195,12 +204,14 @@ async def create_test_user(
 
     yield _create_user
 
+
 @pytest.fixture(scope="session", autouse=True)
 def setup_test_database_schema():
     """
     Runs once per test session.
     Guarantees that all tables exist in the test database before any tests run.
     """
+
     async def _init_db():
         engine = create_async_engine(TEST_DATABASE_URL)
         async with engine.begin() as conn:
@@ -210,6 +221,7 @@ def setup_test_database_schema():
 
     # We use our bulletproof synchronous wrapper so it doesn't fight Playwright!
     asyncio.run(_init_db())
+
 
 @pytest.fixture(autouse=True)
 def clean_database_before_test(request):
@@ -235,15 +247,19 @@ def clean_database_before_test(request):
 
     asyncio.run(_truncate())
 
-    yield # The Playwright test runs here
+    yield  # The Playwright test runs here
+
 
 @pytest.fixture
 def setup_user_circles_synchronous():
     """Seeds the database with circles and assigns the correct roles."""
+
     def _setup(username: str, circles_data: list[dict]):
         async def _insert():
             engine = create_async_engine(TEST_DATABASE_URL)
-            async_session_maker = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+            async_session_maker = async_sessionmaker(
+                engine, class_=AsyncSession, expire_on_commit=False
+            )
 
             async with async_session_maker() as session:
                 # 1. Get the primary test user
@@ -251,10 +267,14 @@ def setup_user_circles_synchronous():
                 user = user_res.scalar_one()
 
                 # 2. Get or create a dummy admin for circles the test user doesn't own
-                admin_res = await session.execute(select(User).where(User.username == "circle_admin"))
+                admin_res = await session.execute(
+                    select(User).where(User.username == "circle_admin")
+                )
                 admin = admin_res.scalar_one_or_none()
                 if not admin:
-                    admin = User(username="circle_admin", email="admin@system.com", hashed_password="xxx")
+                    admin = User(
+                        username="circle_admin", email="admin@system.com", hashed_password="xxx"
+                    )
                     session.add(admin)
                     await session.flush()
 
@@ -268,7 +288,7 @@ def setup_user_circles_synchronous():
                     circle = Circle(
                         name=row["circle_name"],
                         description=f"Automated test circle for {row['circle_name']}",
-                        owner_id=circle_owner_id
+                        owner_id=circle_owner_id,
                     )
                     session.add(circle)
                     await session.flush()
@@ -280,19 +300,28 @@ def setup_user_circles_synchronous():
             await engine.dispose()
 
         asyncio.run(_insert())
+
     yield _setup
+
 
 @pytest.fixture
 def create_circle_post_synchronous():
     """Creates a post inside a specific circle."""
+
     def _create_post(circle_name: str, author_username: str, title: str, content: str):
         async def _insert():
             engine = create_async_engine(TEST_DATABASE_URL)
-            async_session_maker = async_sessionmaker(engine, class_=AsyncSession, expire_on_commit=False)
+            async_session_maker = async_sessionmaker(
+                engine, class_=AsyncSession, expire_on_commit=False
+            )
 
             async with async_session_maker() as session:
-                user = (await session.execute(select(User).where(User.username == author_username))).scalar_one()
-                circle = (await session.execute(select(Circle).where(Circle.name == circle_name))).scalar_one()
+                user = (
+                    await session.execute(select(User).where(User.username == author_username))
+                ).scalar_one()
+                circle = (
+                    await session.execute(select(Circle).where(Circle.name == circle_name))
+                ).scalar_one()
 
                 post = Post(title=title, content=content, author_id=user.id, circle_id=circle.id)
                 session.add(post)
@@ -300,7 +329,9 @@ def create_circle_post_synchronous():
             await engine.dispose()
 
         asyncio.run(_insert())
+
     yield _create_post
+
 
 # ==========================================
 # PYTEST MAGIC HOOK
@@ -313,10 +344,6 @@ def pytest_collection_modifyitems(config, items):
     for item in items:
         # 'item.keywords' contains all the Gherkin tags!
         if "todo" in item.keywords:
-            item.add_marker(
-                pytest.mark.xfail(reason="Known backend todo: Implementation pending")
-            )
+            item.add_marker(pytest.mark.xfail(reason="Known backend todo: Implementation pending"))
         if "bug" in item.keywords:
-            item.add_marker(
-                pytest.mark.xfail(reason="Known backend bug: Fix pending")
-            )
+            item.add_marker(pytest.mark.xfail(reason="Known backend bug: Fix pending"))

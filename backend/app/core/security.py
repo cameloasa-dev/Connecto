@@ -39,6 +39,7 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
 # SESSION TOKENS (DEFAULT AUTH METHOD)
 # ======================================================
 
+
 def create_session_token() -> str:
     """
     Create a secure random session token (64 hex chars).
@@ -58,6 +59,7 @@ def create_session_expiry(hours: int = 24) -> datetime:
 # ======================================================
 # JWT TOKENS (OPTIONAL / FALLBACK)
 # ======================================================
+
 
 def create_access_token(data: dict, expires_delta: timedelta | None = None) -> str:
     """

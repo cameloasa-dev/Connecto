@@ -15,7 +15,6 @@ async def create_test_data() -> None:
     """Create test users, circles, and posts for development ."""
 
     async with AsyncSessionLocal() as session:
-
         # Load test user data from .env
         email = settings.TEST_USER_EMAIL
         username = settings.TEST_USER_USERNAME
@@ -127,4 +126,3 @@ async def create_test_data() -> None:
 
 if __name__ == "__main__":
     asyncio.run(create_test_data())
-

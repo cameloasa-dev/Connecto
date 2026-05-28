@@ -2,6 +2,7 @@
 Unit tests for backend/app/db/models.py
 Tests model attributes, defaults, and constraints (without database)
 """
+
 from sqlalchemy import inspect
 
 from app.db.models import Base, Circle, CircleMember, Post, Role, User, UserSession
@@ -21,8 +22,14 @@ class TestUserModel:
         column_names = [col.key for col in mapper.columns]
 
         required_columns = [
-            "id", "username", "email", "hashed_password",
-            "full_name", "is_active", "created_at", "updated_at"
+            "id",
+            "username",
+            "email",
+            "hashed_password",
+            "full_name",
+            "is_active",
+            "created_at",
+            "updated_at",
         ]
 
         for col in required_columns:
@@ -195,8 +202,13 @@ class TestPostModel:
         column_names = [col.key for col in mapper.columns]
 
         required_columns = [
-            "id", "title", "content", "author_id",
-            "circle_id", "created_at", "updated_at"
+            "id",
+            "title",
+            "content",
+            "author_id",
+            "circle_id",
+            "created_at",
+            "updated_at",
         ]
         for col in required_columns:
             assert col in column_names, f"Missing column: {col}"
@@ -294,8 +306,13 @@ class TestUserSessionModel:
         column_names = [col.key for col in mapper.columns]
 
         required_columns = [
-            "id", "session_token", "user_id", "created_at",
-            "expires_at", "ip_address", "user_agent"
+            "id",
+            "session_token",
+            "user_id",
+            "created_at",
+            "expires_at",
+            "ip_address",
+            "user_agent",
         ]
         for col in required_columns:
             assert col in column_names, f"Missing column: {col}"
@@ -463,6 +480,7 @@ class TestModelInheritance:
     def test_base_is_declarative_base(self):
         """Test that Base is a valid DeclarativeBase"""
         from sqlalchemy.orm import DeclarativeBase
+
         assert issubclass(Base, DeclarativeBase)
 
 

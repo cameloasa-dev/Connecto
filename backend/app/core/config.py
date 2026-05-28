@@ -11,11 +11,7 @@ class Settings(BaseSettings):
     Application settings loaded from environment variables.
     """
 
-    model_config = SettingsConfigDict(
-        env_file=".env",
-        env_ignore_empty=True,
-        extra="ignore"
-    )
+    model_config = SettingsConfigDict(env_file=".env", env_ignore_empty=True, extra="ignore")
 
     # API Configuration
     PROJECT_NAME: str = "Social App API"

@@ -1,4 +1,4 @@
-""""
+""" "
 Social feature schemas for Connecto
 Posts, Circles, Circle Members
 """
@@ -12,16 +12,14 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 # POST SCHEMAS
 # ======================================================
 
+
 class PostBase(BaseModel):
     title: str = Field(..., min_length=1, max_length=100)
     content: str = Field(..., min_length=1)
 
 
 class PostCreate(PostBase):
-    circle_id: int | None = Field(
-        None,
-        description="Optional Circle ID if posting inside a circle"
-    )
+    circle_id: int | None = Field(None, description="Optional Circle ID if posting inside a circle")
 
 
 class PostResponse(PostBase):
@@ -39,6 +37,7 @@ class PostResponse(PostBase):
 # ======================================================
 # CIRCLE SCHEMAS
 # ======================================================
+
 
 class CircleBase(BaseModel):
     name: str = Field(..., min_length=3, max_length=50)
@@ -71,11 +70,7 @@ class CircleMemberResponse(BaseModel):
 
     @model_validator(mode="after")
     def assign_badge(self):
-        badge_map = {
-            CircleRole.OWNER: "👑",
-            CircleRole.MODERATOR: "🛡️",
-            CircleRole.MEMBER: "👤"
-        }
+        badge_map = {CircleRole.OWNER: "👑", CircleRole.MODERATOR: "🛡️", CircleRole.MEMBER: "👤"}
         self.badge = badge_map.get(self.role, "👤")
         return self
 
@@ -94,6 +89,7 @@ class CircleResponse(CircleBase):
 # ======================================================
 # CIRCLE MEMBER MANAGEMENT
 # ======================================================
+
 
 class CircleMemberUpdate(BaseModel):
     role: CircleRole
@@ -123,6 +119,7 @@ class MemberActionResponse(BaseModel):
 # ======================================================
 # FUTURE FEATURES
 # ======================================================
+
 
 class CirclePrivacyUpdate(BaseModel):
     is_private: bool

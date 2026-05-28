@@ -1,6 +1,7 @@
 """
 SQLAlchemy ORM models for the Social App (SQLite compatible)
 """
+
 from sqlalchemy import String
 from sqlalchemy.orm import Mapped, mapped_column
 

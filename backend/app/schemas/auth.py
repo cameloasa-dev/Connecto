@@ -17,6 +17,7 @@ class UserCreate(BaseModel):
     """
     Schema for user registration (frontend RegisterPage)
     """
+
     username: str = Field(..., min_length=3, max_length=50)
     email: EmailStr = Field(...)
     password: str = Field(..., min_length=8, max_length=50)
@@ -44,6 +45,7 @@ class UserLogin(BaseModel):
     """
     Login schema (frontend uses USERNAME, not email)
     """
+
     username: str
     password: str
 
@@ -55,6 +57,7 @@ class UserResponse(BaseModel):
     """
     Public user data returned to frontend
     """
+
     id: int
     username: str
     email: EmailStr
@@ -73,6 +76,7 @@ class SessionResponse(BaseModel):
     """
     Response for session-based authentication
     """
+
     success: bool = True
     username: str
     session_token: str | None = Field(None, description="Session token stored in HTTP-only cookie")
@@ -86,6 +90,7 @@ class Token(BaseModel):
     """
     JWT token response (optional)
     """
+
     access_token: str
     token_type: str = "bearer"
 
@@ -94,4 +99,5 @@ class TokenData(BaseModel):
     """
     Decoded JWT payload (internal use)
     """
+
     username: str | None = None
