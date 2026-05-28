@@ -144,7 +144,7 @@ async def get_post(
 
     row = result.first()
     if not row:
-        raise HTTPException(404, "Post not found")
+        raise HTTPException(status_code=404, detail="Post not found")
 
     post, author_name, circle_name = row
 
@@ -166,7 +166,7 @@ async def delete_post(
 
     post = await db.get(Post, post_id)
     if not post:
-        raise HTTPException(404, "Post not found")
+        raise HTTPException(status_code=404, detail="Post not found")
 
     can_delete = False
 
@@ -184,7 +184,7 @@ async def delete_post(
             can_delete = True
 
     if not can_delete:
-        raise HTTPException(403, "You don't have permission to delete this post")
+        raise HTTPException(status_code=403, detail="You don't have permission to delete this post")
 
     await db.delete(post)
     await db.commit()

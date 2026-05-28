@@ -156,11 +156,11 @@ async def get_circle(
     circle = circle_result.scalar_one_or_none()
 
     if not circle:
-        raise HTTPException(404, "Circle not found")
+        raise HTTPException(status_code=404, detail="Circle not found")
 
     # Check membership
     if not any(m.user_id == current_user.id for m in circle.members):
-        raise HTTPException(403, "You are not a member of this circle")
+        raise HTTPException(status_code=403, detail="You are not a member of this circle")
 
     # Build members
     members = []
@@ -196,10 +196,10 @@ async def update_circle(
 
     circle = await db.get(Circle, circle_id)
     if not circle:
-        raise HTTPException(404, "Circle not found")
+        raise HTTPException(status_code=404, detail="Circle not found")
 
     if circle.owner_id != current_user.id:
-        raise HTTPException(403, "Only the owner can update the circle")
+        raise HTTPException(status_code=403, detail="Only the owner can update the circle")
 
     circle.name = circle_data.name
     circle.description = circle_data.description
@@ -222,10 +222,10 @@ async def delete_circle(
 
     circle = await db.get(Circle, circle_id)
     if not circle:
-        raise HTTPException(404, "Circle not found")
+        raise HTTPException(status_code=404, detail="Circle not found")
 
     if circle.owner_id != current_user.id:
-        raise HTTPException(403, "Only the owner can delete the circle")
+        raise HTTPException(status_code=403, detail="Only the owner can delete the circle")
 
     await db.delete(circle)
     await db.commit()
@@ -244,20 +244,20 @@ async def update_circle_name(
 
     circle = await db.get(Circle, circle_id)
     if not circle:
-        raise HTTPException(404, "Circle not found")
+        raise HTTPException(status_code=404, detail="Circle not found")
 
     if circle.owner_id != current_user.id:
-        raise HTTPException(403, "Only the owner can change the name")
+        raise HTTPException(status_code=403, detail="Only the owner can change the name")
 
     new_name = request.get("name")
     if not new_name or len(new_name) < 3:
-        raise HTTPException(400, "Name must be at least 3 characters")
+        raise HTTPException(status_code=400, detail="Name must be at least 3 characters")
 
     existing = await db.execute(
         select(Circle).where(Circle.name == new_name, Circle.id != circle_id)
     )
     if existing.scalar_one_or_none():
-        raise HTTPException(400, "A circle with this name already exists")
+        raise HTTPException(status_code=400, detail="A circle with this name already exists")
 
     circle.name = new_name
     await db.commit()
