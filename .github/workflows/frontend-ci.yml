@@ -2,37 +2,43 @@ name: Frontend CI
 
 on:
   pull_request:
-    branches: [main]
+    paths:
+      - "frontend/**"
   push:
-    branches: [main]
-  workflow_dispatch:
-
-permissions:
-  contents: read
+    branches:
+      - main
 
 jobs:
   frontend-ci:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
+      - name: Checkout
+        uses: actions/checkout@v4
 
-      - name: ⚛️ Setup Node.js
-        uses: actions/setup-node@v6
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: 20
           cache: "npm"
-          cache-dependency-path: "frontend/package-lock.json"
+          cache-dependency-path: frontend/package-lock.json
 
-      - name: ⚛️ Install frontend deps
-        run: make install-frontend
+      - name: Install dependencies
+        run: npm ci
+        working-directory: frontend
 
-      - name: ⚛️ Lint frontend
+      - name: 🎨 Format frontend
+        run: make format-frontend
+
+      - name: 🔍 Lint frontend
         run: make lint-frontend
 
-      - name: ⚛️ Run unit tests
-        run: make test-frontend-unit
+      - name: 🕵️‍♂️ Audit frontend dependencies
+        run: make audit-frontend
 
-      - name: ⚛️ Build frontend
-        run: make build-frontend
+      - name: 🧪 Run frontend tests
+        run: make test-frontend
+
+      - name: Build frontend
+        run: npm run build
+        working-directory: frontend
