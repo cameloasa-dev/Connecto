@@ -31,12 +31,14 @@ jobs:
 
       - name: 🐍 Setup backend env (SQLite)
         run: |
-          echo "DATABASE_URL=sqlite:///./test.db" > backend/.env
-          echo "ENVIRONMENT=test" >> backend/.env
+          cp backend/.env.test backend/.env
           make install-backend
 
-      - name: 🐍 Lint backend
+      - name: 🎨 Format backend
+        run: make format-backend
+
+      - name: 🔍 Lint backend
         run: make lint-backend
 
-      - name: 🐍 Run backend tests
+      - name: 🧪 Run backend tests
         run: make test-backend

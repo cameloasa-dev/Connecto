@@ -17,6 +17,7 @@ dependencies = [
     "python-multipart>=0.0.26",
     "aiosqlite>=0.22.1",  # pentru SQLite async
     "slowapi>=0.1.9",
+    "pwdlib>=0.2.0",
 ]
 
 [dependency-groups]
