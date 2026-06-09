@@ -37,7 +37,7 @@ jobs:
         run: make audit-frontend
 
       - name: Run frontend tests
-        run: npm run test:run
+        run: make test-frontend
 
       - name: Build frontend
         run: npm run build
