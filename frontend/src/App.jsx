@@ -49,7 +49,7 @@ function App() {
             />
 
             <Route
-              path="/explore"
+              path="/search"
               element={
                 <ProtectedRoute>
                   <Layout>

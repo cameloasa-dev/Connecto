@@ -32,7 +32,7 @@ function Navbar() {
     }
   };
 
-  // If no user, show minimal navbar for public pages
+  // If no user, show minimal navbar for public pages future enhancement: add links to about, contact, etc.
   if (!user) {
     return (
       <header className="navbar">

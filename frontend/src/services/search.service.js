@@ -4,22 +4,12 @@ import api from "./api";
 export const searchService = {
   async search(query) {
     try {
-      const response = await api.get(`/users?limit=100`);
-      const allUsers = response.data || [];
-
-      const filteredUsers = allUsers.filter((user) =>
-        user.username.toLowerCase().includes(query.toLowerCase()),
-      );
-
-      return {
-        users: filteredUsers,
-        circles: [],
-        posts: [],
-      };
+      const response = await api.get(`/search?q=${encodeURIComponent(query)}`);
+      return response.data;
     } catch (err) {
       const message = err.message || "Search failed";
       console.error("Search error:", message);
-      return { users: [], circles: [], posts: [] };
+      throw new Error(message);
     }
   },
 };
