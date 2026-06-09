@@ -2,53 +2,61 @@
 import api from "./api";
 
 export const circleMemberService = {
-  // Search users to add to circle
-  searchUsers: async (query, circleId) => {
-    console.log("📡 API Call: GET /users/search", { query, circleId });
+  // Search users to add to a circle
+  async searchUsers(query, circleId) {
     try {
       const response = await api.get(
         `/users/search?query=${query}&circle_id=${circleId}`,
       );
-      console.log("📡 API Response:", response.data);
       return response.data;
-    } catch (error) {
-      console.error(
-        "📡 API Error:",
-        error.response?.status,
-        error.response?.data,
-      );
-      throw error;
+    } catch (err) {
+      const message = err.message || "Failed to search users";
+      console.error("Error searching users:", message);
+      throw new Error(message);
     }
   },
 
   // Add member to circle
-  addMember: async (circleId, userId) => {
-    const response = await api.post(`/circles/${circleId}/members`, {
-      user_id: userId,
-    });
-    return response.data;
+  async addMember(circleId, userId) {
+    try {
+      const response = await api.post(`/circles/${circleId}/members`, {
+        user_id: userId,
+      });
+      return response.data;
+    } catch (err) {
+      const message = err.message || "Failed to add member";
+      console.error("Error adding member:", message);
+      throw new Error(message);
+    }
   },
 
   // Remove member from circle
-  removeMember: async (circleId, userId) => {
-    const response = await api.delete(`/circles/${circleId}/members/${userId}`);
-    return response.data;
+  async removeMember(circleId, userId) {
+    try {
+      const response = await api.delete(
+        `/circles/${circleId}/members/${userId}`,
+      );
+      return response.data;
+    } catch (err) {
+      const message = err.message || "Failed to remove member";
+      console.error("Error removing member:", message);
+      throw new Error(message);
+    }
   },
 
   // Update member role
-  updateRole: async (circleId, userId, role) => {
-    const response = await api.put(
-      `/circles/${circleId}/members/${userId}/role`,
-      { role },
-    );
-    return response.data;
+  async updateRole(circleId, userId, role) {
+    try {
+      const response = await api.put(
+        `/circles/${circleId}/members/${userId}/role`,
+        { role },
+      );
+      return response.data;
+    } catch (err) {
+      const message = err.message || "Failed to update member role";
+      console.error("Error updating role:", message);
+      throw new Error(message);
+    }
   },
-
-  // Update circle name (owner only)
-  updateCircleName: async (circleId, name) => {
-    const response = await api.put(`/circles/${circleId}/name`, { name });
-    return response.data;
-  },
-
-  // Additional member management methods can be added here
 };
+

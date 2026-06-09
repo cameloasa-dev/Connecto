@@ -5,61 +5,66 @@ const BASE_URL = "/posts";
 
 export const postService = {
   // Get feed (recent posts from user's circles)
-  getFeed: async (limit = 20, offset = 0) => {
+  async getFeed(limit = 20, offset = 0) {
     try {
       const response = await api.get(
         `${BASE_URL}/feed?limit=${limit}&offset=${offset}`,
       );
       return response.data;
-    } catch (error) {
-      console.error("Error fetching feed:", error);
-      throw error;
+    } catch (err) {
+      const message = err.message || "Failed to fetch feed";
+      console.error("Error fetching feed:", message);
+      throw new Error(message);
     }
   },
 
   // Get posts from a specific circle
-  getCirclePosts: async (circleId, limit = 50, offset = 0) => {
+  async getCirclePosts(circleId, limit = 50, offset = 0) {
     try {
-      // Note: The backend API should support pagination for circle posts to handle large circles efficiently.
       const response = await api.get(
         `${BASE_URL}/circle/${circleId}?limit=${limit}&offset=${offset}`,
       );
       return response.data;
-    } catch (error) {
-      console.error("Error fetching circle posts:", error);
-      throw error;
+    } catch (err) {
+      const message = err.message || "Failed to fetch circle posts";
+      console.error("Error fetching circle posts:", message);
+      throw new Error(message);
     }
   },
 
   // Create post
-  createPost: async (postData) => {
+  async createPost(postData) {
     try {
       const response = await api.post(BASE_URL, postData);
       return response.data;
-    } catch (error) {
-      console.error("Error creating post:", error);
-      throw error;
+    } catch (err) {
+      const message = err.message || "Failed to create post";
+      console.error("Error creating post:", message);
+      throw new Error(message);
     }
   },
 
   // Get single post
-  getPost: async (postId) => {
+  async getPost(postId) {
     try {
       const response = await api.get(`${BASE_URL}/${postId}`);
       return response.data;
-    } catch (error) {
-      console.error("Error fetching post:", error);
-      throw error;
+    } catch (err) {
+      const message = err.message || "Failed to fetch post";
+      console.error("Error fetching post:", message);
+      throw new Error(message);
     }
   },
 
   // Delete post
-  deletePost: async (postId) => {
+  async deletePost(postId) {
     try {
       await api.delete(`${BASE_URL}/${postId}`);
-    } catch (error) {
-      console.error("Error deleting post:", error);
-      throw error;
+      return { success: true };
+    } catch (err) {
+      const message = err.message || "Failed to delete post";
+      console.error("Error deleting post:", message);
+      throw new Error(message);
     }
   },
 };

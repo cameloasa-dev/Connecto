@@ -4,38 +4,63 @@ import api from "./api";
 const BASE_URL = "/circles";
 
 export const circleService = {
-  // Fetch circles that the user is a member of
-  getMyCircles: async () => {
+  // Get all circles where the user is a member
+  async getMyCircles() {
     try {
       const response = await api.get(`${BASE_URL}/my`);
       return response.data;
-    } catch (error) {
-      console.error("Error fetching circles:", error);
-      throw error;
+    } catch (err) {
+      const message = err.message || "Failed to fetch circles";
+      console.error("Error fetching circles:", message);
+      throw new Error(message);
     }
   },
 
-  // Fetch details of a specific circle by ID
-  getCircle: async (circleId) => {
+  // Get a specific circle by ID
+  async getCircle(circleId) {
     try {
       const response = await api.get(`${BASE_URL}/${circleId}`);
       return response.data;
-    } catch (error) {
-      console.error("Error fetching circle:", error);
-      throw error;
+    } catch (err) {
+      const message = err.message || "Failed to fetch circle";
+      console.error("Error fetching circle:", message);
+      throw new Error(message);
     }
   },
 
   // Create a new circle
-  createCircle: async (circleData) => {
+  async createCircle(circleData) {
     try {
       const response = await api.post(BASE_URL, circleData);
       return response.data;
-    } catch (error) {
-      console.error("Error creating circle:", error);
-      throw error;
+    } catch (err) {
+      const message = err.message || "Failed to create circle";
+      console.error("Error creating circle:", message);
+      throw new Error(message);
     }
   },
 
-  // Additional methods for updating or deleting circles can be added here
+  // Update circle name (owner only)
+  async updateCircleName(circleId, name) {
+    try {
+      const response = await api.put(`${BASE_URL}/${circleId}/name`, { name });
+      return response.data;
+    } catch (err) {
+      const message = err.message || "Failed to update circle name";
+      console.error("Error updating circle name:", message);
+      throw new Error(message);
+    }
+  },
+
+  // Delete a circle (owner only)
+  async deleteCircle(circleId) {
+    try {
+      const response = await api.delete(`${BASE_URL}/${circleId}`);
+      return response.data;
+    } catch (err) {
+      const message = err.message || "Failed to delete circle";
+      console.error("Error deleting circle:", message);
+      throw new Error(message);
+    }
+  },
 };
