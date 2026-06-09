@@ -8,6 +8,23 @@ vi.mock("../../src/config", () => ({
   API_BASE_URL: "http://mocked-for-tests.local",
 }));
 
+// Mock for custom axios instance (api.js)
+vi.mock("../../src/services/api", () => {
+  return {
+    default: {
+      get: vi.fn(),
+      post: vi.fn(),
+      put: vi.fn(),
+      delete: vi.fn(),
+      interceptors: {
+        request: { use: vi.fn() },
+        response: { use: vi.fn() },
+      },
+    },
+  };
+});
+
+// Mock axios (optional but fine)
 vi.mock("axios");
 
 describe("Auth Service", () => {

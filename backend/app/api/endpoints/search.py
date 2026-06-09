@@ -1,10 +1,10 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.database import get_db
 from app.api.endpoints.auth import get_current_user_from_session
-from app.db.models import User, Circle, Post
+from app.db.database import get_db
+from app.db.models import Circle, Post, User
 
 router = APIRouter(prefix="/search", tags=["search"])
 
