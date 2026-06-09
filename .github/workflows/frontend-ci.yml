@@ -1,4 +1,4 @@
-name: frontend-ci
+name: Frontend CI
 
 on:
   pull_request:
@@ -9,7 +9,7 @@ on:
       - main
 
 jobs:
-  frontend:
+  frontend-ci:
     runs-on: ubuntu-latest
 
     steps:
@@ -32,7 +32,7 @@ jobs:
 
       - name: 🔍 Lint frontend
         run: make lint-frontend
-        
+
       - name: 🕵️‍♂️ Audit frontend dependencies
         run: make audit-frontend
 
