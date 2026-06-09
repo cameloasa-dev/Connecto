@@ -102,6 +102,9 @@ format-frontend:
 	cd frontend && npm run format
 	@echo "✅ Frontend formatted"
 
+check-format-frontend:
+	cd frontend && npm run format:check
+
 # -------------------------
 # UNIFIED FORMAT
 # -------------------------
