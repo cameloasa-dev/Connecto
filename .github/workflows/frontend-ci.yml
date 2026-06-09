@@ -29,19 +29,15 @@ jobs:
 
       - name: Lint frontend
         run: make lint-frontend
-        working-directory: frontend
 
       - name: Check Prettier formatting
         run: make check-format-frontend
-        working-directory: frontend
 
       - name: Audit frontend dependencies
         run: make audit-frontend
-        working-directory: frontend
 
       - name: Run frontend tests
         run: npm run test:run
-        working-directory: frontend
 
       - name: Build frontend
         run: npm run build
