@@ -1,3 +1,4 @@
+//frontend/tests/unit/auth.service.test.js
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { circleService } from "../../src/services/circle.service.js";
 

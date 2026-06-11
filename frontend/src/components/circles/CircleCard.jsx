@@ -1,6 +1,7 @@
 // frontend/src/components/circles/CircleCard.jsx
-// Component for displaying a circle card in the dashboard
+
 import "./CircleCard.css";
+
 const CircleCard = ({ circle, onClick }) => {
   const getBadge = (role) => {
     const badges = {

@@ -12,6 +12,9 @@
     "test:run": "vitest run",
     "test:watch": "vitest",
     "test:integration": "vitest run tests/integration",
+    "test:integration:watch": "vitest tests/integration",
+    "test:unit": "vitest run tests/unit",
+    "test:unit:watch": "vitest tests/unit",
     "test:unit": "vitest run tests/unit",
     "test:debug": "vitest run --reporter verbose",
     "format": "prettier . --write",
@@ -29,6 +32,7 @@
   "devDependencies": {
     "@eslint/js": "^8.57.0",
     "@mswjs/interceptors": "^0.41.9",
+    "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
     "@types/node": "^25.6.0",
