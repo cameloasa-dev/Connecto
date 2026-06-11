@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import DarkModeContext from "./DarkModeContext";
 
+// eslint-disable-next-line react/prop-types
 export const DarkModeProvider = ({ children }) => {
   const [isDarkMode, setIsDarkMode] = useState(() => {
     const saved = localStorage.getItem("darkMode");

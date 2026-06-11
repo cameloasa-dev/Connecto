@@ -1,5 +1,3 @@
-// frontend/vitest.config.js
-
 import { defineConfig } from "vitest/config";
 import react from "@vitejs/plugin-react";
 
@@ -8,8 +6,14 @@ export default defineConfig({
   test: {
     environment: "jsdom",
     globals: true,
-    setupFiles: ["./tests/setupTests.js"],
-    include: ["**/*.{test,spec}.{js,jsx}"],
-    exclude: ["**/node_modules/**", "**/e2e/**"],
+
+    setupFiles: ["./tests/integration/setup/setupTests.js"],
+
+    include: [
+      "tests/unit/**/*.{test,spec}.{js,jsx}",
+      "tests/integration/**/*.{test,spec}.{js,jsx}",
+    ],
+
+    exclude: ["node_modules", "tests/e2e/**"],
   },
 });

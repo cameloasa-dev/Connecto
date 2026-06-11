@@ -1,77 +1,38 @@
 // frontend/src/pages/SearchPage.jsx
-import { useState, useEffect, useCallback } from "react";
 import { useSearchParams, useNavigate } from "react-router-dom";
-import api from "../services/api";
-import { searchService } from "../services/search.service";
+import { useSearchQuery } from "../hooks/useSearchQuery";
 import "./SearchPage.css";
 
 function SearchPage() {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
+
   const query = searchParams.get("q") || "";
 
-  const [results, setResults] = useState({
-    users: [],
-    circles: [],
-    posts: [],
-  });
-  const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState("users");
+  const { data, isLoading, error } = useSearchQuery(query);
 
-  // Function to perform search using the search service
-  const performSearch = useCallback(async () => {
-    setLoading(true);
-    try {
-      const data = await searchService.search(query);
-      setResults(data);
-    } catch (error) {
-      console.error("Search failed:", error);
-    } finally {
-      setLoading(false);
-    }
-  }, [query]);
+  const activeTab = searchParams.get("tab") || "users";
 
-  // Wrapping the callback function in an async wrapper to keep the eslint happy
-  const loadAllUsers = useCallback(async () => {
-    setLoading(true);
-    try {
-      const usersResponse = await api.get("/users?limit=100");
-      setResults({
-        users: usersResponse.data || [],
-        circles: [],
-        posts: [],
-      });
-    } catch (error) {
-      console.error("Failed to load users:", error);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const setTab = (tab) => {
+    const params = new URLSearchParams(searchParams);
+    params.set("tab", tab);
+    navigate(`/search?${params.toString()}`);
+  };
 
-  useEffect(() => {
-    let isMounted = true;
+  if (error) {
+    return (
+      <main className="dashboard-main">
+        <p className="error">Search failed. Try again later.</p>
+      </main>
+    );
+  }
 
-    const getData = async () => {
-      if (query) {
-        await performSearch();
-      } else {
-        await loadAllUsers();
-      }
-    };
-
-    if (isMounted) {
-      getData();
-    }
-
-    return () => {
-      isMounted = false;
-    };
-  }, [query, performSearch, loadAllUsers]);
+  const results = data || { users: [], circles: [], posts: [] };
 
   return (
     <main className="dashboard-main">
       <div className="search-header">
-        <h1>Search Results for "{query}"</h1>
+        <h1>Search Results for {`"${query}"`}</h1>
         <p className="results-count">
           Found {results.users.length} users, {results.circles.length} circles,{" "}
           {results.posts.length} posts
@@ -81,26 +42,26 @@ function SearchPage() {
       <div className="search-tabs">
         <button
           className={`tab ${activeTab === "users" ? "active" : ""}`}
-          onClick={() => setActiveTab("users")}
+          onClick={() => setTab("users")}
         >
           Users ({results.users.length})
         </button>
         <button
           className={`tab ${activeTab === "circles" ? "active" : ""}`}
-          onClick={() => setActiveTab("circles")}
+          onClick={() => setTab("circles")}
         >
           Circles ({results.circles.length})
         </button>
         <button
           className={`tab ${activeTab === "posts" ? "active" : ""}`}
-          onClick={() => setActiveTab("posts")}
+          onClick={() => setTab("posts")}
         >
           Posts ({results.posts.length})
         </button>
       </div>
 
       <div className="search-results">
-        {loading ? (
+        {isLoading ? (
           <div className="loading-spinner">Searching...</div>
         ) : (
           <>

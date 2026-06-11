@@ -6,29 +6,24 @@ import "./UserSidebar.css";
 function UserSidebar() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [isOpen, setIsOpen] = useState(false);
+
+  const [isOpen, setIsOpen] = useState(window.innerWidth > 768);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
-  // Detect screen size changes
   useEffect(() => {
     const handleResize = () => {
-      setIsMobile(window.innerWidth <= 768);
-      if (window.innerWidth > 768) {
-        setIsOpen(true); // Always open on desktop
-      } else {
-        setIsOpen(false); // Closed by default on mobile
-      }
+      const mobile = window.innerWidth <= 768;
+      setIsMobile(mobile);
+      setIsOpen(!mobile);
     };
 
     window.addEventListener("resize", handleResize);
-    handleResize(); // Initial check
-
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   const menuItems = [
     { icon: "🏠", label: "Dashboard", path: "/user-dashboard" },
-    { icon: "🔍", label: "Explore", path: "/explore" },
+    { icon: "🔍", label: "Search", path: "/search" },
     { icon: "⚙️", label: "Settings", path: "/settings" },
     { icon: "❓", label: "Help", path: "/help" },
   ];
@@ -37,14 +32,11 @@ function UserSidebar() {
 
   const handleItemClick = (path) => {
     navigate(path);
-    if (isMobile) {
-      setIsOpen(false); // Close sidebar after navigation on mobile
-    }
+    if (isMobile) setIsOpen(false);
   };
 
   return (
     <>
-      {/* Hamburger button - only visible on mobile */}
       {isMobile && (
         <button
           className={`hamburger-btn ${isOpen ? "open" : ""}`}
@@ -56,12 +48,10 @@ function UserSidebar() {
         </button>
       )}
 
-      {/* Sidebar overlay - only on mobile when open */}
       {isMobile && isOpen && (
         <div className="sidebar-overlay" onClick={() => setIsOpen(false)} />
       )}
 
-      {/* Sidebar */}
       <aside
         className={`sidebar ${isMobile ? "mobile" : ""} ${isOpen ? "open" : ""}`}
       >
@@ -75,9 +65,9 @@ function UserSidebar() {
         </div>
 
         <nav className="sidebar-nav">
-          {menuItems.map((item, index) => (
+          {menuItems.map((item) => (
             <button
-              key={index}
+              key={item.path}
               className={`sidebar-item ${isActive(item.path) ? "active" : ""}`}
               onClick={() => handleItemClick(item.path)}
             >
