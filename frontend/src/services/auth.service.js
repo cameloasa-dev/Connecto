@@ -3,105 +3,82 @@ import api from "./api";
 
 export const authService = {
   async login({ username, password }) {
-    try {
-      const response = await api.post("/auth/login", {
-        username,
-        password,
-      });
-      return response.data;
-    } catch (err) {
-      const message = err.message || "Login failed";
-      console.error("Login error:", message);
-      throw new Error(message);
-    }
+    const { data } = await api.post("/auth/login", {
+      username,
+      password,
+    });
+
+    return data;
   },
 
   async register({ username, password, full_name = "", email = "" }) {
-    try {
-      const response = await api.post("/auth/register", {
-        username,
-        password,
-        full_name,
-        email,
-      });
-      return response.data;
-    } catch (err) {
-      const message = err.message || "Registration failed";
-      console.error("Register error:", message);
-      throw new Error(message);
-    }
+    const { data } = await api.post("/auth/register", {
+      username,
+      password,
+      full_name,
+      email,
+    });
+
+    return data;
   },
 
   async logout() {
     try {
-      const response = await api.post("/auth/logout");
-      return response.data;
-    } catch (err) {
-      console.warn("Logout error:", err.message);
+      const { data } = await api.post("/auth/logout");
+      return data;
+    } catch {
       return { success: true };
     }
   },
 
   async requestPasswordReset({ email }) {
-    try {
-      const response = await api.post("/auth/reset-password", { email });
-      return response.data;
-    } catch (err) {
-      const message = err.message || "Failed to request password reset";
-      console.error("Password reset request error:", message);
-      throw new Error(message);
-    }
+    const { data } = await api.post("/auth/reset-password", { email });
+    return data;
   },
 
   async resetPassword({ token, new_password }) {
-    try {
-      const response = await api.post("/auth/reset-password/confirm", {
-        token,
-        new_password,
-      });
-      return response.data;
-    } catch (err) {
-      const message = err.message || "Failed to reset password";
-      console.error("Password reset error:", message);
-      throw new Error(message);
-    }
+    const { data } = await api.post("/auth/reset-password/confirm", {
+      token,
+      new_password,
+    });
+
+    return data;
   },
 
   async verifyEmail({ token }) {
-    try {
-      const response = await api.post("/auth/verify-email", { token });
-      return response.data;
-    } catch (err) {
-      const message = err.message || "Failed to verify email";
-      console.error("Email verification error:", message);
-      throw new Error(message);
-    }
+    const { data } = await api.post("/auth/verify-email", { token });
+    return data;
   },
 
   async resendVerificationEmail({ email }) {
-    try {
-      const response = await api.post("/auth/resend-verification", { email });
-      return response.data;
-    } catch (err) {
-      const message = err.message || "Failed to resend verification email";
-      console.error("Resend verification error:", message);
-      throw new Error(message);
-    }
+    const { data } = await api.post("/auth/resend-verification", { email });
+    return data;
   },
 
   async checkAuth() {
     try {
-      const response = await api.get("/auth/me");
+      const { data } = await api.get("/auth/me");
+
       return {
         authenticated: true,
-        user: response.data,
+        user: data,
       };
     } catch (err) {
-      if (err.cause?.response?.status === 401) {
-        return { authenticated: false, user: null };
+      const status = err.response?.status;
+
+      if (status === 401) {
+        return {
+          authenticated: false,
+          user: null,
+        };
       }
+
       console.warn("Auth check failed:", err.message);
-      return { authenticated: false, user: null };
+
+      return {
+        authenticated: false,
+        user: null,
+      };
     }
   },
 };

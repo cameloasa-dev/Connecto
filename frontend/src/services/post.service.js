@@ -1,70 +1,34 @@
-// frontend/src/services/post.service.js
 import api from "./api";
 
 const BASE_URL = "/posts";
 
 export const postService = {
-  // Get feed (recent posts from user's circles)
   async getFeed(limit = 20, offset = 0) {
-    try {
-      const response = await api.get(
-        `${BASE_URL}/feed?limit=${limit}&offset=${offset}`,
-      );
-      return response.data;
-    } catch (err) {
-      const message = err.message || "Failed to fetch feed";
-      console.error("Error fetching feed:", message);
-      throw new Error(message);
-    }
+    const res = await api.get(`${BASE_URL}/feed`, {
+      params: { limit, offset },
+    });
+    return res.data;
   },
 
-  // Get posts from a specific circle
   async getCirclePosts(circleId, limit = 50, offset = 0) {
-    try {
-      const response = await api.get(
-        `${BASE_URL}/circle/${circleId}?limit=${limit}&offset=${offset}`,
-      );
-      return response.data;
-    } catch (err) {
-      const message = err.message || "Failed to fetch circle posts";
-      console.error("Error fetching circle posts:", message);
-      throw new Error(message);
-    }
+    const res = await api.get(`${BASE_URL}/circle/${circleId}`, {
+      params: { limit, offset },
+    });
+    return res.data;
   },
 
-  // Create post
   async createPost(postData) {
-    try {
-      const response = await api.post(BASE_URL, postData);
-      return response.data;
-    } catch (err) {
-      const message = err.message || "Failed to create post";
-      console.error("Error creating post:", message);
-      throw new Error(message);
-    }
+    const res = await api.post(BASE_URL, postData);
+    return res.data;
   },
 
-  // Get single post
   async getPost(postId) {
-    try {
-      const response = await api.get(`${BASE_URL}/${postId}`);
-      return response.data;
-    } catch (err) {
-      const message = err.message || "Failed to fetch post";
-      console.error("Error fetching post:", message);
-      throw new Error(message);
-    }
+    const res = await api.get(`${BASE_URL}/${postId}`);
+    return res.data;
   },
 
-  // Delete post
   async deletePost(postId) {
-    try {
-      await api.delete(`${BASE_URL}/${postId}`);
-      return { success: true };
-    } catch (err) {
-      const message = err.message || "Failed to delete post";
-      console.error("Error deleting post:", message);
-      throw new Error(message);
-    }
+    await api.delete(`${BASE_URL}/${postId}`);
+    return { success: true };
   },
 };

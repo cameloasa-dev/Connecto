@@ -10,6 +10,10 @@
     "preview": "vite preview",
     "test": "vitest",
     "test:run": "vitest run",
+    "test:watch": "vitest",
+    "test:integration": "vitest run tests/integration",
+    "test:unit": "vitest run tests/unit",
+    "test:debug": "vitest run --reporter verbose",
     "format": "prettier . --write",
     "format:check": "prettier . --check"
   },

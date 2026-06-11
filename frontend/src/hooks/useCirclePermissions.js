@@ -19,9 +19,7 @@ export const useCirclePermissions = (circle) => {
   }
 
   // Find the current member in circle.members
-  const currentMember = circle.members?.find(
-    (m) => m.user_id === user.id
-  );
+  const currentMember = circle.members?.find((m) => m.user_id === user.id);
 
   const role = currentMember?.role || null;
 

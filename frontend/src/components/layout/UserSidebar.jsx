@@ -52,7 +52,9 @@ function UserSidebar() {
         <div className="sidebar-overlay" onClick={() => setIsOpen(false)} />
       )}
 
-      <aside className={`sidebar ${isMobile ? "mobile" : ""} ${isOpen ? "open" : ""}`}>
+      <aside
+        className={`sidebar ${isMobile ? "mobile" : ""} ${isOpen ? "open" : ""}`}
+      >
         <div className="sidebar-header">
           <h3 className="sidebar-title">Navigation</h3>
           {isMobile && (
