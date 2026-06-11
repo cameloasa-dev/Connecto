@@ -1,3 +1,4 @@
+//frontend/tests/unit/auth.service.test.js
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { postService } from "../../src/services/post.service.js";
 

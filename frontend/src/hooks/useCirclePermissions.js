@@ -25,7 +25,7 @@ export const useCirclePermissions = (circle) => {
 
   const isOwner = role === "owner";
   const isModerator = role === "moderator";
-  const isMember = !!role;
+  const isMember = !!currentMember;
 
   return {
     isOwner,

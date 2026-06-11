@@ -18,7 +18,7 @@ function App() {
   return (
     <AuthProvider>
       <DarkModeProvider>
-        <Router basename="/Connecto/">
+        <Router basename={APP_BASE_PATH}>
           <Routes>
             {/* Public routes */}
             <Route index element={<LoginPage />} />
