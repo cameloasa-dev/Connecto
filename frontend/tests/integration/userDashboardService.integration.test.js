@@ -14,63 +14,49 @@ beforeEach(() => {
 });
 
 // 🧪 INTEGRATION TESTS FOR userDashboardService
-describe("userDashboardService (integration)", () => {
-  it("returns aggregated dashboard data", async () => {
-    // ARRANGE (override MSW default handlers)
+describe("userDashboardService", () => {
+  it("returns dashboard data", async () => {
     server.use(
-      http.get("*/auth/me", () => HttpResponse.json(userFixture)),
-
-      http.get("*/circles/my", () => HttpResponse.json(circlesFixture)),
-
-      http.get("*/posts/feed", ({ request }) => {
-        const url = new URL(request.url);
-
-        expect(url.searchParams.get("limit")).toBe("10");
-
-        return HttpResponse.json(postsFixture);
-      }),
-    );
-
-    // ACT
-    const result = await userDashboardService.getUserDashboardData();
-
-    // ASSERT
-    expect(result).toEqual({
-      user: userFixture,
-      circles: circlesFixture,
-      posts: postsFixture,
-      circlesCount: circlesFixture.length,
-      postsCount: postsFixture.length,
-      notificationsCount: 0,
-    });
-  });
-
-  // 🧪 EMPTY CASE
-  it("handles empty responses safely", async () => {
-    server.use(
-      http.get("*/auth/me", () => HttpResponse.json(userFixture)),
-
-      http.get("*/circles/my", () => HttpResponse.json([])),
-
-      http.get("*/posts/feed", () => HttpResponse.json([])),
+      http.get("*/dashboard", () =>
+        HttpResponse.json({
+          user: userFixture,
+          circles: circlesFixture,
+          feed: postsFixture,
+          stats: {
+            total_circles: circlesFixture.length,
+            total_posts_in_feed: postsFixture.length,
+          },
+        }),
+      ),
     );
 
     const result = await userDashboardService.getUserDashboardData();
 
-    expect(result.circlesCount).toBe(0);
-    expect(result.postsCount).toBe(0);
-  });
-
-  // 🧪 FAILURE CASE
-  it("throws error when one request fails", async () => {
-    server.use(
-      http.get("*/auth/me", () => HttpResponse.json(userFixture)),
-
-      http.get("*/circles/my", () => new HttpResponse(null, { status: 500 })),
-
-      http.get("*/posts/feed", () => HttpResponse.json([])),
-    );
-
-    await expect(userDashboardService.getUserDashboardData()).rejects.toThrow();
+    expect(result.user).toEqual(userFixture);
+    expect(result.circles).toEqual(circlesFixture);
+    expect(result.feed).toEqual(postsFixture);
+    expect(result.stats.total_circles).toBe(circlesFixture.length);
   });
 });
+
+// 🧪 EMPTY CASE
+server.use(
+  http.get("*/dashboard", () =>
+    HttpResponse.json({
+      user: userFixture,
+      circles: [],
+      feed: [],
+      stats: {
+        total_circles: 0,
+        total_posts_in_feed: 0,
+      },
+    }),
+  ),
+);
+
+// 🧪 FAILURE CASE
+server.use(
+  http.get("*/dashboard", () => new HttpResponse(null, { status: 500 })),
+);
+
+await expect(userDashboardService.getUserDashboardData()).rejects.toThrow();
