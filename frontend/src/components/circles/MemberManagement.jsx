@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import { useState } from "react";
 import MemberRow from "./MemberRow";
 import AddMemberModal from "./AddMemberModal";
-import { useCirclePermissions } from "../../hooks/useCirclePermissions";
+import { useCirclePermissions } from "../../hooks/circles/useCirclePermissions";
 import { useAddCircleMember } from "../../hooks/mutations/useCircleMemberMutations";
 import { useRemoveCircleMember } from "../../hooks/mutations/useCircleMemberMutations";
 import { useUpdateCircleMemberRole } from "../../hooks/mutations/useCircleMemberMutations";
