@@ -1,43 +1,42 @@
-// frontend/src/components/layout/CreateCircleModal.jsx
+// frontend/src/components/circles/CreateCircleModal.jsx
+
 import { useState } from "react";
-import { circleService } from "../../services/circle.service";
+import PropTypes from "prop-types";
+import { useCreateCircle } from "../../hooks/mutations/useCircleMutations";
 import "./CreateCircleModal.css";
 
 const CreateCircleModal = ({ isOpen, onClose, onCircleCreated }) => {
-  console.log("📦 CreateCircleModal rendering - isOpen:", isOpen);
+  const createCircle = useCreateCircle();
 
   const [formData, setFormData] = useState({
     name: "",
     description: "",
   });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
 
-  // If the modal is not open, don't render anything
-  if (!isOpen) {
-    console.log("🚫 Modal not open - returning null");
-    return null;
-  }
+  const [error, setError] = useState("");
 
-  console.log("✅ Modal is open - rendering content");
+  if (!isOpen) return null;
+
+  const loading = createCircle.isPending;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("📝 Form submitted:", formData);
 
     try {
-      setLoading(true);
-      setError(null);
-      const newCircle = await circleService.createCircle(formData);
-      console.log("✅ Circle created successfully:", newCircle);
-      onCircleCreated(newCircle);
+      setError("");
+
+      const newCircle = await createCircle.mutateAsync(formData);
+
+      onCircleCreated?.(newCircle);
+
+      setFormData({
+        name: "",
+        description: "",
+      });
+
       onClose();
-      setFormData({ name: "", description: "" }); // Reset form
     } catch (err) {
-      console.error("❌ Error creating circle:", err);
       setError(err.response?.data?.detail || "Failed to create circle");
-    } finally {
-      setLoading(false);
     }
   };
 
@@ -45,14 +44,20 @@ const CreateCircleModal = ({ isOpen, onClose, onCircleCreated }) => {
     <div className="modal-overlay">
       <div className="modal">
         <h2>Create New Circle</h2>
+
         <form onSubmit={handleSubmit}>
           <div className="form-group">
-            <label>Circle Name *</label>
+            <label htmlFor="circle-name">Circle Name *</label>
+
             <input
+              id="circle-name"
               type="text"
               value={formData.name}
               onChange={(e) =>
-                setFormData({ ...formData, name: e.target.value })
+                setFormData((prev) => ({
+                  ...prev,
+                  name: e.target.value,
+                }))
               }
               required
               minLength={3}
@@ -62,15 +67,20 @@ const CreateCircleModal = ({ isOpen, onClose, onCircleCreated }) => {
           </div>
 
           <div className="form-group">
-            <label>Description</label>
+            <label htmlFor="circle-description">Description</label>
+
             <textarea
+              id="circle-description"
               value={formData.description}
               onChange={(e) =>
-                setFormData({ ...formData, description: e.target.value })
+                setFormData((prev) => ({
+                  ...prev,
+                  description: e.target.value,
+                }))
               }
               maxLength={255}
-              placeholder="What's this circle about? (optional)"
-              rows="3"
+              placeholder="What's this circle about?"
+              rows={3}
             />
           </div>
 
@@ -80,6 +90,7 @@ const CreateCircleModal = ({ isOpen, onClose, onCircleCreated }) => {
             <button type="button" onClick={onClose} disabled={loading}>
               Cancel
             </button>
+
             <button type="submit" disabled={loading}>
               {loading ? "Creating..." : "Create Circle"}
             </button>
@@ -88,6 +99,12 @@ const CreateCircleModal = ({ isOpen, onClose, onCircleCreated }) => {
       </div>
     </div>
   );
+};
+
+CreateCircleModal.propTypes = {
+  isOpen: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  onCircleCreated: PropTypes.func,
 };
 
 export default CreateCircleModal;

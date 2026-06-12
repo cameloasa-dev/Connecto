@@ -1,17 +1,14 @@
 // frontend/src/components/circles/MemberRow.jsx
+import propTypes from "prop-types";
 import { useState } from "react";
-import { circleMemberService } from "../../services/circleMember.service";
 import "./MemberRow.css";
 
-const MemberRow = ({
-  member,
-  circleId,
-  onRoleChange,
-  onRemove,
-  currentUserRole,
-}) => {
+//eslint-disable-next-line react/prop-types
+const MemberRow = ({ member, onRoleChange, onRemove, currentUserRole }) => {
   const [isChanging, setIsChanging] = useState(false);
+
   const isOwner = member.role === "owner";
+
   const canManage =
     currentUserRole === "owner" ||
     (currentUserRole === "moderator" && member.role === "member");
@@ -19,27 +16,22 @@ const MemberRow = ({
   const handleRoleChange = async (newRole) => {
     try {
       setIsChanging(true);
-      const updated = await circleMemberService.updateRole(
-        circleId,
-        member.user_id,
-        newRole,
-      );
-      onRoleChange(updated);
-    } catch (error) {
-      console.error("Failed to update role:", error);
+      await onRoleChange(newRole);
     } finally {
       setIsChanging(false);
     }
   };
 
   const handleRemove = async () => {
-    if (confirm(`Remove ${member.username} from circle?`)) {
-      try {
-        await circleMemberService.removeMember(circleId, member.user_id);
-        onRemove(member.user_id);
-      } catch (error) {
-        console.error("Failed to remove member:", error);
-      }
+    const confirmed = window.confirm(`Remove ${member.username} from circle?`);
+
+    if (!confirmed) return;
+
+    try {
+      setIsChanging(true);
+      await onRemove();
+    } finally {
+      setIsChanging(false);
     }
   };
 
@@ -49,11 +41,13 @@ const MemberRow = ({
         <span className="member-avatar">
           {member.username?.charAt(0).toUpperCase()}
         </span>
+
         <div className="member-details">
           <div className="member-name">
             {member.username}
             {isOwner && <span className="owner-tag"> (Owner)</span>}
           </div>
+
           <div className="member-role-badge">
             <span className="badge">{member.badge}</span>
             <span className="role-text">{member.role}</span>
@@ -72,6 +66,7 @@ const MemberRow = ({
             <option value="member">Member 👤</option>
             <option value="moderator">Moderator 🛡️</option>
           </select>
+
           <button
             onClick={handleRemove}
             className="remove-btn"
@@ -84,6 +79,17 @@ const MemberRow = ({
       )}
     </div>
   );
+};
+
+MemberRow.propTypes = {
+  member: propTypes.shape({
+    username: propTypes.string.isRequired,
+    role: propTypes.string.isRequired,
+    badge: propTypes.string,
+  }).isRequired,
+  onRoleChange: propTypes.func.isRequired,
+  onRemove: propTypes.func.isRequired,
+  currentUserRole: propTypes.string.isRequired,
 };
 
 export default MemberRow;

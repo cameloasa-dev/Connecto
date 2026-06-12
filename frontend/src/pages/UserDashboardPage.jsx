@@ -17,8 +17,7 @@ function UserDashboardPage() {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
 
-  const [isCreateCircleModalOpen, setIsCreateCircleModalOpen] =
-    useState(false);
+  const [isCreateCircleModalOpen, setIsCreateCircleModalOpen] = useState(false);
 
   const [showCreatePost, setShowCreatePost] = useState(false);
 
@@ -28,11 +27,7 @@ function UserDashboardPage() {
     }
   }, [authLoading, user, navigate]);
 
-  const {
-    data: dashboard,
-    isLoading,
-    error,
-  } = useDashboardQuery();
+  const { data: dashboard, isLoading, error } = useDashboardQuery();
 
   if (authLoading) {
     return <div className="loading-spinner">Loading...</div>;
@@ -43,19 +38,11 @@ function UserDashboardPage() {
   }
 
   if (isLoading) {
-    return (
-      <div className="loading-spinner">
-        Loading dashboard data...
-      </div>
-    );
+    return <div className="loading-spinner">Loading dashboard data...</div>;
   }
 
   if (error) {
-    return (
-      <div className="error-message">
-        Failed to load dashboard data
-      </div>
-    );
+    return <div className="error-message">Failed to load dashboard data</div>;
   }
 
   const circles = dashboard?.circles ?? [];
@@ -64,32 +51,24 @@ function UserDashboardPage() {
   return (
     <>
       <div className="welcome-section">
-        <h1>
-          Welcome back, {user.full_name || user.username}! 👋
-        </h1>
+        <h1>Welcome back, {user.full_name || user.username}! 👋</h1>
         <p>Here&apos;s what&apos;s happening in your circles.</p>
       </div>
 
       <div className="stats-grid">
         <div className="stat-card">
           <h3>Your Circles</h3>
-          <p className="stat-number">
-            {dashboard.circlesCount}
-          </p>
+          <p className="stat-number">{dashboard.circlesCount}</p>
         </div>
 
         <div className="stat-card">
           <h3>Recent Posts</h3>
-          <p className="stat-number">
-            {dashboard.postsCount}
-          </p>
+          <p className="stat-number">{dashboard.postsCount}</p>
         </div>
 
         <div className="stat-card">
           <h3>Notifications</h3>
-          <p className="stat-number">
-            {dashboard.notificationsCount}
-          </p>
+          <p className="stat-number">{dashboard.notificationsCount}</p>
         </div>
       </div>
 
@@ -105,9 +84,7 @@ function UserDashboardPage() {
           className="secondary-btn"
           onClick={() => setShowCreatePost((prev) => !prev)}
         >
-          {showCreatePost
-            ? "Hide"
-            : "Create New Post"}
+          {showCreatePost ? "Hide" : "Create New Post"}
         </button>
       </div>
 
@@ -128,23 +105,17 @@ function UserDashboardPage() {
               <CircleCard
                 key={circle.id}
                 circle={circle}
-                onClick={() =>
-                  navigate(`/circles/${circle.id}`)
-                }
+                onClick={() => navigate(`/circles/${circle.id}`)}
               />
             ))}
           </div>
         ) : (
           <div className="empty-state">
-            <p>
-              You haven&apos;t joined any circles yet.
-            </p>
+            <p>You haven&apos;t joined any circles yet.</p>
 
             <button
               className="primary-btn"
-              onClick={() =>
-                setIsCreateCircleModalOpen(true)
-              }
+              onClick={() => setIsCreateCircleModalOpen(true)}
             >
               Create Your First Circle
             </button>
@@ -158,17 +129,12 @@ function UserDashboardPage() {
         {posts.length > 0 ? (
           <div className="posts-feed">
             {posts.map((post) => (
-              <PostCard
-                key={post.id}
-                post={post}
-                showCircle
-              />
+              <PostCard key={post.id} post={post} showCircle />
             ))}
           </div>
         ) : (
           <p className="empty-message">
             No recent posts in your circles.
-
             <button
               className="link-btn"
               onClick={() => setShowCreatePost(true)}
@@ -182,17 +148,13 @@ function UserDashboardPage() {
       {import.meta.env.DEV && (
         <details className="debug-info">
           <summary>Debug: Raw Data</summary>
-          <pre>
-            {JSON.stringify(dashboard, null, 2)}
-          </pre>
+          <pre>{JSON.stringify(dashboard, null, 2)}</pre>
         </details>
       )}
 
       <CreateCircleModal
         isOpen={isCreateCircleModalOpen}
-        onClose={() =>
-          setIsCreateCircleModalOpen(false)
-        }
+        onClose={() => setIsCreateCircleModalOpen(false)}
       />
     </>
   );

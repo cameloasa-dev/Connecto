@@ -3,6 +3,7 @@ import { useState } from "react";
 import { circleMemberService } from "../../services/circleMember.service";
 import "./AddMemberModal.css";
 
+// eslint-disable-next-line react/prop-types
 const AddMemberModal = ({ isOpen, onClose, circleId, onMemberAdded }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
