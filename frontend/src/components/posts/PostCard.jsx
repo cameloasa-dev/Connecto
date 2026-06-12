@@ -1,45 +1,43 @@
-import PropTypes from "prop-types";
+import { useState } from "react";
+import propTypes from "prop-types";
+import PostSettingsModal from "./PostSettingsModal";
 import PostActions from "./PostActions";
-import "./PostCard.css";
+import { useDeletePost } from "../../hooks/mutations/usePostMutations";
 
-const PostCard = ({ post, showCircle = false }) => {
+const PostCard = ({ post }) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const { mutateAsync: deletePost } = useDeletePost();
+
+  const handleDelete = async () => {
+    if (!window.confirm("Delete post?")) return;
+    await deletePost(post.id);
+  };
+
   return (
     <div className="post-card">
-      <div className="post-header">
-        <div className="post-author-avatar">
-          {post.author_name?.charAt(0).toUpperCase() || "U"}
-        </div>
+      <h4>{post.title}</h4>
+      <p>{post.content}</p>
 
-        <div className="post-author-info">
-          <div className="post-author">{post.author_name}</div>
-          <div className="post-date">
-            {new Date(post.created_at).toLocaleDateString()}
-          </div>
-        </div>
-      </div>
+      <PostActions
+        onEdit={() => setIsEditing(true)}
+        onDelete={handleDelete}
+      />
 
-      <div className="post-content">
-        <h4>{post.title}</h4>
-        <p>{post.content}</p>
-
-        {showCircle && post.circle_name && (
-          <div className="post-circle">in {post.circle_name}</div>
-        )}
-      </div>
-
-      <PostActions />
+      {isEditing && (
+        <PostSettingsModal
+          post={post}
+          onClose={() => setIsEditing(false)}
+        />
+      )}
     </div>
   );
 };
 
 PostCard.propTypes = {
-  showCircle: PropTypes.bool,
-  post: PropTypes.shape({
-    author_name: PropTypes.string,
-    created_at: PropTypes.string,
-    title: PropTypes.string,
-    content: PropTypes.string,
-    circle_name: PropTypes.string,
+  post: propTypes.shape({
+    id: propTypes.number.isRequired,
+    title: propTypes.string.isRequired,
+    content: propTypes.string.isRequired,
   }).isRequired,
 };
 
