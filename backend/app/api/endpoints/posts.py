@@ -51,6 +51,7 @@ def build_post_response(
         updated_at=post.updated_at,
     )
 
+
 # ======================================================
 # Update Post
 # ======================================================
@@ -60,7 +61,7 @@ async def update_post(
     post_data: PostCreate,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user_from_session),
-)-> PostResponse:
+) -> PostResponse:
 
     post = await db.get(Post, post_id)
 
@@ -77,9 +78,9 @@ async def update_post(
     await db.refresh(post)
 
     return build_post_response(
-        post,
-        current_user.username,
-        post.circle.name if post.circle else None)
+        post, current_user.username, post.circle.name if post.circle else None
+    )
+
 
 # ======================================================
 # CREATE POST
