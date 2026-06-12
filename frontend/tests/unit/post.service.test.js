@@ -18,7 +18,6 @@ describe("postService (unit)", () => {
     vi.clearAllMocks();
   });
 
-
   // =========================
   // GET CIRCLE POSTS
   // =========================

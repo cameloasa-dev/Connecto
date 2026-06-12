@@ -43,3 +43,21 @@ export const useUpdateCircleName = () => {
     },
   });
 };
+
+export const useDeleteCircle = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (circleId) => circleService.deleteCircle(circleId),
+
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["myCircles"],
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: ["dashboard"],
+      });
+    },
+  });
+};

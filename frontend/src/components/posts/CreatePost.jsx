@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useCreatePost } from "../../hooks/useCreatePostMutation";
+import { useCreatePost } from "../../hooks/mutations/usePostMutations";
 
 // eslint-disable-next-line react/prop-types
 const CreatePost = ({ onPostCreated, circles = [] }) => {
