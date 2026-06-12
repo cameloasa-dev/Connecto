@@ -1,6 +1,6 @@
 // frontend/src/pages/SearchPage.jsx
 import { useSearchParams, useNavigate } from "react-router-dom";
-import { useSearchQuery } from "../hooks/useSearchQuery";
+import { useSearchQuery } from "../hooks/search/useSearchQuery";
 import "./SearchPage.css";
 
 function SearchPage() {
