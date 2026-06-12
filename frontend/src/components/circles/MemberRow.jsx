@@ -1,6 +1,6 @@
 import propTypes from "prop-types";
 import { useState } from "react";
-import { useCirclePermissions } from "../../hooks/useCirclePermissions";
+import { useCirclePermissions } from "../../hooks/circles/useCirclePermissions";
 import "./MemberRow.css";
 
 const MemberRow = ({ member, circle, onRoleChange, onRemove }) => {
