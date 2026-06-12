@@ -1,3 +1,4 @@
+//frontend/src/hooks/mutations/usePostMutations.js
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { postService } from "../../services/post.service";
 
@@ -36,7 +37,7 @@ export const useDeletePost = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: postService.deletePost,
+    mutationFn: (postId) => postService.deletePost(postId),
 
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["dashboard"] });

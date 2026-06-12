@@ -1,51 +1,50 @@
 // frontend/src/components/circles/AddMemberModal.jsx
 import { useState } from "react";
-import { circleMemberService } from "../../services/circleMember.service";
+import PropTypes from "prop-types";
+import { useSearchUsers } from "../../hooks/search/useSearchUsersMutation";
+import { useAddCircleMember } from "../../hooks/mutations/useCircleMemberMutations";
 import "./AddMemberModal.css";
 
-// eslint-disable-next-line react/prop-types
 const AddMemberModal = ({ isOpen, onClose, circleId, onMemberAdded }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResults, setSearchResults] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
 
-  const handleSearch = async () => {
-    if (!searchQuery.trim()) return;
-
-    setLoading(true);
-    setError(null);
-    try {
-      console.log("🔍 Searching for:", searchQuery, "in circle:", circleId);
-      const results = await circleMemberService.searchUsers(
-        searchQuery,
-        circleId,
-      );
-      console.log("✅ Search results:", results);
-      setSearchResults(results);
-    } catch (err) {
-      console.error("❌ Search failed - Full error:", err);
-      console.error("❌ Response data:", err.response?.data);
-      console.error("❌ Response status:", err.response?.status);
-      setError("Search failed. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleAddMember = async (userId) => {
-    try {
-      const newMember = await circleMemberService.addMember(circleId, userId);
-      onMemberAdded(newMember);
-      // Remove from search results
-      setSearchResults((prev) => prev.filter((user) => user.id !== userId));
-    } catch (err) {
-      setError("Failed to add member. Please try again.");
-      console.error("Failed to add member:", err);
-    }
-  };
+  const { mutate: searchUsers, isPending: isSearching } = useSearchUsers();
+  const { mutate: addMember, isPending: isAdding } = useAddCircleMember();
 
   if (!isOpen) return null;
+
+  const handleSearch = () => {
+    if (!searchQuery.trim()) return;
+
+    searchUsers(
+      { query: searchQuery, circleId },
+      {
+        onSuccess: (results) => {
+          setSearchResults(results);
+        },
+        onError: () => {
+          setSearchResults([]);
+        },
+      },
+    );
+  };
+
+  const handleAddMember = (userId) => {
+    addMember(
+      { circleId, userId },
+      {
+        onSuccess: (newMember) => {
+          onMemberAdded(newMember);
+
+          // remove user from search results
+          setSearchResults((prev) =>
+            prev.filter((user) => user.id !== userId),
+          );
+        },
+      },
+    );
+  };
 
   return (
     <div className="modal-overlay">
@@ -64,53 +63,63 @@ const AddMemberModal = ({ isOpen, onClose, circleId, onMemberAdded }) => {
               placeholder="Search by username..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              onKeyPress={(e) => e.key === "Enter" && handleSearch()}
+              onKeyDown={(e) => e.key === "Enter" && handleSearch()}
               className="search-input"
               autoFocus
             />
+
             <button
               onClick={handleSearch}
-              disabled={loading || !searchQuery.trim()}
+              disabled={isSearching || !searchQuery.trim()}
               className="search-btn"
             >
-              {loading ? "Searching..." : "Search"}
+              {isSearching ? "Searching..." : "Search"}
             </button>
           </div>
 
-          {error && <div className="error-message">{error}</div>}
-
           <div className="search-results">
-            {searchResults.length > 0
-              ? searchResults.map((user) => (
-                  <div key={user.id} className="user-result">
-                    <div className="user-info">
-                      <span className="user-avatar">
-                        {user.username.charAt(0).toUpperCase()}
-                      </span>
-                      <div>
-                        <div className="user-name">{user.username}</div>
-                        <div className="user-email">{user.email}</div>
-                      </div>
+            {searchResults.length > 0 ? (
+              searchResults.map((user) => (
+                <div key={user.id} className="user-result">
+                  <div className="user-info">
+                    <span className="user-avatar">
+                      {user.username.charAt(0).toUpperCase()}
+                    </span>
+                    <div>
+                      <div className="user-name">{user.username}</div>
+                      <div className="user-email">{user.email}</div>
                     </div>
-                    <button
-                      onClick={() => handleAddMember(user.id)}
-                      className="add-btn"
-                    >
-                      Add
-                    </button>
                   </div>
-                ))
-              : searchQuery &&
-                !loading && (
-                  <p className="no-results">
-                    No users found matching "{searchQuery}"
-                  </p>
-                )}
+
+                  <button
+                    onClick={() => handleAddMember(user.id)}
+                    disabled={isAdding}
+                    className="add-btn"
+                  >
+                    {isAdding ? "Adding..." : "Add"}
+                  </button>
+                </div>
+              ))
+            ) : (
+              searchQuery &&
+              !isSearching && (
+                <p className="no-results">
+                  No users found matching &quot;{searchQuery}&quot;
+                </p>
+              )
+            )}
           </div>
         </div>
       </div>
     </div>
   );
+};
+
+AddMemberModal.propTypes = {
+  isOpen: PropTypes.bool.isRequired,
+  onClose: PropTypes.func.isRequired,
+  circleId: PropTypes.string.isRequired,
+  onMemberAdded: PropTypes.func.isRequired,
 };
 
 export default AddMemberModal;

@@ -1,17 +1,17 @@
-// frontend/src/components/circles/MemberRow.jsx
 import propTypes from "prop-types";
 import { useState } from "react";
+import { useCirclePermissions } from "../../hooks/useCirclePermissions";
 import "./MemberRow.css";
 
-//eslint-disable-next-line react/prop-types
-const MemberRow = ({ member, onRoleChange, onRemove, currentUserRole }) => {
+const MemberRow = ({ member, circle, onRoleChange, onRemove }) => {
   const [isChanging, setIsChanging] = useState(false);
+
+  const { canManageMembers } = useCirclePermissions(circle);
 
   const isOwner = member.role === "owner";
 
   const canManage =
-    currentUserRole === "owner" ||
-    (currentUserRole === "moderator" && member.role === "member");
+    canManageMembers && member.role !== "owner";
 
   const handleRoleChange = async (newRole) => {
     try {
@@ -23,7 +23,9 @@ const MemberRow = ({ member, onRoleChange, onRemove, currentUserRole }) => {
   };
 
   const handleRemove = async () => {
-    const confirmed = window.confirm(`Remove ${member.username} from circle?`);
+    const confirmed = window.confirm(
+      `Remove ${member.username} from circle?`
+    );
 
     if (!confirmed) return;
 
@@ -69,8 +71,8 @@ const MemberRow = ({ member, onRoleChange, onRemove, currentUserRole }) => {
 
           <button
             onClick={handleRemove}
-            className="remove-btn"
             disabled={isChanging}
+            className="remove-btn"
             title="Remove member"
           >
             ✕
@@ -87,9 +89,9 @@ MemberRow.propTypes = {
     role: propTypes.string.isRequired,
     badge: propTypes.string,
   }).isRequired,
+  circle: propTypes.object.isRequired,
   onRoleChange: propTypes.func.isRequired,
   onRemove: propTypes.func.isRequired,
-  currentUserRole: propTypes.string.isRequired,
 };
 
 export default MemberRow;

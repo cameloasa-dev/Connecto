@@ -9,7 +9,6 @@ import { useRemoveCircleMember } from "../../hooks/mutations/useCircleMemberMuta
 import { useUpdateCircleMemberRole } from "../../hooks/mutations/useCircleMemberMutations";
 import "./MemberManagement.css";
 
-//eslint-disable-next-line react/prop-types
 const MemberManagement = ({ circle, currentUserId }) => {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 

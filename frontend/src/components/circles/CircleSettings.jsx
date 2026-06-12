@@ -1,6 +1,6 @@
 import { useState } from "react";
 import PropTypes from "prop-types";
-import { useCirclePermissions } from "../../hooks/useCirclePermissions";
+import { useCirclePermissions } from "../../hooks/circles/useCirclePermissions";
 import { useUpdateCircleName } from "../../hooks/mutations/useCircleMutations";
 import "./CircleSettings.css";
 
