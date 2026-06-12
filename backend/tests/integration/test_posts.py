@@ -144,23 +144,6 @@ async def test_get_post_forbidden_not_member(client: AsyncClient, user2: User, c
 
 
 # ------------------------------------------------------
-# 3. FEED
-# ------------------------------------------------------
-@pytest.mark.asyncio
-async def test_feed(client: AsyncClient, circle: Circle):
-    # Create posts
-    await client.post("/posts/", json={"title": "A", "content": "1", "circle_id": circle.id})
-    await client.post("/posts/", json={"title": "B", "content": "2", "circle_id": circle.id})
-
-    response = await client.get("/posts/feed")
-    assert response.status_code == 200
-
-    feed = response.json()
-    assert len(feed) >= 2
-    assert feed[0]["title"] in ("A", "B")
-
-
-# ------------------------------------------------------
 # 4. DELETE POST
 # ------------------------------------------------------
 @pytest.mark.asyncio

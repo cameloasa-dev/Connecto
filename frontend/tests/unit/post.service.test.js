@@ -19,28 +19,6 @@ describe("postService (unit)", () => {
   });
 
   // =========================
-  // GET FEED
-  // =========================
-  describe("getFeed", () => {
-    it("fetches feed with params", async () => {
-      api.get.mockResolvedValue({
-        data: [{ id: 1, content: "post 1" }],
-      });
-
-      const result = await postService.getFeed(10, 5);
-
-      expect(api.get).toHaveBeenCalledWith("/posts/feed", {
-        params: {
-          limit: 10,
-          offset: 5,
-        },
-      });
-
-      expect(result).toEqual([{ id: 1, content: "post 1" }]);
-    });
-  });
-
-  // =========================
   // GET CIRCLE POSTS
   // =========================
   describe("getCirclePosts", () => {

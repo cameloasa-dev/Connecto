@@ -1,6 +1,6 @@
 import { renderHook } from "@testing-library/react";
 import { describe, it, expect, vi } from "vitest";
-import { useCirclePermissions } from "../../src/hooks/useCirclePermissions";
+import { useCirclePermissions } from "../../src/hooks/circles/useCirclePermissions";
 
 // mock context
 vi.mock("../../src/contexts/useAuth", () => ({
@@ -21,9 +21,7 @@ describe("useCirclePermissions (unit)", () => {
     };
 
     // ACT
-    const { result } = renderHook(() =>
-      useCirclePermissions(circle)
-    );
+    const { result } = renderHook(() => useCirclePermissions(circle));
 
     // ASSERT
     expect(result.current.isOwner).toBe(true);
@@ -40,7 +38,7 @@ describe("useCirclePermissions (unit)", () => {
     const { result } = renderHook(() =>
       useCirclePermissions({
         members: [{ user_id: 1, role: "owner" }],
-      })
+      }),
     );
 
     expect(result.current.isOwner).toBe(false);
@@ -56,9 +54,7 @@ describe("useCirclePermissions (unit)", () => {
       members: [{ user_id: 1, role: "moderator" }],
     };
 
-    const { result } = renderHook(() =>
-      useCirclePermissions(circle)
-    );
+    const { result } = renderHook(() => useCirclePermissions(circle));
 
     expect(result.current.isModerator).toBe(true);
     expect(result.current.canModerate).toBe(true);

@@ -3,13 +3,6 @@ import api from "./api";
 const BASE_URL = "/posts";
 
 export const postService = {
-  async getFeed(limit = 20, offset = 0) {
-    const res = await api.get(`${BASE_URL}/feed`, {
-      params: { limit, offset },
-    });
-    return res.data;
-  },
-
   async getCirclePosts(circleId, limit = 50, offset = 0) {
     const res = await api.get(`${BASE_URL}/circle/${circleId}`, {
       params: { limit, offset },
@@ -24,6 +17,11 @@ export const postService = {
 
   async getPost(postId) {
     const res = await api.get(`${BASE_URL}/${postId}`);
+    return res.data;
+  },
+
+  async updatePost(postId, postData) {
+    const res = await api.put(`${BASE_URL}/${postId}`, postData);
     return res.data;
   },
 
