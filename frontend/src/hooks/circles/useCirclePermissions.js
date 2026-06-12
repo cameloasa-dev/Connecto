@@ -1,5 +1,5 @@
 // frontend/src/hooks/useCirclePermissions.js
-import { useAuth } from "../contexts/useAuth";
+import { useAuth } from "../../contexts/useAuth";
 
 export const useCirclePermissions = (circle) => {
   const { user } = useAuth();

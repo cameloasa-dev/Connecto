@@ -1,6 +1,6 @@
 import { renderHook } from "@testing-library/react";
 import { describe, it, expect, vi } from "vitest";
-import { useCirclePermissions } from "../../src/hooks/useCirclePermissions";
+import { useCirclePermissions } from "../../src/hooks/circles/useCirclePermissions";
 
 // mock context
 vi.mock("../../src/contexts/useAuth", () => ({

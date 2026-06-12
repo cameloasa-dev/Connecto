@@ -51,44 +51,35 @@ def build_post_response(
         updated_at=post.updated_at,
     )
 
-
 # ======================================================
-# FEED
+# Update Post
 # ======================================================
-@router.get("/feed", response_model=list[PostResponse])
-async def get_feed(
+@router.put("/{post_id}", response_model=PostResponse)
+async def update_post(
+    post_id: int,
+    post_data: PostCreate,
     db: AsyncSession = Depends(get_db),
     current_user: User = Depends(get_current_user_from_session),
-    limit: int = 20,
-    offset: int = 0,
-) -> list[PostResponse]:
+)-> PostResponse:
 
-    # Circles where user is a member
-    member_circles = await db.execute(
-        select(CircleMember.circle_id).where(CircleMember.user_id == current_user.id)
-    )
-    circle_ids = [row[0] for row in member_circles.fetchall()]
+    post = await db.get(Post, post_id)
 
-    if not circle_ids:
-        return []
+    if not post:
+        raise HTTPException(status_code=404, detail="Post not found")
 
-    # Posts from those circles
-    posts_result = await db.execute(
-        select(Post, User.username, Circle.name)
-        .join(User, Post.author_id == User.id)
-        .join(Circle, Post.circle_id == Circle.id, isouter=True)
-        .where(Post.circle_id.in_(circle_ids))
-        .order_by(desc(Post.created_at))
-        .offset(offset)
-        .limit(limit)
-    )
+    if post.author_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Not allowed")
 
-    feed = []
-    for post, author_name, circle_name in posts_result:
-        feed.append(build_post_response(post, author_name, circle_name))
+    post.title = post_data.title
+    post.content = post_data.content
 
-    return feed
+    await db.commit()
+    await db.refresh(post)
 
+    return build_post_response(
+        post,
+        current_user.username,
+        post.circle.name if post.circle else None)
 
 # ======================================================
 # CREATE POST
