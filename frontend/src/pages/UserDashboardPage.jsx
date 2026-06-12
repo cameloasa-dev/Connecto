@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { useAuth } from "../contexts/useAuth";
-import { useDashboardQuery } from "../hooks/useDashboardQuery";
+import { useDashboardQuery } from "../hooks/dashboard/useDashboardQuery";
 
 import CreateCircleModal from "../components/circles/CreateCircleModal";
 import CircleCard from "../components/circles/CircleCard";
