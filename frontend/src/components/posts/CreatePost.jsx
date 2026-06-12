@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useCreatePostMutation } from "../../hooks/useCreatePostMutation";
+import { useCreatePost } from "../../hooks/useCreatePostMutation";
 
 // eslint-disable-next-line react/prop-types
 const CreatePost = ({ onPostCreated, circles = [] }) => {
@@ -9,7 +9,7 @@ const CreatePost = ({ onPostCreated, circles = [] }) => {
     circle_id: null,
   });
 
-  const { mutate, isPending, error } = useCreatePostMutation();
+  const { mutate, isPending, error } = useCreatePost();
 
   const handleSubmit = (e) => {
     e.preventDefault();
