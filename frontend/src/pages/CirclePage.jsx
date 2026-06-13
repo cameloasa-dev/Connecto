@@ -4,7 +4,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/useAuth.js";
 import CreatePost from "../components/posts/CreatePost.jsx";
 import PostCard from "../components/posts/PostCard.jsx";
-import MemberManagement from "../components/circles/MemberManagement";
+import MemberManagement from "../components/members/MemberManagement.jsx";
 import CircleSettings from "../components/circles/CircleSettings";
 import { circleService } from "../services/circle.service";
 import { postService } from "../services/post.service";

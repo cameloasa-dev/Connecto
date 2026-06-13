@@ -1,4 +1,4 @@
-// frontend/src/components/circles/MemberManagement.jsx
+// frontend/src/components/members/MemberManagement.jsx
 import PropTypes from "prop-types";
 import { useState } from "react";
 import MemberRow from "./MemberRow";
