@@ -15,7 +15,7 @@ Node.js 20+
 
 npm 10+
 
-PostgreSQL 15+
+Sqlite
 
 Make
 
