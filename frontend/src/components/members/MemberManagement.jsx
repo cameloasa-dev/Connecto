@@ -1,8 +1,8 @@
 // frontend/src/components/circles/MemberManagement.jsx
 import PropTypes from "prop-types";
 import { useState } from "react";
-import MemberRow from "./MemberRow";
-import AddMemberModal from "./AddMemberModal";
+import MemberRow from "./members/MemberRow";
+import AddMemberModal from "./members/AddMemberModal";
 import { useCirclePermissions } from "../../hooks/circles/useCirclePermissions";
 import { useAddCircleMember } from "../../hooks/mutations/useCircleMemberMutations";
 import { useRemoveCircleMember } from "../../hooks/mutations/useCircleMemberMutations";
