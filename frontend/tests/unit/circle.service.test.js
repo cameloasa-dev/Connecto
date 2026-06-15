@@ -70,21 +70,32 @@ describe("circleService (unit)", () => {
   });
 
   // =========================
-  // UPDATE CIRCLE NAME
+  // UPDATE CIRCLE
   // =========================
-  describe("updateCircleName", () => {
-    it("updates circle name", async () => {
+  describe("updateCircle", () => {
+    it("updates circle name and description", async () => {
       api.put.mockResolvedValue({
-        data: { id: 1, name: "Updated" },
+        data: {
+          id: 1,
+          name: "Updated",
+          description: "New description",
+        },
       });
 
-      const result = await circleService.updateCircleName(1, "Updated");
-
-      expect(api.put).toHaveBeenCalledWith("/circles/1/name", {
+      const payload = {
         name: "Updated",
-      });
+        description: "New description",
+      };
 
-      expect(result).toEqual({ id: 1, name: "Updated" });
+      const result = await circleService.updateCircle(1, payload);
+
+      expect(api.put).toHaveBeenCalledWith("/circles/1", payload);
+
+      expect(result).toEqual({
+        id: 1,
+        name: "Updated",
+        description: "New description",
+      });
     });
   });
 
