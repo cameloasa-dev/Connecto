@@ -45,15 +45,27 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 # -----------------------------
 # INITIALIZE APP
 # -----------------------------
-app = FastAPI(
-    title=settings.PROJECT_NAME,
-    version=settings.VERSION,
-    description="Connecto API (FastAPI + SQLite)",
-    lifespan=lifespan,
-    docs_url="/docs",
-    redoc_url="/redoc",
-    openapi_url="/openapi.json",
-)
+if settings.ENVIRONMENT == "production":
+    app = FastAPI(
+        title=settings.PROJECT_NAME,
+        version=settings.VERSION,
+        description="Connecto API (FastAPI + SQLite)",
+        lifespan=lifespan,
+        docs_url=None,
+        redoc_url=None,
+        openapi_url=None,
+    )
+else:
+    app = FastAPI(
+        title=settings.PROJECT_NAME,
+        version=settings.VERSION,
+        description="Connecto API (FastAPI + SQLite)",
+        lifespan=lifespan,
+        docs_url="/docs",
+        redoc_url="/redoc",
+        openapi_url="/openapi.json",
+    )
+
 
 app.state.limiter = limiter
 

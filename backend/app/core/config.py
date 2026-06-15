@@ -3,7 +3,11 @@ Application configuration
 Environment variables and settings management
 """
 
+import os
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+ENV = os.getenv("ENVIRONMENT", "development")
 
 
 class Settings(BaseSettings):
@@ -12,7 +16,7 @@ class Settings(BaseSettings):
     """
 
     model_config = SettingsConfigDict(
-        env_file=".env.development",  # Load from .env.development by default
+        env_file=f".env.{ENV}",  # Load from .env.development by default
         env_ignore_empty=True,
         extra="ignore",
     )
@@ -42,9 +46,9 @@ class Settings(BaseSettings):
     # CORS
     ALLOWED_ORIGINS: list[str] = [
         "http://localhost:3000",  # dev
-        # "https://connecto.vercel.app",  # production (exemplu)
-        # "https://connecto.netlify.app", # production (exemplu)
-        # "https://connecto.se",          # production (domeniu propriu)
+        # "https://connecto.vercel.app",  # production (exemple)
+        # "https://connecto.netlify.app", # production (exemple)
+        # "https://connecto.se",          # production (my domain, but not live yet)
     ]
 
     # Environment

@@ -15,9 +15,16 @@ class SecurityHeadersMiddleware:
         self.app = app
 
     async def __call__(self, scope: Scope, receive: Receive, send: Send) -> None:
+        path: str = scope.get("path", "")
 
         async def send_wrapper(message: dict[str, Any]) -> None:
             if message.get("type") == "http.response.start":
+
+                # Skip CSP for Swagger / ReDoc / OpenAPI
+                if path.startswith("/docs") or path.startswith("/redoc") or path.startswith("/openapi"):
+                    await send(message)
+                    return
+
                 headers = message.setdefault("headers", [])
 
                 # Basic security headers
