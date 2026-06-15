@@ -1,6 +1,6 @@
 //frontend/src/components/posts/PostActions.jsx
-import React from 'react';
-import propTypes from 'prop-types';
+import React from "react";
+import propTypes from "prop-types";
 
 const PostActions = ({ onLike, onComment, onShare }) => {
   return (
@@ -19,7 +19,6 @@ const PostActions = ({ onLike, onComment, onShare }) => {
     </div>
   );
 };
-
 
 PostActions.propTypes = {
   onLike: propTypes.func,

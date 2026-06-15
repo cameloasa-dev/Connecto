@@ -18,16 +18,10 @@ const PostCard = ({ post }) => {
       <h4>{post.title}</h4>
       <p>{post.content}</p>
 
-      <PostActions
-        onEdit={() => setIsEditing(true)}
-        onDelete={handleDelete}
-      />
+      <PostActions onEdit={() => setIsEditing(true)} onDelete={handleDelete} />
 
       {isEditing && (
-        <PostSettingsModal
-          post={post}
-          onClose={() => setIsEditing(false)}
-        />
+        <PostSettingsModal post={post} onClose={() => setIsEditing(false)} />
       )}
     </div>
   );
