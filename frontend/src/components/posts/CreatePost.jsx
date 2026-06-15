@@ -46,9 +46,7 @@ const CreatePost = ({ onPostCreated, circles = [] }) => {
           type="text"
           placeholder="Post title"
           value={formData.title}
-          onChange={(e) =>
-            setFormData({ ...formData, title: e.target.value })
-          }
+          onChange={(e) => setFormData({ ...formData, title: e.target.value })}
           required
           disabled={isPending}
         />
@@ -100,7 +98,7 @@ CreatePost.propTypes = {
     propTypes.shape({
       id: propTypes.number.isRequired,
       name: propTypes.string.isRequired,
-    })
+    }),
   ),
 };
 

@@ -22,12 +22,12 @@ function App() {
           <Routes>
             {/* Public routes */}
             <Route index element={<LoginPage />} />
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/register" element={<RegisterPage />} />
+            <Route path="login" element={<LoginPage />} />
+            <Route path="register" element={<RegisterPage />} />
 
             {/* Protected routes */}
             <Route
-              path="/user-dashboard"
+              path="user-dashboard"
               element={
                 <ProtectedRoute>
                   <Layout>
@@ -38,7 +38,7 @@ function App() {
             />
 
             <Route
-              path="/circles/:circleId"
+              path="circles/:circleId"
               element={
                 <ProtectedRoute>
                   <Layout>
@@ -49,7 +49,7 @@ function App() {
             />
 
             <Route
-              path="/search"
+              path="search"
               element={
                 <ProtectedRoute>
                   <Layout>
@@ -61,13 +61,13 @@ function App() {
 
             {/* Commented out until pages are created */}
             {/* 
-          <Route path="/settings" element={
+          <Route path="settings" element={
             <ProtectedRoute>
               <SettingsPage />
             </ProtectedRoute>
           } />
           
-          <Route path="/help" element={
+          <Route path="help" element={
             <ProtectedRoute>
               <HelpPage />
             </ProtectedRoute>

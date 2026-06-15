@@ -8,11 +8,7 @@ const PostSettingsModal = ({ post, onClose }) => {
       <div className="modal">
         <h3>Edit Post</h3>
 
-        <PostEditor
-          post={post}
-          onSuccess={onClose}
-          onCancel={onClose}
-        />
+        <PostEditor post={post} onSuccess={onClose} onCancel={onClose} />
       </div>
     </div>
   );

@@ -10,8 +10,7 @@ const MemberRow = ({ member, circle, onRoleChange, onRemove }) => {
 
   const isOwner = member.role === "owner";
 
-  const canManage =
-    canManageMembers && member.role !== "owner";
+  const canManage = canManageMembers && member.role !== "owner";
 
   const handleRoleChange = async (newRole) => {
     try {
@@ -23,9 +22,7 @@ const MemberRow = ({ member, circle, onRoleChange, onRemove }) => {
   };
 
   const handleRemove = async () => {
-    const confirmed = window.confirm(
-      `Remove ${member.username} from circle?`
-    );
+    const confirmed = window.confirm(`Remove ${member.username} from circle?`);
 
     if (!confirmed) return;
 

@@ -11,21 +11,21 @@ const PostEditor = ({ post, onSuccess, onCancel }) => {
 
   const handleSave = async () => {
     try {
-    if (title === post.title && content === post.content) {
-      onCancel();
-      return;
+      if (title === post.title && content === post.content) {
+        onCancel();
+        return;
+      }
+
+      await updatePost({
+        postId: post.id,
+        data: { title, content },
+      });
+
+      onSuccess();
+    } catch (err) {
+      console.error("Failed to update post:", err);
     }
-
-    await updatePost({
-      postId: post.id,
-      data: { title, content },
-    });
-
-    onSuccess();
-  } catch (err) {
-    console.error("Failed to update post:", err);
-  }
-};
+  };
   return (
     <div className="post-editor">
       <input

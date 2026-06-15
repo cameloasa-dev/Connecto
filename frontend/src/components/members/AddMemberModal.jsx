@@ -38,9 +38,7 @@ const AddMemberModal = ({ isOpen, onClose, circleId, onMemberAdded }) => {
           onMemberAdded(newMember);
 
           // remove user from search results
-          setSearchResults((prev) =>
-            prev.filter((user) => user.id !== userId),
-          );
+          setSearchResults((prev) => prev.filter((user) => user.id !== userId));
         },
       },
     );
@@ -78,36 +76,34 @@ const AddMemberModal = ({ isOpen, onClose, circleId, onMemberAdded }) => {
           </div>
 
           <div className="search-results">
-            {searchResults.length > 0 ? (
-              searchResults.map((user) => (
-                <div key={user.id} className="user-result">
-                  <div className="user-info">
-                    <span className="user-avatar">
-                      {user.username.charAt(0).toUpperCase()}
-                    </span>
-                    <div>
-                      <div className="user-name">{user.username}</div>
-                      <div className="user-email">{user.email}</div>
+            {searchResults.length > 0
+              ? searchResults.map((user) => (
+                  <div key={user.id} className="user-result">
+                    <div className="user-info">
+                      <span className="user-avatar">
+                        {user.username.charAt(0).toUpperCase()}
+                      </span>
+                      <div>
+                        <div className="user-name">{user.username}</div>
+                        <div className="user-email">{user.email}</div>
+                      </div>
                     </div>
-                  </div>
 
-                  <button
-                    onClick={() => handleAddMember(user.id)}
-                    disabled={isAdding}
-                    className="add-btn"
-                  >
-                    {isAdding ? "Adding..." : "Add"}
-                  </button>
-                </div>
-              ))
-            ) : (
-              searchQuery &&
-              !isSearching && (
-                <p className="no-results">
-                  No users found matching &quot;{searchQuery}&quot;
-                </p>
-              )
-            )}
+                    <button
+                      onClick={() => handleAddMember(user.id)}
+                      disabled={isAdding}
+                      className="add-btn"
+                    >
+                      {isAdding ? "Adding..." : "Add"}
+                    </button>
+                  </div>
+                ))
+              : searchQuery &&
+                !isSearching && (
+                  <p className="no-results">
+                    No users found matching &quot;{searchQuery}&quot;
+                  </p>
+                )}
           </div>
         </div>
       </div>

@@ -51,7 +51,7 @@ const PostSettings = ({ post }) => {
 
 PostSettings.propTypes = {
   post: propTypes.shape({
-    id: propTypes.string.isRequired,    
+    id: propTypes.string.isRequired,
     title: propTypes.string.isRequired,
     content: propTypes.string.isRequired,
   }).isRequired,
