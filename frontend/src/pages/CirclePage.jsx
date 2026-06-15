@@ -1,4 +1,3 @@
-// frontend/src/pages/CirclePage.jsx
 import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/useAuth.js";
@@ -6,28 +5,24 @@ import { useAuth } from "../contexts/useAuth.js";
 import PostCard from "../components/posts/PostCard.jsx";
 import CreatePost from "../components/posts/CreatePost.jsx";
 
+import CircleMemberManager from "../components/members/CircleMemberManager.jsx";
+
 import { useCircle } from "../hooks/circles/useCircle";
 import { useCirclePosts } from "../hooks/posts/useCirclePosts";
 
 import "./CirclePage.css";
 
 function CirclePage() {
-  const circleId = Number(useParams().circleId);
+  const { circleId } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
 
   const [showCreatePost, setShowCreatePost] = useState(false);
   const [activeTab, setActiveTab] = useState("posts");
 
-  // ======================
-  // DATA (HOOKS ONLY)
-  // ======================
-  const { data: circle, isLoading, error } = useCircle(circleId);
-  const { data: posts = [] } = useCirclePosts(circleId);
+  const { data: circle, isLoading, error } = useCircle(Number(circleId));
+  const { data: posts = [] } = useCirclePosts(Number(circleId));
 
-  // ======================
-  // LOADING / ERROR
-  // ======================
   if (isLoading) {
     return <div className="loading-spinner">Loading circle...</div>;
   }
@@ -50,16 +45,16 @@ function CirclePage() {
 
   if (!circle) return null;
 
-  // ======================
-  // ROLE LOGIC
-  // ======================
-  const currentUserMember = circle.members?.find((m) => m.user_id === user?.id);
+  const currentMember = circle.members?.find(
+    (m) => m.user_id === user?.id
+  );
 
-  const isOwner = currentUserMember?.role === "owner";
-  const isModerator = currentUserMember?.role === "moderator";
+  const isOwner = currentMember?.role === "owner";
+  const isModerator = currentMember?.role === "moderator";
 
   return (
     <div className="circle-page">
+
       {/* HEADER */}
       <div className="circle-header">
         <button
@@ -73,7 +68,7 @@ function CirclePage() {
 
         <div className="circle-badge">
           {isOwner && "👑 Owner"}
-          {isModerator && "🛡️ Moderator"}
+          {!isOwner && isModerator && "🛡️ Moderator"}
         </div>
 
         <p>{circle.description || "No description"}</p>
@@ -90,6 +85,11 @@ function CirclePage() {
           {showCreatePost ? "Cancel" : "+ Create Post"}
         </button>
       </div>
+
+      {/* CREATE POST */}
+      {showCreatePost && (
+        <CreatePost circles={[circle]} />
+      )}
 
       {/* TABS */}
       <div className="circle-tabs">
@@ -110,21 +110,25 @@ function CirclePage() {
 
       {/* CONTENT */}
       <div className="tab-content">
+
+        {/* POSTS */}
         {activeTab === "posts" && (
           <div className="posts-section">
             {posts.length === 0 ? (
               <p>No posts yet</p>
             ) : (
-              posts.map((post) => <PostCard key={post.id} post={post} />)
+              posts.map((post) => (
+                <PostCard key={post.id} post={post} />
+              ))
             )}
           </div>
         )}
 
+        {/* MEMBERS */}
         {activeTab === "members" && (
-          <div className="members-section">
-            <p>Members feature will stay unchanged for now</p>
-          </div>
+          <CircleMemberManager circle={circle} />
         )}
+
       </div>
 
       {/* DEBUG */}
