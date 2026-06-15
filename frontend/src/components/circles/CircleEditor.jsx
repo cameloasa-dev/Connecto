@@ -1,42 +1,42 @@
 //frontend/src/components/posts/PostEditor.jsx
 import { useState } from "react";
 import propTypes from "prop-types";
-import { useUpdatePost } from "../../hooks/mutations/usePostMutations";
+import { useUpdateCircle } from "../../hooks/mutations/useCircleMutations";
 
-const PostEditor = ({ post, onSuccess, onCancel }) => {
-  const [title, setTitle] = useState(post.title);
-  const [content, setContent] = useState(post.content);
+const CircleEditor = ({ circle, onSuccess, onCancel }) => {
+  const [name, setName] = useState(circle.name);
+  const [description, setDescription] = useState(circle.description);
 
-  const { mutateAsync: updatePost, isPending } = useUpdatePost();
+  const { mutateAsync: updateCircle, isPending } = useUpdateCircle();
 
   const handleSave = async () => {
     try {
-      if (title === post.title && content === post.content) {
+      if (name === circle.name && description === circle.description) {
         onCancel();
         return;
       }
 
-      await updatePost({
-        postId: post.id,
-        postData: { title, content },
+      await updateCircle({
+        circleId: circle.id,
+        circleData: { name, description },
       });
 
       onSuccess();
     } catch (err) {
-      console.error("Failed to update post:", err);
+      console.error("Failed to update circle:", err);
     }
   };
   return (
     <div className="post-editor">
       <input
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
+        value={name}
+        onChange={(e) => setName(e.target.value)}
         disabled={isPending}
       />
 
       <textarea
-        value={content}
-        onChange={(e) => setContent(e.target.value)}
+        value={description}
+        onChange={(e) => setDescription(e.target.value)}
         disabled={isPending}
       />
 
@@ -61,14 +61,14 @@ const PostEditor = ({ post, onSuccess, onCancel }) => {
   );
 };
 
-PostEditor.propTypes = {
-  post: propTypes.shape({
+CircleEditor.propTypes = {
+  circle: propTypes.shape({
     id: propTypes.number.isRequired,
-    title: propTypes.string.isRequired,
-    content: propTypes.string.isRequired,
+    name: propTypes.string.isRequired,
+    description: propTypes.string.isRequired,
   }).isRequired,
   onSuccess: propTypes.func.isRequired,
   onCancel: propTypes.func.isRequired,
 };
 
-export default PostEditor;
+export default CircleEditor;

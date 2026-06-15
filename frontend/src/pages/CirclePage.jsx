@@ -1,13 +1,14 @@
 // frontend/src/pages/CirclePage.jsx
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/useAuth.js";
-import CreatePost from "../components/posts/CreatePost.jsx";
+
 import PostCard from "../components/posts/PostCard.jsx";
-import MemberManagement from "../components/members/MemberManagement.jsx";
-import CircleSettings from "../components/circles/CircleSettings";
-import { circleService } from "../services/circle.service";
-import { postService } from "../services/post.service";
+import CreatePost from "../components/posts/CreatePost.jsx";
+
+import { useCircle } from "../hooks/circles/useCircle";
+import { useCirclePosts } from "../hooks/posts/useCirclePosts";
+
 import "./CirclePage.css";
 
 function CirclePage() {
@@ -15,89 +16,19 @@ function CirclePage() {
   const navigate = useNavigate();
   const { user } = useAuth();
 
-  const [circle, setCircle] = useState(null);
-  const [posts, setPosts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
   const [showCreatePost, setShowCreatePost] = useState(false);
   const [activeTab, setActiveTab] = useState("posts");
 
-  // Load circle data
-  useEffect(() => {
-    const fetchCircleData = async () => {
-      try {
-        setLoading(true);
-        setError("");
+  // ======================
+  // DATA (HOOKS ONLY)
+  // ======================
+  const { data: circle, isLoading, error } = useCircle(circleId);
+  const { data: posts = [] } = useCirclePosts(circleId);
 
-        const [circleData, postsData] = await Promise.all([
-          circleService.getCircle(circleId),
-          postService.getCirclePosts(circleId),
-        ]);
-
-        setCircle(circleData);
-        setPosts(postsData || []);
-      } catch (err) {
-        console.error("Failed to load circle:", err);
-        if (err.response?.status === 403) {
-          setError("You are not a member of this circle");
-        } else if (err.response?.status === 404) {
-          setError("Circle not found");
-        } else {
-          setError("Failed to load circle data");
-        }
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchCircleData();
-  }, [circleId]);
-
-  const handlePostCreated = (newPost) => {
-    setPosts([newPost, ...posts]);
-    setShowCreatePost(false);
-  };
-
-  const handleMemberUpdated = (updatedData) => {
-    if (updatedData.type === "remove") {
-      setCircle((prev) => ({
-        ...prev,
-        members: prev.members.filter((m) => m.user_id !== updatedData.userId),
-        member_count: prev.member_count - 1,
-      }));
-    } else if (updatedData.member) {
-      setCircle((prev) => {
-        const existingIndex = prev.members.findIndex(
-          (m) => m.user_id === updatedData.member.user_id,
-        );
-
-        if (existingIndex >= 0) {
-          const newMembers = [...prev.members];
-          newMembers[existingIndex] = updatedData.member;
-          return { ...prev, members: newMembers };
-        } else {
-          return {
-            ...prev,
-            members: [...prev.members, updatedData.member],
-            member_count: prev.member_count + 1,
-          };
-        }
-      });
-    }
-  };
-
-  const handleCircleUpdated = (updatedCircle) => {
-    setCircle(updatedCircle);
-  };
-
-  const currentUserRole = circle?.members?.find(
-    (m) => m.user_id === user?.id,
-  )?.role;
-  const isOwner = currentUserRole === "owner";
-  const isModerator = currentUserRole === "moderator";
-  const canChangeSettings = isOwner;
-
-  if (loading) {
+  // ======================
+  // LOADING / ERROR
+  // ======================
+  if (isLoading) {
     return <div className="loading-spinner">Loading circle...</div>;
   }
 
@@ -105,7 +36,8 @@ function CirclePage() {
     return (
       <div className="error-container">
         <h2>Error</h2>
-        <p>{error}</p>
+        <p>Failed to load circle</p>
+
         <button
           className="primary-btn"
           onClick={() => navigate("/user-dashboard")}
@@ -118,124 +50,87 @@ function CirclePage() {
 
   if (!circle) return null;
 
+  // ======================
+  // ROLE LOGIC
+  // ======================
+  const currentUserMember = circle.members?.find((m) => m.user_id === user?.id);
+
+  const isOwner = currentUserMember?.role === "owner";
+  const isModerator = currentUserMember?.role === "moderator";
+
   return (
     <div className="circle-page">
-      {/* Circle Header */}
+      {/* HEADER */}
       <div className="circle-header">
-        <div className="circle-header-content">
-          <button
-            className="back-btn"
-            onClick={() => navigate("/user-dashboard")}
-          >
-            ← Back to Dashboard
-          </button>
+        <button
+          className="back-btn"
+          onClick={() => navigate("/user-dashboard")}
+        >
+          ← Back
+        </button>
 
-          <div className="circle-title-section">
-            <h1>{circle.name}</h1>
-            <div className="circle-badge">
-              {isOwner && "👑 Owner"}
-              {isModerator && "🛡️ Moderator"}
-            </div>
-          </div>
+        <h1>{circle.name}</h1>
 
-          <p className="circle-description">
-            {circle.description || "No description"}
-          </p>
-
-          <div className="circle-stats">
-            <div className="stat">
-              <span className="stat-value">{circle.member_count}</span>
-              <span className="stat-label">Members</span>
-            </div>
-            <div className="stat">
-              <span className="stat-value">{posts.length}</span>
-              <span className="stat-label">Posts</span>
-            </div>
-            <div className="stat">
-              <span className="stat-value">📅</span>
-              <span className="stat-label">
-                Created {new Date(circle.created_at).toLocaleDateString()}
-              </span>
-            </div>
-          </div>
-
-          <div className="circle-actions">
-            <button
-              className="primary-btn"
-              onClick={() => setShowCreatePost(!showCreatePost)}
-            >
-              {showCreatePost ? "Cancel" : "+ Create Post"}
-            </button>
-          </div>
-
-          {showCreatePost && (
-            <div className="create-post-section">
-              <CreatePost
-                onPostCreated={handlePostCreated}
-                circles={[circle]}
-                selectedCircleId={circle.id}
-              />
-            </div>
-          )}
+        <div className="circle-badge">
+          {isOwner && "👑 Owner"}
+          {isModerator && "🛡️ Moderator"}
         </div>
+
+        <p>{circle.description || "No description"}</p>
+
+        <div className="circle-stats">
+          <span>Members: {circle.member_count}</span>
+          <span>Posts: {posts.length}</span>
+        </div>
+
+        <button
+          className="primary-btn"
+          onClick={() => setShowCreatePost((v) => !v)}
+        >
+          {showCreatePost ? "Cancel" : "+ Create Post"}
+        </button>
       </div>
 
+      {/* TABS */}
       <div className="circle-tabs">
         <button
-          className={`tab ${activeTab === "posts" ? "active" : ""}`}
+          className={activeTab === "posts" ? "active tab" : "tab"}
           onClick={() => setActiveTab("posts")}
         >
-          Posts ({posts.length})
+          Posts
         </button>
+
         <button
-          className={`tab ${activeTab === "members" ? "active" : ""}`}
+          className={activeTab === "members" ? "active tab" : "tab"}
           onClick={() => setActiveTab("members")}
         >
-          Members ({circle.member_count})
+          Members
         </button>
       </div>
 
+      {/* CONTENT */}
       <div className="tab-content">
         {activeTab === "posts" && (
           <div className="posts-section">
-            {posts.length > 0 ? (
-              posts.map((post) => <PostCard key={post.id} post={post} />)
+            {posts.length === 0 ? (
+              <p>No posts yet</p>
             ) : (
-              <div className="empty-state">
-                <p>No posts in this circle yet.</p>
-                <button
-                  className="primary-btn"
-                  onClick={() => setShowCreatePost(true)}
-                >
-                  Create First Post
-                </button>
-              </div>
+              posts.map((post) => <PostCard key={post.id} post={post} />)
             )}
           </div>
         )}
 
         {activeTab === "members" && (
           <div className="members-section">
-            <MemberManagement
-              circle={circle}
-              members={circle.members || []}
-              onMemberUpdated={handleMemberUpdated}
-              currentUserId={user?.id}
-            />
-
-            {canChangeSettings && (
-              <CircleSettings
-                circle={circle}
-                onCircleUpdated={handleCircleUpdated}
-              />
-            )}
+            <p>Members feature will stay unchanged for now</p>
           </div>
         )}
       </div>
 
+      {/* DEBUG */}
       {import.meta.env.DEV && (
         <details className="debug-info">
-          <summary>Debug: Circle Data</summary>
+          <summary>Debug: Raw Data</summary>
           <pre>{JSON.stringify(circle, null, 2)}</pre>
         </details>
       )}

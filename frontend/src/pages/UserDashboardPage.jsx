@@ -4,10 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/useAuth";
 import { useDashboardQuery } from "../hooks/dashboard/useDashboardQuery";
 
-import CreateCircleModal from "../components/circles/CreateCircleModal";
 import CircleCard from "../components/circles/CircleCard";
-
-// POSTS (refactor curat)
 import CreatePost from "../components/posts/CreatePost";
 import PostList from "../components/posts/PostList";
 
@@ -17,8 +14,9 @@ function UserDashboardPage() {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
 
-  const [isCreateCircleModalOpen, setIsCreateCircleModalOpen] = useState(false);
   const [showCreatePost, setShowCreatePost] = useState(false);
+
+  const { data: dashboard, isLoading, error } = useDashboardQuery();
 
   useEffect(() => {
     if (!authLoading && !user) {
@@ -26,48 +24,41 @@ function UserDashboardPage() {
     }
   }, [authLoading, user, navigate]);
 
-  const { data: dashboard, isLoading, error } = useDashboardQuery();
-
-  if (authLoading) {
+  if (authLoading || isLoading) {
     return <div className="loading-spinner">Loading...</div>;
   }
 
-  if (!user) {
-    return null;
-  }
-
-  if (isLoading) {
-    return <div className="loading-spinner">Loading dashboard data...</div>;
-  }
+  if (!user) return null;
 
   if (error) {
-    return <div className="error-message">Failed to load dashboard data</div>;
+    return <div className="error-message">Failed to load dashboard</div>;
   }
 
   const circles = dashboard?.circles ?? [];
-  const posts = dashboard?.feed ?? []; // IMPORTANT: feed contains recent posts from all circles the user is part of
+  const posts = dashboard?.feed ?? [];
 
   return (
-    <>
+    <div className="dashboard">
+      {/* HEADER */}
       <div className="welcome-section">
-        <h1>Welcome back, {user.full_name || user.username}! 👋</h1>
-        <p>Here&apos;s what&apos;s happening in your circles.</p>
+        <h1>Welcome back, {user.full_name || user.username} 👋</h1>
+        <p>Your circles and activity overview</p>
       </div>
 
       {/* ACTIONS */}
       <div className="action-buttons">
         <button
           className="primary-btn"
-          onClick={() => setIsCreateCircleModalOpen(true)}
+          onClick={() => navigate("/circles/create")}
         >
-          + Create New Circle
+          + Create Circle
         </button>
 
         <button
           className="secondary-btn"
-          onClick={() => setShowCreatePost((prev) => !prev)}
+          onClick={() => setShowCreatePost((v) => !v)}
         >
-          {showCreatePost ? "Hide" : "Create New Post"}
+          {showCreatePost ? "Hide Post Creator" : "Create Post"}
         </button>
       </div>
 
@@ -78,13 +69,11 @@ function UserDashboardPage() {
         </div>
       )}
 
-      {/* CIRCLES (nemodificat) */}
+      {/* CIRCLES */}
       <section className="circles-section">
-        <div className="section-header">
-          <h2>Your Circles</h2>
-        </div>
+        <h2>Your Circles</h2>
 
-        {circles.length > 0 ? (
+        {circles.length ? (
           <div className="circles-grid">
             {circles.map((circle) => (
               <CircleCard
@@ -96,34 +85,28 @@ function UserDashboardPage() {
           </div>
         ) : (
           <div className="empty-state">
-            <p>You haven&apos;t joined any circles yet.</p>
+            <p>You are not part of any circles yet.</p>
 
             <button
               className="primary-btn"
-              onClick={() => setIsCreateCircleModalOpen(true)}
+              onClick={() => navigate("/circles/create")}
             >
-              Create Your First Circle
+              Create your first circle
             </button>
           </div>
         )}
       </section>
 
-      {/* POSTS FEED (REFACUTAT) */}
+      {/* FEED */}
       <section className="feed-section">
         <h2>Recent Activity</h2>
 
-        {posts.length > 0 ? (
+        {posts.length ? (
           <PostList posts={posts} />
         ) : (
-          <p className="empty-message">
-            No recent posts in your circles.
-            <button
-              className="link-btn"
-              onClick={() => setShowCreatePost(true)}
-            >
-              Create one now!
-            </button>
-          </p>
+          <div className="empty-state">
+            <p>No recent activity.</p>
+          </div>
         )}
       </section>
 
@@ -134,12 +117,7 @@ function UserDashboardPage() {
           <pre>{JSON.stringify(dashboard, null, 2)}</pre>
         </details>
       )}
-
-      <CreateCircleModal
-        isOpen={isCreateCircleModalOpen}
-        onClose={() => setIsCreateCircleModalOpen(false)}
-      />
-    </>
+    </div>
   );
 }
 

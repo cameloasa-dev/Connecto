@@ -21,25 +21,19 @@ export const useCreateCircle = () => {
   });
 };
 
-export const useUpdateCircleName = () => {
+export const useUpdateCircle = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ circleId, name }) =>
-      circleService.updateCircleName(circleId, name),
+    mutationFn: ({ circleId, circleData }) =>
+      circleService.updateCircle(circleId, circleData),
 
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({
-        queryKey: ["circle"],
+        queryKey: ["circle", variables.circleId],
       });
-
-      queryClient.invalidateQueries({
-        queryKey: ["myCircles"],
-      });
-
-      queryClient.invalidateQueries({
-        queryKey: ["dashboard"],
-      });
+      queryClient.invalidateQueries({ queryKey: ["myCircles"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
     },
   });
 };
