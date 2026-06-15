@@ -1,7 +1,7 @@
 import api from "./api";
 
 export const searchService = {
-  async search(query) {
+  async searchGlobal(query) {
     const res = await api.get("/search", {
       params: {
         q: query,

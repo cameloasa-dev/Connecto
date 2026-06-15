@@ -5,6 +5,8 @@ import { useAuth } from "../contexts/useAuth";
 import { useDashboardQuery } from "../hooks/dashboard/useDashboardQuery";
 
 import CircleCard from "../components/circles/CircleCard";
+import CreateCircle from "../components/circles/CreateCircle";
+
 import CreatePost from "../components/posts/CreatePost";
 import PostList from "../components/posts/PostList";
 
@@ -14,6 +16,7 @@ function UserDashboardPage() {
   const { user, loading: authLoading } = useAuth();
   const navigate = useNavigate();
 
+  const [showCreateCircle, setShowCreateCircle] = useState(false);
   const [showCreatePost, setShowCreatePost] = useState(false);
 
   const { data: dashboard, isLoading, error } = useDashboardQuery();
@@ -49,9 +52,9 @@ function UserDashboardPage() {
       <div className="action-buttons">
         <button
           className="primary-btn"
-          onClick={() => navigate("/circles/create")}
+          onClick={() => setShowCreateCircle((v) => !v)}
         >
-          + Create Circle
+          {showCreateCircle ? "Cancel" : "+ Create Circle"}
         </button>
 
         <button
@@ -61,6 +64,19 @@ function UserDashboardPage() {
           {showCreatePost ? "Hide Post Creator" : "Create Post"}
         </button>
       </div>
+
+      {/* CREATE CIRCLE */}
+
+      {showCreateCircle && (
+        <div className="create-circle-section">
+          <CreateCircle
+            onCircleCreated={() => {
+              setShowCreateCircle(false);
+              // optional: invalidate dashboard query
+            }}
+          />
+        </div>
+      )}
 
       {/* CREATE POST */}
       {showCreatePost && (
