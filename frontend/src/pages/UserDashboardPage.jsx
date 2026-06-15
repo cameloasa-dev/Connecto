@@ -1,5 +1,3 @@
-// frontend/src/pages/UserDashboardPage.jsx
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -8,8 +6,10 @@ import { useDashboardQuery } from "../hooks/dashboard/useDashboardQuery";
 
 import CreateCircleModal from "../components/circles/CreateCircleModal";
 import CircleCard from "../components/circles/CircleCard";
+
+// POSTS (refactor curat)
 import CreatePost from "../components/posts/CreatePost";
-import PostCard from "../components/posts/PostCard";
+import PostList from "../components/posts/PostList";
 
 import "./UserDashboardPage.css";
 
@@ -18,7 +18,6 @@ function UserDashboardPage() {
   const navigate = useNavigate();
 
   const [isCreateCircleModalOpen, setIsCreateCircleModalOpen] = useState(false);
-
   const [showCreatePost, setShowCreatePost] = useState(false);
 
   useEffect(() => {
@@ -46,7 +45,7 @@ function UserDashboardPage() {
   }
 
   const circles = dashboard?.circles ?? [];
-  const posts = dashboard?.posts ?? [];
+  const posts = dashboard?.feed ?? []; // IMPORTANT: feed contains recent posts from all circles the user is part of
 
   return (
     <>
@@ -55,23 +54,7 @@ function UserDashboardPage() {
         <p>Here&apos;s what&apos;s happening in your circles.</p>
       </div>
 
-      <div className="stats-grid">
-        <div className="stat-card">
-          <h3>Your Circles</h3>
-          <p className="stat-number">{dashboard.circlesCount}</p>
-        </div>
-
-        <div className="stat-card">
-          <h3>Recent Posts</h3>
-          <p className="stat-number">{dashboard.postsCount}</p>
-        </div>
-
-        <div className="stat-card">
-          <h3>Notifications</h3>
-          <p className="stat-number">{dashboard.notificationsCount}</p>
-        </div>
-      </div>
-
+      {/* ACTIONS */}
       <div className="action-buttons">
         <button
           className="primary-btn"
@@ -88,12 +71,14 @@ function UserDashboardPage() {
         </button>
       </div>
 
+      {/* CREATE POST */}
       {showCreatePost && (
         <div className="create-post-section">
           <CreatePost circles={circles} />
         </div>
       )}
 
+      {/* CIRCLES (nemodificat) */}
       <section className="circles-section">
         <div className="section-header">
           <h2>Your Circles</h2>
@@ -123,15 +108,12 @@ function UserDashboardPage() {
         )}
       </section>
 
+      {/* POSTS FEED (REFACUTAT) */}
       <section className="feed-section">
         <h2>Recent Activity</h2>
 
         {posts.length > 0 ? (
-          <div className="posts-feed">
-            {posts.map((post) => (
-              <PostCard key={post.id} post={post} showCircle />
-            ))}
-          </div>
+          <PostList posts={posts} />
         ) : (
           <p className="empty-message">
             No recent posts in your circles.
@@ -145,6 +127,7 @@ function UserDashboardPage() {
         )}
       </section>
 
+      {/* DEBUG */}
       {import.meta.env.DEV && (
         <details className="debug-info">
           <summary>Debug: Raw Data</summary>

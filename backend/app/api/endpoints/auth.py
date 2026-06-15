@@ -182,6 +182,9 @@ async def get_current_user_from_session(
     return user
 
 
+# =========================================================
+# Me
+# =========================================================
 @router.get("/me", response_model=UserResponse)
 async def get_current_user_endpoint(
     current_user: User = Depends(get_current_user_from_session),

@@ -18,7 +18,7 @@ const PostEditor = ({ post, onSuccess, onCancel }) => {
 
       await updatePost({
         postId: post.id,
-        data: { title, content },
+        postData: { title, content },
       });
 
       onSuccess();

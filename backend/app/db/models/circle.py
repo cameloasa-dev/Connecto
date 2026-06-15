@@ -22,12 +22,20 @@ class Circle(Base):
         DateTime(), server_default=func.now(), nullable=False
     )
 
-    owner = relationship("User", back_populates="owned_circles")
+    owner = relationship("User", back_populates="owned_circles", lazy="selectin")
     members = relationship(
-        "CircleMember", back_populates="circle", cascade="all, delete-orphan", passive_deletes=True
+        "CircleMember",
+        back_populates="circle",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+        lazy="selectin",
     )
     posts = relationship(
-        "Post", back_populates="circle", cascade="all, delete-orphan", passive_deletes=True
+        "Post",
+        back_populates="circle",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+        lazy="selectin",
     )
 
 

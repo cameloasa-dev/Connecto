@@ -2,7 +2,7 @@
 import PostCard from "./PostCard";
 import propTypes from "prop-types";
 
-const PostList = ({ posts = [], showCircle = false }) => {
+const PostList = ({ posts = [] }) => {
   if (!posts.length) {
     return <p className="empty-message">No posts yet.</p>;
   }
@@ -10,7 +10,7 @@ const PostList = ({ posts = [], showCircle = false }) => {
   return (
     <div className="posts-feed">
       {posts.map((post) => (
-        <PostCard key={post.id} post={post} showCircle={showCircle} />
+        <PostCard key={post.id} post={post} />
       ))}
     </div>
   );
@@ -24,7 +24,6 @@ PostList.propTypes = {
       content: propTypes.string.isRequired,
     }),
   ).isRequired,
-  showCircle: propTypes.bool,
 };
 
 export default PostList;
