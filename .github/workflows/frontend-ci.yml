@@ -2,11 +2,12 @@ name: Frontend CI
 
 on:
   pull_request:
-    paths:
-      - "frontend/**"
+    branches:
+      - main
   push:
     branches:
       - main
+  workflow_dispatch:
 
 jobs:
   frontend-ci:
@@ -39,6 +40,6 @@ jobs:
       - name: 🧪 Run frontend tests
         run: make test-frontend
 
-      #- name: Build frontend
-      #  run: npm run build
-      #  working-directory: frontend
+      - name: Build frontend
+        run: npm run build
+        working-directory: frontend
