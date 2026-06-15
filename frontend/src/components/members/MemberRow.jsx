@@ -1,18 +1,18 @@
-import propTypes from "prop-types";
+//frontend/src/components/members/MemberRow
 import { useState } from "react";
-import { useCirclePermissions } from "../../hooks/circles/useCirclePermissions";
+import PropTypes from "prop-types";
+
 import "./MemberRow.css";
 
-const MemberRow = ({ member, circle, onRoleChange, onRemove }) => {
+const MemberRow = ({ member, canManageMembers, onRoleChange, onRemove }) => {
   const [isChanging, setIsChanging] = useState(false);
 
-  const { canManageMembers } = useCirclePermissions(circle);
-
   const isOwner = member.role === "owner";
+  const canManage = canManageMembers && !isOwner;
 
-  const canManage = canManageMembers && member.role !== "owner";
+  const handleRoleChange = async (e) => {
+    const newRole = e.target.value;
 
-  const handleRoleChange = async (newRole) => {
     try {
       setIsChanging(true);
       await onRoleChange(newRole);
@@ -22,9 +22,9 @@ const MemberRow = ({ member, circle, onRoleChange, onRemove }) => {
   };
 
   const handleRemove = async () => {
-    const confirmed = window.confirm(`Remove ${member.username} from circle?`);
+    const ok = window.confirm(`Remove ${member.username} from circle?`);
 
-    if (!confirmed) return;
+    if (!ok) return;
 
     try {
       setIsChanging(true);
@@ -37,9 +37,9 @@ const MemberRow = ({ member, circle, onRoleChange, onRemove }) => {
   return (
     <div className="member-row">
       <div className="member-info">
-        <span className="member-avatar">
+        <div className="member-avatar">
           {member.username?.charAt(0).toUpperCase()}
-        </span>
+        </div>
 
         <div className="member-details">
           <div className="member-name">
@@ -47,30 +47,28 @@ const MemberRow = ({ member, circle, onRoleChange, onRemove }) => {
             {isOwner && <span className="owner-tag"> (Owner)</span>}
           </div>
 
-          <div className="member-role-badge">
-            <span className="badge">{member.badge}</span>
+          <div className="member-role">
             <span className="role-text">{member.role}</span>
           </div>
         </div>
       </div>
 
-      {!isOwner && canManage && (
+      {canManage && (
         <div className="member-actions">
           <select
             value={member.role}
-            onChange={(e) => handleRoleChange(e.target.value)}
+            onChange={handleRoleChange}
             disabled={isChanging}
             className="role-select"
           >
-            <option value="member">Member 👤</option>
-            <option value="moderator">Moderator 🛡️</option>
+            <option value="member">Member</option>
+            <option value="moderator">Moderator</option>
           </select>
 
           <button
             onClick={handleRemove}
             disabled={isChanging}
             className="remove-btn"
-            title="Remove member"
           >
             ✕
           </button>
@@ -81,14 +79,14 @@ const MemberRow = ({ member, circle, onRoleChange, onRemove }) => {
 };
 
 MemberRow.propTypes = {
-  member: propTypes.shape({
-    username: propTypes.string.isRequired,
-    role: propTypes.string.isRequired,
-    badge: propTypes.string,
+  member: PropTypes.shape({
+    username: PropTypes.string.isRequired,
+    role: PropTypes.string.isRequired,
   }).isRequired,
-  circle: propTypes.object.isRequired,
-  onRoleChange: propTypes.func.isRequired,
-  onRemove: propTypes.func.isRequired,
+
+  canManageMembers: PropTypes.bool.isRequired,
+  onRoleChange: PropTypes.func.isRequired,
+  onRemove: PropTypes.func.isRequired,
 };
 
 export default MemberRow;

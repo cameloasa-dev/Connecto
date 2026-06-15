@@ -12,7 +12,7 @@ import { useCirclePosts } from "../hooks/posts/useCirclePosts";
 import "./CirclePage.css";
 
 function CirclePage() {
-  const { circleId } = useParams();
+  const circleId = Number(useParams().circleId);
   const navigate = useNavigate();
   const { user } = useAuth();
 
