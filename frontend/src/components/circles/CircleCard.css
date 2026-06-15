@@ -1,108 +1,135 @@
 /* frontend/src/components/circles/CircleCard.css */
+
+/* =========================
+   CARD
+========================= */
 .circle-card {
   background: var(--card-bg);
   border: 1px solid var(--border-color);
-  border-radius: 16px;
-  padding: 2rem 1.5rem;
-  cursor: pointer;
-  transition:
-    transform 0.2s,
-    box-shadow 0.2s;
+  border-radius: 14px;
+  padding: 1.25rem;
   box-shadow: var(--shadow-sm);
-  min-height: 180px;
-  display: flex;
-  flex-direction: column;
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+  margin-bottom: 1rem;
 }
 
 .circle-card:hover {
-  transform: translateY(-4px);
-  box-shadow: var(--shadow-lg);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
 }
 
-.circle-card h3 {
-  margin: 0 0 0.75rem 0;
-  font-size: 1.4rem;
-  font-weight: 600;
+/* =========================
+   CONTENT
+========================= */
+.circle-card h4 {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.1rem;
   color: var(--text-primary);
-  line-height: 1.3;
 }
 
 .circle-card p {
+  margin: 0;
   color: var(--text-secondary);
-  margin: 0 0 1.5rem 0;
-  font-size: 1rem;
-  line-height: 1.5;
-  flex: 1;
+  line-height: 1.6;
+  white-space: pre-wrap;
 }
 
-.circle-meta {
+/* =========================
+   ACTIONS
+========================= */
+.circle-actions {
   display: flex;
-  gap: 1.5rem;
-  align-items: center;
-  font-size: 1rem;
-  color: var(--text-secondary);
-  border-top: 2px solid var(--border-color);
-  padding-top: 1.25rem;
-  margin-top: auto;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--border-color);
 }
 
-.badge {
-  font-size: 1.5rem;
-  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
-}
-
-.role {
-  text-transform: capitalize;
-  font-weight: 500;
-  color: var(--text-primary);
-  background: var(--hover-bg);
-  padding: 0.25rem 0.75rem;
-  border-radius: 20px;
+.circle-action-btn {
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
   font-size: 0.9rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  background: var(--hover-bg);
+  color: var(--text-primary);
 }
 
-.member-count {
-  margin-left: auto;
-  color: var(--text-muted);
-  font-size: 0.95rem;
+.circle-action-btn:hover:not(:disabled) {
+  background: var(--border-color);
+}
+
+.circle-action-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* Delete button */
+.circle-action-btn.danger {
+  background: rgba(239, 68, 68, 0.12);
+  color: #ef4444;
+}
+
+.circle-action-btn.danger:hover:not(:disabled) {
+  background: #ef4444;
+  color: white;
+}
+
+/* =========================
+   EDITOR MODAL
+========================= */
+.circle-editor-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+
   display: flex;
   align-items: center;
-  gap: 0.25rem;
+  justify-content: center;
+
+  z-index: 1000;
 }
 
-.member-count::before {
-  content: "👥";
-  font-size: 1rem;
-  opacity: 0.8;
+.circle-editor-modal {
+  width: 100%;
+  max-width: 550px;
+
+  background: var(--card-bg);
+  border-radius: 12px;
+
+  padding: 1.5rem;
+
+  box-shadow: var(--shadow-lg);
 }
 
-/* Dark mode adjustments */
-.dark-mode .circle-card {
-  border-color: var(--border-color);
+.circle-editor-modal h3 {
+  margin-top: 0;
+  margin-bottom: 1rem;
 }
 
-.dark-mode .role {
-  background: var(--bg-secondary);
-}
-
+/* =========================
+   RESPONSIVE
+========================= */
 @media (max-width: 768px) {
   .circle-card {
-    padding: 1.5rem;
-    min-height: 160px;
+    padding: 1rem;
   }
 
-  .circle-card h3 {
-    font-size: 1.2rem;
+  .circle-actions {
+    flex-direction: column;
   }
 
-  .circle-meta {
-    gap: 1rem;
-    flex-wrap: wrap;
-  }
-
-  .member-count {
-    margin-left: 0;
+  .circle-action-btn {
     width: 100%;
-    justify-content: flex-end;
+  }
+
+  .circle-editor-modal {
+    margin: 1rem;
+    max-width: none;
   }
 }

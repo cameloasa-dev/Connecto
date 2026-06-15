@@ -1,3 +1,4 @@
+//frontend/src/components/post/PostCard
 import { useState } from "react";
 import propTypes from "prop-types";
 import PostEditor from "./PostEditor";
@@ -23,11 +24,19 @@ const PostCard = ({ post }) => {
       <p>{post.content}</p>
 
       <div className="post-actions">
-        <button onClick={() => setIsEditing(true)} disabled={isPending}>
+        <button
+          className="post-action-btn"
+          onClick={() => setIsEditing(true)}
+          disabled={isPending}
+        >
           Edit
         </button>
 
-        <button onClick={handleDelete} disabled={isPending}>
+        <button
+          className="post-action-btn danger"
+          onClick={handleDelete}
+          disabled={isPending}
+        >
           {isPending ? "Deleting..." : "Delete"}
         </button>
       </div>

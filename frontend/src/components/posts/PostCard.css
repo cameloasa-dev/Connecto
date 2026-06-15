@@ -1,7 +1,7 @@
 /* frontend/src/components/posts/PostCard.css */
 
 /* =========================
-   CARD
+   POST CARD
 ========================= */
 .post-card {
   background: var(--card-bg);
@@ -37,12 +37,25 @@
 }
 
 /* =========================
-   BUTTON SYSTEM (GLOBAL)
+   ACTIONS (CARD + EDITOR)
+========================= */
+.post-actions,
+.post-editor-actions {
+  display: flex;
+  gap: 0.6rem;
+  justify-content: flex-end;
+  margin-top: 1rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border-color);
+}
+
+/* =========================
+   BUTTON SYSTEM (GLOBAL REUSABLE)
 ========================= */
 .btn {
   border: none;
   cursor: pointer;
-  padding: 0.45rem 0.9rem;
+  padding: 0.5rem 0.9rem;
   border-radius: 8px;
   font-size: 0.85rem;
   font-weight: 500;
@@ -57,29 +70,27 @@
   cursor: not-allowed;
 }
 
-/* PRIMARY (Save, Like) */
+/* PRIMARY */
 .btn-primary {
-  background: rgba(59, 130, 246, 0.12);
-  color: var(--primary-color);
+  background: var(--primary-color);
+  color: white;
 }
 
 .btn-primary:hover:not(:disabled) {
-  background: var(--primary-color);
-  color: #fff;
+  opacity: 0.9;
 }
 
-/* DANGER (Delete) */
+/* DANGER */
 .btn-danger {
-  background: rgba(239, 68, 68, 0.12);
-  color: #ef4444;
+  background: #ef4444;
+  color: white;
 }
 
 .btn-danger:hover:not(:disabled) {
-  background: #ef4444;
-  color: #fff;
+  opacity: 0.85;
 }
 
-/* NEUTRAL (Cancel, Edit, Share default) */
+/* NEUTRAL */
 .btn-neutral {
   background: var(--hover-bg);
   color: var(--text-primary);
@@ -87,18 +98,6 @@
 
 .btn-neutral:hover:not(:disabled) {
   background: var(--border-color);
-}
-
-/* =========================
-   ACTION BAR (POST CARD)
-========================= */
-.post-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.6rem;
-  margin-top: 1rem;
-  padding-top: 0.75rem;
-  border-top: 1px solid var(--border-color);
 }
 
 /* =========================
@@ -125,15 +124,8 @@
   resize: vertical;
 }
 
-/* editor actions */
-.post-editor .actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 0.6rem;
-}
-
 /* =========================
-   MODAL OVERLAY
+   MODAL
 ========================= */
 .post-editor-overlay {
   position: fixed;
@@ -163,7 +155,7 @@
   }
 
   .post-actions,
-  .post-editor .actions {
+  .post-editor-actions {
     flex-direction: column;
     align-items: stretch;
   }

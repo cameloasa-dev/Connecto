@@ -11,7 +11,7 @@ import ProtectedRoute from "./routes/ProtectedRoute.jsx";
 import AuthProvider from "./contexts/AuthProvider";
 import { DarkModeProvider } from "./contexts/DarkModeProvider";
 import Layout from "./components/layout/Layout.jsx";
-import "./App.css";
+//import "./App.css";
 import { APP_BASE_PATH } from "./config";
 
 function App() {

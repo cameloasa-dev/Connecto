@@ -2,7 +2,6 @@ import { useState } from "react";
 import propTypes from "prop-types";
 import { useCreatePost } from "../../hooks/mutations/usePostMutations";
 
-// eslint-disable-next-line react/prop-types
 const CreatePost = ({ onPostCreated, circles = [] }) => {
   const [formData, setFormData] = useState({
     title: "",
