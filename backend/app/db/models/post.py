@@ -27,5 +27,5 @@ class Post(Base):
         DateTime(), server_default=func.now(), onupdate=func.now(), nullable=False
     )
 
-    author = relationship("User", back_populates="posts")
-    circle = relationship("Circle", back_populates="posts")
+    author = relationship("User", back_populates="posts", lazy="selectin")
+    circle = relationship("Circle", back_populates="posts", lazy="selectin")

@@ -28,6 +28,6 @@ class User(Base):
         DateTime(), server_default=func.now(), onupdate=func.now(), nullable=True
     )
 
-    owned_circles = relationship("Circle", back_populates="owner")
-    circle_memberships = relationship("CircleMember", back_populates="user")
-    posts = relationship("Post", back_populates="author")
+    owned_circles = relationship("Circle", back_populates="owner", lazy="selectin")
+    circle_memberships = relationship("CircleMember", back_populates="user", lazy="selectin")
+    posts = relationship("Post", back_populates="author", lazy="selectin")

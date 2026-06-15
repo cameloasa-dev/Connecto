@@ -1,27 +1,49 @@
 import { useState } from "react";
 import propTypes from "prop-types";
-import PostSettingsModal from "./PostSettingsModal";
-import PostActions from "./PostActions";
+import PostEditor from "./PostEditor";
 import { useDeletePost } from "../../hooks/mutations/usePostMutations";
+import "./PostCard.css";
 
 const PostCard = ({ post }) => {
   const [isEditing, setIsEditing] = useState(false);
-  const { mutateAsync: deletePost } = useDeletePost();
+  const { mutateAsync: deletePost, isPending } = useDeletePost();
 
   const handleDelete = async () => {
+    if (isPending) return;
     if (!window.confirm("Delete post?")) return;
+
     await deletePost(post.id);
   };
+
+  const closeEditor = () => setIsEditing(false);
 
   return (
     <div className="post-card">
       <h4>{post.title}</h4>
       <p>{post.content}</p>
 
-      <PostActions onEdit={() => setIsEditing(true)} onDelete={handleDelete} />
+      <div className="post-actions">
+        <button onClick={() => setIsEditing(true)} disabled={isPending}>
+          Edit
+        </button>
+
+        <button onClick={handleDelete} disabled={isPending}>
+          {isPending ? "Deleting..." : "Delete"}
+        </button>
+      </div>
 
       {isEditing && (
-        <PostSettingsModal post={post} onClose={() => setIsEditing(false)} />
+        <div className="post-editor-overlay">
+          <div className="post-editor-modal">
+            <h3>Edit Post</h3>
+
+            <PostEditor
+              post={post}
+              onSuccess={closeEditor}
+              onCancel={closeEditor}
+            />
+          </div>
+        </div>
       )}
     </div>
   );

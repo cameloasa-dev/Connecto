@@ -1,13 +1,18 @@
 /* frontend/src/components/posts/PostCard.css */
+
+/* =========================
+   CARD
+========================= */
 .post-card {
   background: var(--card-bg);
   border: 1px solid var(--border-color);
-  border-radius: 12px;
-  padding: 1.5rem;
+  border-radius: 14px;
+  padding: 1.25rem;
   box-shadow: var(--shadow-sm);
   transition:
-    transform 0.2s,
-    box-shadow 0.2s;
+    transform 0.2s ease,
+    box-shadow 0.2s ease;
+  margin-bottom: 1rem;
 }
 
 .post-card:hover {
@@ -15,97 +20,156 @@
   box-shadow: var(--shadow-md);
 }
 
-.post-header {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
-
-.post-author-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background: var(--primary-color);
-  color: white;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: bold;
-  text-transform: uppercase;
-}
-
-.post-author-info {
-  flex: 1;
-}
-
-.post-author {
-  font-weight: 600;
-  color: var(--text-primary);
-}
-
-.post-date {
-  font-size: 0.85rem;
-  color: var(--text-muted);
-}
-
+/* =========================
+   CONTENT
+========================= */
 .post-content h4 {
   margin: 0 0 0.5rem 0;
-  color: var(--text-primary);
   font-size: 1.1rem;
+  color: var(--text-primary);
 }
 
 .post-content p {
+  margin: 0;
   color: var(--text-secondary);
   line-height: 1.6;
-  margin: 0 0 0.5rem 0;
+  white-space: pre-wrap;
 }
 
-.post-circle {
+/* =========================
+   BUTTON SYSTEM (GLOBAL)
+========================= */
+.btn {
+  border: none;
+  cursor: pointer;
+  padding: 0.45rem 0.9rem;
+  border-radius: 8px;
   font-size: 0.85rem;
-  color: var(--primary-color);
-  font-style: italic;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
 }
 
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* PRIMARY (Save, Like) */
+.btn-primary {
+  background: rgba(59, 130, 246, 0.12);
+  color: var(--primary-color);
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: var(--primary-color);
+  color: #fff;
+}
+
+/* DANGER (Delete) */
+.btn-danger {
+  background: rgba(239, 68, 68, 0.12);
+  color: #ef4444;
+}
+
+.btn-danger:hover:not(:disabled) {
+  background: #ef4444;
+  color: #fff;
+}
+
+/* NEUTRAL (Cancel, Edit, Share default) */
+.btn-neutral {
+  background: var(--hover-bg);
+  color: var(--text-primary);
+}
+
+.btn-neutral:hover:not(:disabled) {
+  background: var(--border-color);
+}
+
+/* =========================
+   ACTION BAR (POST CARD)
+========================= */
 .post-actions {
   display: flex;
-  gap: 1rem;
+  justify-content: flex-end;
+  gap: 0.6rem;
   margin-top: 1rem;
-  padding-top: 1rem;
+  padding-top: 0.75rem;
   border-top: 1px solid var(--border-color);
 }
 
-.post-action-btn {
-  background: none;
-  border: none;
-  color: var(--text-muted);
-  cursor: pointer;
-  padding: 0.5rem 1rem;
-  border-radius: 20px;
-  transition: all 0.2s;
+/* =========================
+   EDITOR
+========================= */
+.post-editor {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.post-editor input,
+.post-editor textarea {
+  width: 100%;
+  padding: 0.6rem;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background: var(--card-bg);
+  color: var(--text-primary);
+}
+
+.post-editor textarea {
+  min-height: 120px;
+  resize: vertical;
+}
+
+/* editor actions */
+.post-editor .actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.6rem;
+}
+
+/* =========================
+   MODAL OVERLAY
+========================= */
+.post-editor-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  justify-content: center;
+  z-index: 50;
 }
 
-.post-action-btn:hover {
-  background: var(--hover-bg);
-  color: var(--primary-color);
+.post-editor-modal {
+  width: 100%;
+  max-width: 500px;
+  background: var(--card-bg);
+  padding: 1.25rem;
+  border-radius: 12px;
+  box-shadow: var(--shadow-md);
 }
 
+/* =========================
+   RESPONSIVE
+========================= */
 @media (max-width: 768px) {
   .post-card {
     padding: 1rem;
   }
 
-  .post-actions {
-    flex-wrap: wrap;
-    gap: 0.5rem;
+  .post-actions,
+  .post-editor .actions {
+    flex-direction: column;
+    align-items: stretch;
   }
 
-  .post-action-btn {
-    padding: 0.5rem;
-    flex: 1;
+  .btn {
+    width: 100%;
     justify-content: center;
   }
 }

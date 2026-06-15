@@ -1,4 +1,4 @@
-// frontend/src/hooks/useDashboardQuery.js
+// frontend/src/hooks/dashboard/useDashboardQuery.js
 import { useQuery } from "@tanstack/react-query";
 import { userDashboardService } from "../../services/userDashboard.service";
 
