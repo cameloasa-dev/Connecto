@@ -37,7 +37,6 @@ class Post(Base):
         lazy="selectin",
     )
 
-
     likes = relationship(
         "PostLike",
         back_populates="post",

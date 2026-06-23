@@ -1,4 +1,4 @@
-# backend/utols/pagination
+# backend/utils/pagination
 from math import ceil
 
 
