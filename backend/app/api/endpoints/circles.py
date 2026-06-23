@@ -11,12 +11,9 @@ from sqlalchemy.orm import selectinload
 from app.api.endpoints.auth import get_current_user_from_session
 from app.db.database import get_db
 from app.db.models import Circle, CircleMember, User
-from app.schemas import (
-    CircleCreate,
-    CircleMemberResponse,
-    CircleResponse,
-    CircleRole,
-)
+from app.schemas.circles.circle_members import CircleMemberResponse, CircleRole
+from app.schemas.circles.requests import CircleCreate
+from app.schemas.circles.responses import CircleResponse
 
 router = APIRouter(prefix="/circles", tags=["circles"])
 

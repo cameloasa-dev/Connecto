@@ -40,16 +40,21 @@ install-frontend:
 # ============================================================================
 # DATABASE COMMANDS
 # ============================================================================
-.PHONY: seed-database db-reset db-refresh
+.PHONY: seed-database db-create db-reset db-refresh
 
 seed-database:
 	@echo "🌱 Seeding database..."
 	cd backend && uv run python scripts/seed.py
 	@echo "✅ Test data added"
 
+db-create:
+	@echo "🛠️  Creating database tables..."
+	cd backend && uv run python -m scripts.create_db
+	@echo "✅ Database created"
+
 db-reset:
 	@echo "⚠️  Resetting database..."
-	cd backend && uv run python scripts/reset_db.py
+	cd backend && uv run python -m scripts.reset_db
 	@echo "✅ Database reset complete"
 
 db-refresh: db-reset seed-database
@@ -66,11 +71,27 @@ db-refresh: db-reset seed-database
 # -------------------------
 # BACKEND LINT
 # -------------------------
+# ============================
+# BACKEND LINTING
+# ============================
+
+ruff-backend:
+	@echo "🔍 Ruff check..."
+	cd backend && uv run ruff check .
+
+ruff-backend-fix:
+	@echo "🛠️ Ruff fix..."
+	cd backend && uv run ruff check --fix .
+
+mypy-backend:
+	@echo "🔍 Mypy type-check..."
+	cd backend && uv run mypy .
+
 lint-backend:
-	@echo "🔍 Linting Backend..."
+	@echo "🔍 Running full backend lint..."
 	cd backend && uv run ruff check .
 	cd backend && uv run mypy .
-	@echo "✅ Backend lint passed"
+	@echo "✅ Backend lint complete (errors may still exist)"
 
 # -------------------------
 # FRONTEND LINT

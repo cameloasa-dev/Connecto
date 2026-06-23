@@ -22,7 +22,7 @@ from app.core.security import (
 )
 from app.db.database import get_db
 from app.db.models import User, UserSession
-from app.schemas import (
+from app.schemas.auth import (
     SessionResponse,
     UserCreate,
     UserLogin,

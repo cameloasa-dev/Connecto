@@ -201,3 +201,6 @@ API Docs (Swagger):
 
 API Docs (ReDoc):  
 [http://localhost:8000/redoc]
+
+Database:
+[https://sqliteviewer.app/#/dev.db/table/users/]

@@ -6,6 +6,6 @@ export const useSearchQuery = (query) => {
   return useQuery({
     queryKey: ["search", "global", query],
     queryFn: () => searchService.searchGlobal(query),
-    enabled: !!query?.trim(), 
+    enabled: !!query?.trim(),
   });
 };
