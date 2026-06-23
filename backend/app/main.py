@@ -20,8 +20,6 @@ from app.api.endpoints import (
     circle_members,
     circles,
     dashboard,
-    post_comments,
-    post_likes,
     posts,
     search,
     users,
@@ -142,8 +140,6 @@ app.include_router(circle_members.router)
 app.include_router(posts.router)
 app.include_router(dashboard.router)
 app.include_router(search.router)
-app.include_router(post_likes.router)
-app.include_router(post_comments.router)
 
 
 # -----------------------------
