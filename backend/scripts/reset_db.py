@@ -3,6 +3,7 @@
 import asyncio
 
 from app.db.database import Base, engine
+from app.db.models import *  # noqa: F401,F403
 
 
 async def reset_database() -> None:

@@ -12,7 +12,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.endpoints.auth import get_current_user_from_session
 from app.db.database import get_db
 from app.db.models import Circle, CircleMember, User
-from app.schemas import (
+from app.schemas.circles.circle_members import (
     AddMemberRequest,
     CircleMemberResponse,
     CircleRole,

@@ -29,3 +29,19 @@ class Post(Base):
 
     author = relationship("User", back_populates="posts", lazy="selectin")
     circle = relationship("Circle", back_populates="posts", lazy="selectin")
+    comments = relationship(
+        "Comment",
+        back_populates="post",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+        lazy="selectin",
+    )
+
+
+    likes = relationship(
+        "PostLike",
+        back_populates="post",
+        cascade="all, delete-orphan",
+        passive_deletes=True,
+        lazy="selectin",
+    )

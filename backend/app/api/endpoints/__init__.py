@@ -3,11 +3,15 @@ Endpoints package
 Exports all API routers
 """
 
-from app.api.endpoints.auth import router as auth_router
-from app.api.endpoints.circle_members import router as circle_members_router
-from app.api.endpoints.circles import router as circles_router
-from app.api.endpoints.posts import router as posts_router
-from app.api.endpoints.users import router as users_router
+from .auth import router as auth_router
+from .circle_members import router as circle_members_router
+from .circles import router as circles_router
+from .dashboard import router as dashboard_router
+from .post_comments import router as post_comments_router
+from .post_likes import router as post_likes_router
+from .posts import router as posts_router
+from .search import router as search_router
+from .users import router as users_router
 
 __all__ = [
     "auth_router",
@@ -15,4 +19,8 @@ __all__ = [
     "circles_router",
     "circle_members_router",
     "posts_router",
+    "post_likes_router",
+    "post_comments_router",
+    "search_router",
+    "dashboard_router",
 ]

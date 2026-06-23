@@ -31,3 +31,5 @@ class User(Base):
     owned_circles = relationship("Circle", back_populates="owner", lazy="selectin")
     circle_memberships = relationship("CircleMember", back_populates="user", lazy="selectin")
     posts = relationship("Post", back_populates="author", lazy="selectin")
+    comments = relationship("Comment", back_populates="user", lazy="selectin")
+    liked_posts = relationship("PostLike", back_populates="user", lazy="selectin")

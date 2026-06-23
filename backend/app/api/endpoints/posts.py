@@ -10,7 +10,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.api.endpoints.auth import get_current_user_from_session
 from app.db.database import get_db
 from app.db.models import Circle, CircleMember, Post, User
-from app.schemas import CircleRole, PostCreate, PostResponse
+from app.schemas.circles.circle_members import CircleRole
+from app.schemas.posts.requests import PostCreate
+from app.schemas.posts.responses import PostResponse
 
 router = APIRouter(prefix="/posts", tags=["posts"])
 

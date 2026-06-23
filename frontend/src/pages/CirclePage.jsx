@@ -45,16 +45,13 @@ function CirclePage() {
 
   if (!circle) return null;
 
-  const currentMember = circle.members?.find(
-    (m) => m.user_id === user?.id
-  );
+  const currentMember = circle.members?.find((m) => m.user_id === user?.id);
 
   const isOwner = currentMember?.role === "owner";
   const isModerator = currentMember?.role === "moderator";
 
   return (
     <div className="circle-page">
-
       {/* HEADER */}
       <div className="circle-header">
         <button
@@ -87,9 +84,7 @@ function CirclePage() {
       </div>
 
       {/* CREATE POST */}
-      {showCreatePost && (
-        <CreatePost circles={[circle]} />
-      )}
+      {showCreatePost && <CreatePost circles={[circle]} />}
 
       {/* TABS */}
       <div className="circle-tabs">
@@ -110,25 +105,19 @@ function CirclePage() {
 
       {/* CONTENT */}
       <div className="tab-content">
-
         {/* POSTS */}
         {activeTab === "posts" && (
           <div className="posts-section">
             {posts.length === 0 ? (
               <p>No posts yet</p>
             ) : (
-              posts.map((post) => (
-                <PostCard key={post.id} post={post} />
-              ))
+              posts.map((post) => <PostCard key={post.id} post={post} />)
             )}
           </div>
         )}
 
         {/* MEMBERS */}
-        {activeTab === "members" && (
-          <CircleMemberManager circle={circle} />
-        )}
-
+        {activeTab === "members" && <CircleMemberManager circle={circle} />}
       </div>
 
       {/* DEBUG */}
