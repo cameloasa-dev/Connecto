@@ -7,9 +7,8 @@ from app.repositories.circle_repository import CircleRepository
 from app.repositories.post_repository import PostRepository
 from app.repositories.user_repository import UserRepository
 from app.schemas.circles.circle_members import CircleRole
-from app.schemas.posts.comments import CommentCreate
-from app.schemas.posts.comments import CommentResponse
-from app.schemas.posts.likes import LikeResponse
+from app.schemas.posts.comments import CommentCreate, CommentResponse
+from app.schemas.posts.likes import LikeToggleResponse
 from app.schemas.posts.requests import PostCreate
 from app.schemas.posts.responses import PostResponse
 
@@ -154,7 +153,7 @@ class PostService:
     # LIKE / UNLIKE
     # --------------------------------------------------
 
-    async def toggle_like(self, post_id: int, current_user: User) -> LikeResponse:
+    async def toggle_like(self, post_id: int, current_user: User) -> LikeToggleResponse:
         post = await self._ensure_post(post_id)
 
         if post.circle_id:
@@ -169,7 +168,7 @@ class PostService:
 
         count = await self.post_repo.count_likes(post_id)
 
-        return LikeResponse(
+        return LikeToggleResponse(
             success=True,
             liked=liked,
             likes_count=count,

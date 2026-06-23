@@ -12,9 +12,8 @@ from app.db.models import User
 from app.repositories.circle_repository import CircleRepository
 from app.repositories.post_repository import PostRepository
 from app.repositories.user_repository import UserRepository
-from app.schemas.posts.comments import CommentCreate
-from app.schemas.posts.comments import CommentResponse
-from app.schemas.posts.likes import LikeResponse
+from app.schemas.posts.comments import CommentCreate, CommentResponse
+from app.schemas.posts.likes import LikeToggleResponse
 from app.schemas.posts.requests import PostCreate
 from app.schemas.posts.responses import PostResponse
 from app.services.post_service import PostService
@@ -98,12 +97,12 @@ async def get_circle_posts(
 # ======================================================
 # LIKE / UNLIKE POST
 # ======================================================
-@router.post("/{post_id}/like", response_model=LikeResponse)
+@router.post("/{post_id}/like", response_model=LikeToggleResponse)
 async def toggle_like(
     post_id: int,
     current_user: User = Depends(get_current_user_from_session),
     service: PostService = Depends(get_post_service),
-) -> LikeResponse:
+) -> LikeToggleResponse:
     return await service.toggle_like(post_id, current_user)
 
 
