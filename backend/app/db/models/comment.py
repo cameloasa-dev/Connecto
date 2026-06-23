@@ -23,5 +23,5 @@ class Comment(Base):
         DateTime(), server_default=func.now(), nullable=False
     )
 
-    post = relationship("Post", back_populates="comments")
-    user = relationship("User", back_populates="comments")
+    post = relationship("Post", back_populates="comments", lazy="selectin")
+    user = relationship("User", back_populates="comments", lazy="selectin")

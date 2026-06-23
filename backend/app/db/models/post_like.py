@@ -24,7 +24,5 @@ class PostLike(Base):
         DateTime(), server_default=func.now(), nullable=False
     )
 
-    post = relationship("Post", back_populates="likes")
-    user = relationship("User", back_populates="liked_posts")
-    likes = relationship("PostLike", back_populates="post", cascade="all, delete-orphan")
-    comments = relationship("Comment", back_populates="post", cascade="all, delete-orphan")
+    post = relationship("Post", back_populates="likes", lazy="selectin")
+    user = relationship("User", back_populates="liked_posts", lazy="selectin")
