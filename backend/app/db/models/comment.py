@@ -19,6 +19,8 @@ class Comment(Base):
 
     content: Mapped[str] = mapped_column(String(500), nullable=False)
 
+    status: Mapped[str] = mapped_column(String(20), default="pending", nullable=False)
+
     created_at: Mapped[datetime] = mapped_column(
         DateTime(), server_default=func.now(), nullable=False
     )

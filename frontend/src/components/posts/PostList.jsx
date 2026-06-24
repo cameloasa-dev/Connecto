@@ -1,29 +1,33 @@
 // frontend/src/components/posts/PostList.jsx
+// frontend/src/components/posts/PostList.jsx
+import PropTypes from "prop-types";
 import PostCard from "./PostCard";
-import propTypes from "prop-types";
+import "./PostList.css";
 
-const PostList = ({ posts = [] }) => {
-  if (!posts.length) {
-    return <p className="empty-message">No posts yet.</p>;
+const PostList = ({ posts, circles }) => {
+  if (!posts?.length) {
+    return (
+      <div className="empty-state">
+        <p>No posts yet.</p>
+      </div>
+    );
   }
 
   return (
-    <div className="posts-feed">
+    <div className="posts-grid">
       {posts.map((post) => (
-        <PostCard key={post.id} post={post} />
+        <PostCard key={post.id} post={post} circles={circles} />
       ))}
     </div>
   );
 };
 
 PostList.propTypes = {
-  posts: propTypes.arrayOf(
-    propTypes.shape({
-      id: propTypes.number.isRequired,
-      title: propTypes.string.isRequired,
-      content: propTypes.string.isRequired,
-    }),
-  ).isRequired,
+  posts: PropTypes.array.isRequired,
+  circles: PropTypes.array.isRequired,
 };
 
 export default PostList;
+
+
+

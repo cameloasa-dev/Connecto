@@ -18,6 +18,7 @@ class CommentResponse(BaseModel):
     user_id: int
     username: str | None
     content: str
+    status: str
     created_at: datetime
 
     model_config = ConfigDict(from_attributes=True)

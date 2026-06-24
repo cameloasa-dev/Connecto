@@ -9,7 +9,7 @@ from app.repositories.user_repository import UserRepository
 from app.schemas.circles.circle_members import CircleRole
 from app.schemas.posts.comments import CommentCreate, CommentResponse
 from app.schemas.posts.likes import LikeToggleResponse
-from app.schemas.posts.requests import PostCreate
+from app.schemas.posts.requests import PostCreate, PostUpdate
 from app.schemas.posts.responses import PostResponse
 
 
@@ -38,12 +38,40 @@ class PostService:
         if not await self.circle_repo.is_member(circle_id, user_id):
             raise HTTPException(403, "Not a member of this circle")
 
-    async def _build_post_response(self, post: Post) -> PostResponse:
+    async def _ensure_comment(self, comment_id: int) -> Comment:
+        comment = await self.post_repo.get_comment_by_id(comment_id)
+        if not comment:
+            raise HTTPException(404, "Comment not found")
+        return comment
+
+    async def _build_post_response(
+        self, post: Post, current_user: User | None = None
+    ) -> PostResponse:
+
         author = await self.user_repo.get_by_id(post.author_id)
         circle = await self.circle_repo.get_circle_by_id(post.circle_id) if post.circle_id else None
 
+        liked_by_me = False
+        can_edit = False
+        can_delete = False
+
+        if current_user:
+            liked_by_me = await self.post_repo.has_liked(post.id, current_user.id)
+
+            is_author = post.author_id == current_user.id
+
+            if post.circle_id is None:
+                is_owner_or_moderator = False
+            else:
+                is_owner_or_moderator = await self.circle_repo.user_is_owner_or_moderator(
+                    post.circle_id, current_user.id
+                )
+
+            can_edit = is_author or is_owner_or_moderator
+            can_delete = is_author or is_owner_or_moderator
+
         likes_count = await self.post_repo.count_likes(post.id)
-        comments_count = await self.post_repo.count_comments(post.id)
+        comments_count = await self.post_repo.count_comments(post.id, status="approved")
 
         return PostResponse(
             id=post.id,
@@ -57,6 +85,9 @@ class PostService:
             updated_at=post.updated_at,
             likes_count=likes_count,
             comments_count=comments_count,
+            liked_by_me=liked_by_me,
+            can_delete=can_delete,
+            can_edit=can_edit,
         )
 
     # --------------------------------------------------
@@ -75,24 +106,34 @@ class PostService:
         )
 
         created = await self.post_repo.create_post(post)
-        return await self._build_post_response(created)
+        return await self._build_post_response(created, current_user)
 
     # --------------------------------------------------
     # UPDATE POST
     # --------------------------------------------------
 
-    async def update_post(self, post_id: int, data: PostCreate, current_user: User) -> PostResponse:
+    async def update_post(self, post_id: int, data: PostUpdate, current_user: User) -> PostResponse:
 
         post = await self._ensure_post(post_id)
 
         if post.author_id != current_user.id:
             raise HTTPException(403, "Not allowed")
 
-        post.title = data.title
-        post.content = data.content
+        if data.title is not None:
+            post.title = data.title
+
+        if data.content is not None:
+            post.content = data.content
+
+        if data.circle_id is not None:
+            await self._ensure_circle_member(data.circle_id, current_user.id)
+            post.circle_id = data.circle_id
+
+        if data.circle_id is None and data.circle_id is not ...:
+            post.circle_id = None
 
         updated = await self.post_repo.update_post(post)
-        return await self._build_post_response(updated)
+        return await self._build_post_response(updated, current_user)
 
     # --------------------------------------------------
     # DELETE POST
@@ -101,12 +142,10 @@ class PostService:
     async def delete_post(self, post_id: int, current_user: User) -> None:
         post = await self._ensure_post(post_id)
 
-        # Author can delete
         if post.author_id == current_user.id:
             await self.post_repo.delete_post(post)
             return
 
-        # Circle moderators/owners can delete
         if post.circle_id:
             role = await self.circle_repo.get_user_role(post.circle_id, current_user.id)
             if role in (CircleRole.OWNER, CircleRole.MODERATOR):
@@ -116,20 +155,16 @@ class PostService:
         raise HTTPException(403, "You don't have permission to delete this post")
 
     # --------------------------------------------------
-    # GET POST BY ID
+    # GET POST BY ID (with approved comments)
     # --------------------------------------------------
 
     async def get_post(self, post_id: int, current_user: User) -> PostResponse:
-        row = await self.post_repo.get_post_with_author_and_circle(post_id)
-        if not row:
-            raise HTTPException(404, "Post not found")
-
-        post, author_name, circle_name = row
+        post = await self._ensure_post(post_id)
 
         if post.circle_id:
             await self._ensure_circle_member(post.circle_id, current_user.id)
 
-        return await self._build_post_response(post)
+        return await self._build_post_response(post, current_user)
 
     # --------------------------------------------------
     # GET POSTS FOR CIRCLE
@@ -143,11 +178,7 @@ class PostService:
 
         rows = await self.post_repo.get_posts_for_circle(circle_id, limit, offset)
 
-        responses: list[PostResponse] = []
-        for post, _author_name in rows:
-            responses.append(await self._build_post_response(post))
-
-        return responses
+        return [await self._build_post_response(post, current_user) for post, _author_name in rows]
 
     # --------------------------------------------------
     # LIKE / UNLIKE
@@ -175,7 +206,7 @@ class PostService:
         )
 
     # --------------------------------------------------
-    # COMMENTS
+    # COMMENTS (pending)
     # --------------------------------------------------
 
     async def add_comment(
@@ -191,11 +222,11 @@ class PostService:
             post_id=post_id,
             user_id=current_user.id,
             content=data.content,
+            status="pending",
             created_at=datetime.now(),
         )
 
         created = await self.post_repo.add_comment(comment)
-
         user = await self.user_repo.get_by_id(current_user.id)
 
         return CommentResponse(
@@ -204,24 +235,85 @@ class PostService:
             user_id=current_user.id,
             username=user.username if user else None,
             content=created.content,
+            status=created.status,
             created_at=created.created_at,
         )
 
+    # --------------------------------------------------
+    # APPROVE COMMENT
+    # --------------------------------------------------
+
+    async def approve_comment(self, comment_id: int, current_user: User) -> CommentResponse:
+        comment = await self._ensure_comment(comment_id)
+        post = await self._ensure_post(comment.post_id)
+
+        if post.circle_id:
+            role = await self.circle_repo.get_user_role(post.circle_id, current_user.id)
+            if role not in (CircleRole.OWNER, CircleRole.MODERATOR):
+                raise HTTPException(403, "Not allowed")
+
+        comment.status = "approved"
+        updated = await self.post_repo.update_comment(comment)
+
+        user = await self.user_repo.get_by_id(comment.user_id)
+
+        return CommentResponse(
+            id=updated.id,
+            post_id=updated.post_id,
+            user_id=updated.user_id,
+            username=user.username if user else None,
+            content=updated.content,
+            status=updated.status,
+            created_at=updated.created_at,
+        )
+
+    # --------------------------------------------------
+    # DELETE COMMENT (author or moderator)
+    # --------------------------------------------------
+
     async def delete_comment(self, comment_id: int, current_user: User) -> None:
+        comment = await self._ensure_comment(comment_id)
+        post = await self._ensure_post(comment.post_id)
 
-        # We need to fetch the comment manually
-        comments = await self.post_repo.get_comments_for_post(post_id=0)  # placeholder
-        comment = next((c for c in comments if c.id == comment_id), None)
+        if comment.user_id == current_user.id:
+            await self.post_repo.delete_comment(comment)
+            return
 
-        if not comment:
-            raise HTTPException(404, "Comment not found")
+        if post.circle_id:
+            role = await self.circle_repo.get_user_role(post.circle_id, current_user.id)
+            if role in (CircleRole.OWNER, CircleRole.MODERATOR):
+                await self.post_repo.delete_comment(comment)
+                return
 
-        # Only author or moderator/owner can delete
-        if comment.user_id != current_user.id:
-            post = await self._ensure_post(comment.post_id)
-            if post.circle_id:
-                role = await self.circle_repo.get_user_role(post.circle_id, current_user.id)
-                if role not in (CircleRole.OWNER, CircleRole.MODERATOR):
-                    raise HTTPException(403, "Not allowed")
+        raise HTTPException(403, "Not allowed")
 
-        await self.post_repo.delete_comment(comment)
+    # --------------------------------------------------
+    # Get pending COMMENT (author or moderator)
+    # --------------------------------------------------
+    async def get_pending_comments(self, post_id: int, current_user: User) -> list[CommentResponse]:
+        post = await self._ensure_post(post_id)
+
+        # doar owner sau moderator pot vedea pending
+        if post.circle_id:
+            role = await self.circle_repo.get_user_role(post.circle_id, current_user.id)
+            if role not in (CircleRole.OWNER, CircleRole.MODERATOR):
+                raise HTTPException(403, "Not allowed")
+
+        comments = await self.post_repo.get_comments_for_post(post_id, status="pending")
+
+        responses = []
+        for c in comments:
+            user = await self.user_repo.get_by_id(c.user_id)
+            responses.append(
+                CommentResponse(
+                    id=c.id,
+                    post_id=c.post_id,
+                    user_id=c.user_id,
+                    username=user.username if user else None,
+                    content=c.content,
+                    status=c.status,
+                    created_at=c.created_at,
+                )
+            )
+
+        return responses

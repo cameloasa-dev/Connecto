@@ -7,6 +7,8 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict
 
+from .comments import CommentResponse
+
 # ======================================================
 # POST RESPONSE SCHEMAS
 # ======================================================
@@ -30,6 +32,8 @@ class PostResponse(BaseModel):
 
     can_edit: bool = False
     can_delete: bool = False
+
+    comments: list[CommentResponse] | None = None
 
     created_at: datetime
     updated_at: datetime | None

@@ -79,6 +79,14 @@ class CircleRepository:
         member = await self.get_member(circle_id, user_id)
         return member is not None and member.role == CircleRole.OWNER
 
+    async def user_is_owner_or_moderator(self, circle_id: int, user_id: int) -> bool:
+        role = await self.get_user_role(circle_id, user_id)
+        return role in (CircleRole.OWNER, CircleRole.MODERATOR)
+
+    async def is_moderator(self, circle_id: int, user_id: int) -> bool:
+        role = await self.get_user_role(circle_id, user_id)
+        return role == CircleRole.MODERATOR
+
     async def get_user_role(self, circle_id: int, user_id: int) -> CircleRole | None:
         member = await self.get_member(circle_id, user_id)
         if not member:
