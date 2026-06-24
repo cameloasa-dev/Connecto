@@ -14,5 +14,8 @@ export const useCircles = () => {
   return useQuery({
     queryKey: ["myCircles"],
     queryFn: () => circleService.getMyCircles(),
+    staleTime: 1000 * 60 * 5,
+    refetchOnWindowFocus: false,
+    select: (circles) => circles.sort((a, b) => a.name.localeCompare(b.name)),
   });
 };

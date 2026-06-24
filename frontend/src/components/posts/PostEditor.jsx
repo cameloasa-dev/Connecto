@@ -1,44 +1,86 @@
 //frontend/src/components/posts/PostEditor.jsx
 import { useState } from "react";
-import propTypes from "prop-types";
-import { useUpdatePost } from "../../hooks/mutations/usePostMutations";
+import PropTypes from "prop-types";
+import {
+  useCreatePost,
+  useUpdatePost,
+} from "../../hooks/mutations/usePostMutations";
 
-const PostEditor = ({ post, onSuccess, onCancel }) => {
-  const [title, setTitle] = useState(post.title);
-  const [content, setContent] = useState(post.content);
+const PostEditor = ({ post, circles = [], onSuccess, onCancel }) => {
+  const isEdit = !!post;
 
-  const { mutateAsync: updatePost, isPending } = useUpdatePost();
+  const [formData, setFormData] = useState({
+    title: post?.title || "",
+    content: post?.content || "",
+    circle_id: post?.circle_id || null,
+  });
+
+  const { mutateAsync: createPost, isPending: creating } = useCreatePost();
+
+  const { mutateAsync: updatePost, isPending: updating } = useUpdatePost();
+
+  const isPending = creating || updating;
 
   const handleSave = async () => {
     try {
-      if (title === post.title && content === post.content) {
-        onCancel();
-        return;
+      if (isEdit) {
+        // EDIT MODE
+        await updatePost({
+          postId: post.id,
+          postData: {
+            title: formData.title,
+            content: formData.content,
+            circle_id: formData.circle_id,
+          },
+        });
+      } else {
+        // CREATE MODE
+        await createPost(formData);
       }
-
-      await updatePost({
-        postId: post.id,
-        postData: { title, content },
-      });
 
       onSuccess();
     } catch (err) {
-      console.error("Failed to update post:", err);
+      console.error("Failed to save post:", err);
     }
   };
+
   return (
     <div className="post-editor">
+      <h3>{isEdit ? "Edit Post" : "Create New Post"}</h3>
+
       <input
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
+        type="text"
+        placeholder="Post title"
+        value={formData.title}
+        onChange={(e) => setFormData({ ...formData, title: e.target.value })}
         disabled={isPending}
       />
 
       <textarea
-        value={content}
-        onChange={(e) => setContent(e.target.value)}
+        placeholder="What's on your mind?"
+        value={formData.content}
+        onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+        rows="4"
         disabled={isPending}
       />
+
+      <select
+        value={formData.circle_id || ""}
+        onChange={(e) =>
+          setFormData({
+            ...formData,
+            circle_id: e.target.value ? Number(e.target.value) : null,
+          })
+        }
+        disabled={isPending}
+      >
+        <option value="">Public Post</option>
+        {circles.map((circle) => (
+          <option key={circle.id} value={circle.id}>
+            {circle.name}
+          </option>
+        ))}
+      </select>
 
       <div className="actions">
         <button
@@ -46,7 +88,7 @@ const PostEditor = ({ post, onSuccess, onCancel }) => {
           onClick={handleSave}
           disabled={isPending}
         >
-          Save
+          {isEdit ? "Save Changes" : "Post"}
         </button>
 
         <button
@@ -62,13 +104,15 @@ const PostEditor = ({ post, onSuccess, onCancel }) => {
 };
 
 PostEditor.propTypes = {
-  post: propTypes.shape({
-    id: propTypes.number.isRequired,
-    title: propTypes.string.isRequired,
-    content: propTypes.string.isRequired,
-  }).isRequired,
-  onSuccess: propTypes.func.isRequired,
-  onCancel: propTypes.func.isRequired,
+  post: PropTypes.shape({
+    id: PropTypes.number,
+    title: PropTypes.string,
+    content: PropTypes.string,
+    circle_id: PropTypes.number,
+  }),
+  circles: PropTypes.array,
+  onSuccess: PropTypes.func.isRequired,
+  onCancel: PropTypes.func.isRequired,
 };
 
 export default PostEditor;

@@ -5,15 +5,13 @@ from .circle_members import (
     UserSearchResponse,
 )
 from .join import CircleJoinRequest, CircleJoinResponse
-from .requests import CircleCreate, CirclePrivacyUpdate, UpdateCircleRequest
+from .requests import CircleCreate, CircleUpdate
 from .responses import CircleResponse
 
 __all__ = [
     "CircleCreate",
-    "UpdateCircleRequest",
+    "CircleUpdate",
     "CircleResponse",
-    "CirclePrivacyUpdate",
-    "CircleJoinRequestCircleMemberResponse",
     "CircleJoinRequest",
     "CircleJoinResponse",
     "AddMemberRequest",

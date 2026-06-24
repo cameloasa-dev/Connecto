@@ -5,7 +5,7 @@ from fastapi import HTTPException
 from app.db.models import Circle, CircleMember, User
 from app.repositories.circle_repository import CircleRepository
 from app.schemas.circles.circle_members import CircleMemberResponse, CircleRole
-from app.schemas.circles.requests import CircleCreate
+from app.schemas.circles.requests import CircleCreate, CircleUpdate
 from app.schemas.circles.responses import CircleResponse
 
 
@@ -76,6 +76,7 @@ class CircleService:
         new_circle = Circle(
             name=circle_data.name,
             description=circle_data.description,
+            is_private=circle_data.is_private,
             owner_id=current_user.id,
         )
 
@@ -110,7 +111,7 @@ class CircleService:
     # --------------------------------------------------
 
     async def update_circle(
-        self, circle_id: int, data: CircleCreate, current_user: User
+        self, circle_id: int, data: CircleUpdate, current_user: User
     ) -> CircleResponse:
         circle = await self.repo.get_circle_by_id(circle_id)
         if not circle:
@@ -119,8 +120,14 @@ class CircleService:
         if circle.owner_id != current_user.id:
             raise HTTPException(403, "Only the owner can update the circle")
 
-        circle.name = data.name
-        circle.description = data.description
+        if data.name is not None:
+            circle.name = data.name
+
+        if data.description is not None:
+            circle.description = data.description
+
+        if data.is_private is not None:
+            circle.is_private = data.is_private
 
         await self.repo.update_circle(circle)
 
@@ -139,28 +146,3 @@ class CircleService:
             raise HTTPException(403, "Only the owner can delete the circle")
 
         await self.repo.delete_circle(circle)
-
-    # --------------------------------------------------
-    # UPDATE CIRCLE NAME
-    # --------------------------------------------------
-
-    async def update_circle_name(
-        self, circle_id: int, new_name: str, current_user: User
-    ) -> CircleResponse:
-        circle = await self.repo.get_circle_by_id(circle_id)
-        if not circle:
-            raise HTTPException(404, "Circle not found")
-
-        if circle.owner_id != current_user.id:
-            raise HTTPException(403, "Only the owner can change the name")
-
-        if not new_name or len(new_name) < 3:
-            raise HTTPException(400, "Name must be at least 3 characters")
-
-        if await self.repo.circle_name_exists(new_name, exclude_id=circle_id):
-            raise HTTPException(400, "A circle with this name already exists")
-
-        circle.name = new_name
-        await self.repo.update_circle(circle)
-
-        return await self.get_circle(circle_id, current_user)

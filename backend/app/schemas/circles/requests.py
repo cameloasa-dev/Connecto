@@ -16,13 +16,12 @@ class CircleBase(BaseModel):
 
 
 class CircleCreate(CircleBase):
-    pass
-
-
-class UpdateCircleRequest(BaseModel):
     name: str = Field(..., min_length=3, max_length=50)
-    description: str = Field(..., max_length=255)
+    description: str | None = Field(None, max_length=255)
+    is_private: bool = False
 
 
-class CirclePrivacyUpdate(BaseModel):
-    is_private: bool
+class CircleUpdate(BaseModel):
+    name: str | None = Field(None, min_length=3, max_length=50)
+    description: str | None = Field(None, max_length=255)
+    is_private: bool | None = None

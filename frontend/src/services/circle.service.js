@@ -19,7 +19,7 @@ export const circleService = {
   },
 
   async updateCircle(circleId, circleData) {
-    const res = await api.put(`${BASE_URL}/${circleId}`, circleData);
+    const res = await api.patch(`${BASE_URL}/${circleId}`, circleData);
     return res.data;
   },
 

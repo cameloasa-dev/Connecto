@@ -150,7 +150,7 @@ async def test_get_circle_forbidden(
 # ------------------------------------------------------
 @pytest.mark.asyncio
 async def test_update_circle(client: AsyncClient, circle: Circle):
-    response = await client.put(
+    response = await client.patch(
         f"/circles/{circle.id}",
         json={"name": "Updated", "description": "New desc"},
     )
@@ -182,26 +182,12 @@ async def test_update_circle_forbidden(
     token = login.json()["session_token"]
     client.cookies.set("session_token", token)
 
-    response = await client.put(
+    response = await client.patch(
         f"/circles/{circle.id}",
         json={"name": "Hack", "description": "Hack"},
     )
 
     assert response.status_code == 403
-
-
-# ------------------------------------------------------
-# UPDATE CIRCLE NAME
-# ------------------------------------------------------
-@pytest.mark.asyncio
-async def test_update_circle_name(client: AsyncClient, circle: Circle):
-    response = await client.put(
-        f"/circles/{circle.id}/name",
-        json={"name": "NewName"},
-    )
-
-    assert response.status_code == 200
-    assert response.json()["name"] == "NewName"
 
 
 # ------------------------------------------------------
