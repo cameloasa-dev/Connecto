@@ -136,9 +136,30 @@ format: format-backend format-frontend
 # BACKEND TESTS
 # -------------------------
 test-backend:
-	@echo "🧪 Running Backend Tests..."
+	@echo "🧪 Running ALL Backend Tests (unit + integration)..."
 	cd backend && uv run pytest -v
-	@echo "✅ Backend tests passed"
+	@echo "✅ All backend tests passed"
+
+test-unit-backend:
+	@echo "🔍 Running UNIT tests..."
+	cd backend && uv run pytest tests/unit -v
+	@echo "✅ Unit tests passed"
+
+test-integration-backend:
+	@echo "🔬 Running INTEGRATION tests..."
+	cd backend && uv run pytest tests/integration -v
+	@echo "✅ Integration tests passed"
+
+test-coverage-backend:
+	@echo "📊 Running coverage report..."
+	cd backend && uv run coverage run -m pytest
+	cd backend && uv run coverage report -m
+
+test-coverage-html-backend:
+	@echo "🌐 Generating HTML coverage report..."
+	cd backend && uv run coverage run -m pytest
+	cd backend && uv run coverage html
+	@echo "📁 Open backend/htmlcov/index.html în browser""
 
 # -------------------------
 # FRONTEND TESTS

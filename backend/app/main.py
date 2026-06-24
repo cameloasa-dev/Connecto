@@ -11,9 +11,12 @@ from contextlib import asynccontextmanager
 from typing import Any
 
 from fastapi import FastAPI, Request, Response
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from slowapi.errors import RateLimitExceeded
+from sqlalchemy.exc import IntegrityError
+from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from app.api.endpoints import (
     auth,
@@ -25,6 +28,12 @@ from app.api.endpoints import (
     users,
 )
 from app.core.config import settings
+from app.core.error_handlers import (
+    global_exception_handler,
+    http_exception_handler,
+    integrity_error_handler,
+    validation_exception_handler,
+)
 from app.core.limiter import limiter
 from app.core.security_headers import SecurityHeadersMiddleware
 from app.db.database import Base, engine
@@ -129,6 +138,13 @@ app.add_middleware(
 
 app.add_middleware(SecurityHeadersMiddleware)
 
+# -----------------------------
+# Error handler
+# -----------------------------
+app.add_exception_handler(StarletteHTTPException, http_exception_handler)
+app.add_exception_handler(RequestValidationError, validation_exception_handler)
+app.add_exception_handler(IntegrityError, integrity_error_handler)
+app.add_exception_handler(Exception, global_exception_handler)
 
 # -----------------------------
 # ROUTERS
