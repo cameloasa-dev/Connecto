@@ -67,7 +67,7 @@ async def test_register_duplicate_username(client: AsyncClient) -> None:
     response = await client.post("/auth/register", json=payload)
 
     assert response.status_code == 400
-    assert "already taken" in response.json()["detail"].lower()
+    assert "already taken" in response.json()["error"].lower()
 
 
 @pytest.mark.asyncio
@@ -86,7 +86,7 @@ async def test_register_duplicate_email(client: AsyncClient) -> None:
     response = await client.post("/auth/register", json=payload)
 
     assert response.status_code == 400
-    assert "already taken" in response.json()["detail"].lower()
+    assert "already taken" in response.json()["error"].lower()
 
 
 # ============================================================================

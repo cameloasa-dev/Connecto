@@ -60,7 +60,7 @@ async def test_login_wrong_password(client: AsyncClient) -> None:
     )
 
     assert response.status_code == 401
-    assert "invalid username or password" in response.json()["detail"].lower()
+    assert "invalid username or password" in response.json()["error"].lower()
 
 
 # ============================================================================
@@ -76,7 +76,7 @@ async def test_login_nonexistent_user(client: AsyncClient) -> None:
     )
 
     assert response.status_code == 401
-    assert "invalid username or password" in response.json()["detail"].lower()
+    assert "invalid username or password" in response.json()["error"].lower()
 
 
 # ============================================================================
@@ -103,4 +103,4 @@ async def test_login_inactive_user(client: AsyncClient, db_session: AsyncSession
     )
 
     assert response.status_code == 403
-    assert "inactive" in response.json()["detail"].lower()
+    assert "inactive" in response.json()["error"].lower()

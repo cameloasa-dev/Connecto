@@ -17,6 +17,14 @@ def get_user_service(db: AsyncSession = Depends(get_db)) -> UserService:
 
 
 # ======================================================
+# GET ME
+# ======================================================
+@router.get("/me", response_model=UserResponse)
+async def get_me(current_user: User = Depends(get_current_user_from_session)) -> UserResponse:
+    return UserResponse.model_validate(current_user)
+
+
+# ======================================================
 # GET ALL USERS (with pagination)
 # ======================================================
 @router.get("/", response_model=list[UserResponse])

@@ -150,3 +150,17 @@ async def test_search_users_circle_not_found(
     response = await client.get("/users/search?query=user&circle_id=99999")
 
     assert response.status_code == 403
+
+
+# ------------------------------------------------------
+# TEST: Me
+# ------------------------------------------------------
+@pytest.mark.asyncio
+async def test_get_me(client: AsyncClient, test_owner: User):
+    response = await client.get("/users/me")
+
+    assert response.status_code == 200
+    data = response.json()
+
+    assert data["id"] == test_owner.id
+    assert data["username"] == test_owner.username

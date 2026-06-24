@@ -18,6 +18,8 @@ dependencies = [
     "aiosqlite>=0.22.1",  # pentru SQLite async
     "slowapi>=0.1.9",
     "pwdlib>=0.2.0",
+    "coverage>=7.14.3",
+    "pytest-cov>=7.1.0",
 ]
 
 [dependency-groups]
