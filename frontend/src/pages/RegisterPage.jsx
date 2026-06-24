@@ -2,62 +2,39 @@
 import { useState } from "react";
 import { useAuth } from "../contexts/useAuth.js";
 import { useNavigate, Link } from "react-router-dom";
+import { validateRegister } from "../validation/authValidation.js";
 import "./RegisterPage.css";
 
 function RegisterPage() {
   const [username, setUsername] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
-  const [fullName, setFullName] = useState("");
-  const [email, setEmail] = useState("");
 
   const { register, loading } = useAuth();
-
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
-    // Validation
-    if (password !== confirmPassword) {
-      setError("Passwords do not match");
-      return;
-    }
+    // Validation error
+    const validationError = validateRegister({
+      username,
+      email,
+      password,
+      confirmPassword,
+      fullName,
+    });
 
-    if (password.length < 8) {
-      setError("Password must be at least 8 characters");
-      return;
-    }
-
-    if (
-      password &&
-      !/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@£$€&]).{8,}$/.test(password)
-    ) {
-      setError(
-        "Password must include at least one upper and lower case letter, a number and a special character",
-      );
-      return;
-    }
-
-    if (username.length < 3 || username.length > 50) {
-      setError("Username must be between 3 and 50 characters");
-      return;
-    }
-
-    if (email && !/\S+@\S+\.\S+/.test(email)) {
-      setError("Please enter a valid email address");
-      return;
-    }
-
-    if (fullName && (fullName.length < 2 || fullName.length > 100)) {
-      setError("Full name must be between 2-100 characters if provided");
+    if (validationError) {
+      setError(validationError);
       return;
     }
 
     try {
-      // Construct the user data object to send to the backend
       const userData = {
         username,
         password,
@@ -65,14 +42,20 @@ function RegisterPage() {
         email,
       };
 
-      const result = await register(userData); // send the whole object to the register function
-      console.log("Registration successful:", result);
+      const result = await register(userData);
 
-      const message = `Account created for ${result.username || username}! You can now login.`;
+      const message = `Account created for ${
+        result.username || username
+      }! You can now login.`;
 
       navigate("/login", { state: { success: message } });
     } catch (err) {
-      setError(err.message || "Registration failed");
+      const message =
+        err?.response?.data?.error ||
+        err?.message ||
+        "Registration failed. Please try again.";
+
+      setError(message);
       console.error("Registration error:", err);
     }
   };
@@ -83,11 +66,10 @@ function RegisterPage() {
         <h1 className="register-title">Create Account</h1>
 
         <form onSubmit={handleSubmit} className="register-form">
-          {/* Username Field */}
+          {/* Username */}
           <div className="form-group">
             <label htmlFor="username">Username *</label>
             <input
-              name="username"
               id="username"
               type="text"
               value={username}
@@ -99,15 +81,14 @@ function RegisterPage() {
               maxLength="50"
             />
             <small className="form-hint">
-              3-50 characters, letters, numbers and underscores only
+              3–50 characters, letters and numbers only
             </small>
           </div>
 
-          {/* Full Name Field */}
+          {/* Full Name */}
           <div className="form-group">
             <label htmlFor="fullName">Full Name (Optional)</label>
             <input
-              name="fullName"
               id="fullName"
               type="text"
               value={fullName}
@@ -119,11 +100,10 @@ function RegisterPage() {
             />
           </div>
 
-          {/* Email Field */}
+          {/* Email */}
           <div className="form-group">
             <label htmlFor="email">Email *</label>
             <input
-              name="email"
               id="email"
               type="email"
               value={email}
@@ -132,16 +112,12 @@ function RegisterPage() {
               required
               disabled={loading}
             />
-            <small className="form-hint">
-              Required. Please use a valid email address.
-            </small>
           </div>
 
-          {/* Password Field */}
+          {/* Password */}
           <div className="form-group">
             <label htmlFor="password">Password *</label>
             <input
-              name="password"
               id="password"
               type="password"
               value={password}
@@ -152,16 +128,15 @@ function RegisterPage() {
               minLength="8"
             />
             <small className="form-hint">
-              At least 8 characters must include upper and lower case letters,
-              numbers and special characters
+              Must include upper & lower case letters, numbers and special
+              characters
             </small>
           </div>
 
-          {/* Confirm Password Field */}
+          {/* Confirm Password */}
           <div className="form-group">
             <label htmlFor="confirmPassword">Confirm Password *</label>
             <input
-              name="confirmPassword"
               id="confirmPassword"
               type="password"
               value={confirmPassword}
@@ -177,7 +152,9 @@ function RegisterPage() {
           <button
             type="submit"
             className="submit-button"
-            disabled={loading || !username || !password || !confirmPassword}
+            disabled={
+              loading || !username || !email || !password || !confirmPassword
+            }
           >
             {loading ? "Creating account..." : "Create Account"}
           </button>

@@ -15,9 +15,15 @@
     "test:integration:watch": "vitest tests/integration",
     "test:unit": "vitest run tests/unit",
     "test:unit:watch": "vitest tests/unit",
+    "test:coverage": "vitest run --coverage",
     "test:debug": "vitest run --reporter verbose",
     "format": "prettier . --write",
-    "format:check": "prettier . --check"
+    "format:check": "prettier . --check",
+    "quality:unused": "knip",
+    "quality:deps": "depcheck",
+    "quality:lint": "eslint .",
+    "quality:coverage": "vitest run --coverage",
+    "quality": "npm run quality:unused && npm run quality:deps && npm run quality:lint && npm run quality:coverage"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.101.0",
@@ -39,6 +45,7 @@
     "@types/react": "^19.2.5",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.1",
+    "@vitest/coverage-v8": "^4.1.9",
     "eslint": "^8.57.0",
     "eslint-config-prettier": "^9.1.2",
     "eslint-plugin-react": "^7.37.5",
@@ -46,6 +53,7 @@
     "eslint-plugin-vitest": "^0.5.4",
     "globals": "^16.5.0",
     "jsdom": "^29.0.2",
+    "knip": "^6.18.0",
     "msw": "^2.14.6",
     "prettier": "^3.8.3",
     "vite": "^7.2.4",

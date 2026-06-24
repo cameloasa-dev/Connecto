@@ -61,7 +61,9 @@ function CirclePage() {
           ← Back
         </button>
 
-        <h1>{circle.name}</h1>
+        <h1>
+          {circle.name} {circle.is_private && "🔒"}
+        </h1>
 
         <div className="circle-badge">
           {isOwner && "👑 Owner"}

@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { useNavigate, useLocation, Link } from "react-router-dom";
 import { useAuth } from "../contexts/useAuth.js";
+import { validateLogin } from "../validation/authValidation.js";
 import "./LoginPage.css";
 
 function LoginPage() {
@@ -11,26 +12,33 @@ function LoginPage() {
 
   const { login, loading } = useAuth();
   const navigate = useNavigate();
-
-  // Display successful registration message if user was directed here from Register page
   const location = useLocation();
+
   const success = location.state?.success || null;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
-    // Call login via AuthContext
+    // VALIDARE LOCALĂ
+    const validationError = validateLogin({ username, password });
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+
     try {
-      // login function from AuthContext
       const result = await login({ username, password });
       console.log("Login successful:", result);
 
-      // Navigate to dashboard or home page after successful login
-      navigate("/user-dashboard");
+      navigate("/user-dashboard", { replace: true });
     } catch (err) {
-      // err is Error object from authService/AuthContext
-      setError(err.message || "Login failed");
+      const message =
+        err?.response?.data?.error ||
+        err?.message ||
+        "Login failed. Please try again.";
+
+      setError(message);
       console.error("Login error:", err);
     }
   };
@@ -83,7 +91,8 @@ function LoginPage() {
 
         <div className="login-links">
           <p>
-            Don't have an account? <Link to="/register">Register here</Link>
+            Don&apos;t have an account?{" "}
+            <Link to="/register">Register here</Link>
           </p>
           <p>
             <Link to="/forgot-password">Forgot password?</Link>

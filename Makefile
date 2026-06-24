@@ -164,10 +164,42 @@ test-coverage-html-backend:
 # -------------------------
 # FRONTEND TESTS
 # -------------------------
-test-frontend:
+test-unit-frontend:
 	@echo "🧪 Running Frontend Unit Tests..."
-	cd frontend && npm run test:run
+	cd frontend && npm run test:unit
 	@echo "✅ Frontend unit tests passed"
+
+test-integration-frontend:
+	@echo "🧪 Running Frontend Integration Tests..."
+	cd frontend && npm run test:integration
+	@echo "✅ Frontend integration tests passed"
+
+test-coverage-frontend:
+	@echo "📊 Generating Frontend Coverage..."
+	cd frontend && npm run test:coverage
+	@echo "✅ Frontend coverage generated"
+	
+test-frontend: test-unit-frontend test-integration-frontend
+	@echo "✨ All frontend tests passed!"
+
+# -------------------------
+# FRONTEND QUALITY
+# -------------------------
+
+quality-frontend-unused:
+	cd frontend && npm run quality:unused || cmd /c exit 0
+
+quality-frontend-deps:
+	cd frontend && npm run quality:deps || cmd /c exit 0
+
+quality-frontend-lint:
+	cd frontend && npm run quality:lint
+
+quality-frontend-coverage:
+	cd frontend && npm run quality:coverage
+
+quality-frontend: quality-frontend-unused quality-frontend-deps quality-frontend-lint quality-frontend-coverage
+	@echo "✨ Frontend quality checks passed!"
 
 # -------------------------
 # FRONTEND AUDIT

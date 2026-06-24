@@ -12,7 +12,7 @@ export const useCircle = (circleId) => {
 
 export const useCircles = () => {
   return useQuery({
-    queryKey: ["circles"],
+    queryKey: ["myCircles"],
     queryFn: () => circleService.getMyCircles(),
   });
 };

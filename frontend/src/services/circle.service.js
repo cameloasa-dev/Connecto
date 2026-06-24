@@ -23,11 +23,6 @@ export const circleService = {
     return res.data;
   },
 
-  async updateCircleName(circleId, name) {
-    const res = await api.put(`${BASE_URL}/${circleId}`, { name });
-    return res.data;
-  },
-
   async deleteCircle(circleId) {
     const res = await api.delete(`${BASE_URL}/${circleId}`);
     return res.data;

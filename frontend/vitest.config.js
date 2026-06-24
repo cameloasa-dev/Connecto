@@ -18,4 +18,11 @@ export default defineConfig({
 
     exclude: ["node_modules", "tests/e2e/**"],
   },
+  coverage: {
+    provider: "v8",
+    reporter: ["text", "html"],
+    reportsDirectory: "./coverage",
+    all: true,
+    include: ["src/**/*.{js,jsx}"],
+  },
 });
