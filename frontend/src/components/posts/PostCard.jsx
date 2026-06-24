@@ -53,7 +53,7 @@ const PostCard = ({ post, circles }) => {
           <div className="post-editor-modal">
             <PostEditor
               post={post}
-              circles={circles}   
+              circles={circles}
               onSuccess={closeEditor}
               onCancel={closeEditor}
             />
@@ -76,9 +76,8 @@ PostCard.propTypes = {
     propTypes.shape({
       id: propTypes.number.isRequired,
       name: propTypes.string.isRequired,
-    })
+    }),
   ).isRequired,
 };
 
 export default PostCard;
-

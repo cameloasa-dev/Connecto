@@ -1,0 +1,52 @@
+.notif-dropdown {
+  position: absolute;
+  top: 48px;
+  right: 0;
+  width: 260px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px;
+  z-index: 1000;
+}
+
+.notif-header {
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.notif-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.notif-item:last-child {
+  border-bottom: none;
+}
+
+.notif-circle-name {
+  font-size: 14px;
+}
+
+.notif-count {
+  font-size: 12px;
+  opacity: 0.7;
+}
+
+.notif-view-btn {
+  background: var(--primary);
+  color: white;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.notif-empty {
+  text-align: center;
+  padding: 10px;
+  opacity: 0.7;
+}
