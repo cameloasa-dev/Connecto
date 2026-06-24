@@ -19,11 +19,16 @@ export const useCirclePermissions = (circle) => {
     isModerator,
     isMember,
 
-    // permissions
+    // existing permissions
     canModerate: isOwner || isModerator,
     canManageMembers: isOwner || isModerator,
     canChangeRoles: isOwner,
     canDeleteCircle: isOwner,
     canPost: isMember,
+
+    // NEW permissions for comments
+    canApproveComments: isOwner || isModerator,
+    canSeePendingComments: isOwner || isModerator,
+    canDeleteAnyComment: isOwner || isModerator,
   };
 };
