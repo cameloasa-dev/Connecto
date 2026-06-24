@@ -1,38 +1,36 @@
 // frontend/src/components/layout/Navbar.jsx
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../../contexts/useAuth";
 import { useDarkMode } from "../../hooks/useDarkMode";
+
+import { useNavbarSearch } from "../../hooks/navbar/useNavbarSearch";
+import { useNavbarDropdown } from "../../hooks/navbar/useNavbarDropdown";
+import { usePendingNotifications } from "../../hooks/navbar/usePendingNotifications";
+
+import { NavbarNotificationsDropdown } from "./NavbarNotificationsDropdown";
+
 import "./Navbar.css";
 
 function Navbar() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const [showDropdown, setShowDropdown] = useState(false);
+
   const { isDarkMode, toggleDarkMode } = useDarkMode();
-  const [searchQuery, setSearchQuery] = useState("");
+  const { searchQuery, setSearchQuery, handleSearch } = useNavbarSearch();
+
+  const userDropdown = useNavbarDropdown();
+  const notifDropdown = useNavbarDropdown();
+
+  const notif = usePendingNotifications();
 
   const handleLogout = async () => {
     if (window.confirm("Are you sure you want to logout?")) {
-      try {
-        await logout();
-        navigate("/login");
-      } catch (error) {
-        console.error("Logout failed:", error);
-        alert("Logout failed. Please try again.");
-      }
+      await logout();
+      navigate("/login");
     }
   };
 
-  const handleSearch = (e) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/search?q=${encodeURIComponent(searchQuery)}`);
-      setSearchQuery("");
-    }
-  };
-
-  // If no user, show minimal navbar for public pages future enhancement: add links to about, contact, etc.
+  // Public navbar
   if (!user) {
     return (
       <header className="navbar">
@@ -56,7 +54,7 @@ function Navbar() {
     );
   }
 
-  // Navbar for authenticated users
+  // Authenticated navbar
   return (
     <header className="navbar">
       <div className="navbar-left">
@@ -66,6 +64,7 @@ function Navbar() {
         >
           Social Circles
         </div>
+
         <form onSubmit={handleSearch} className="navbar-search">
           <input
             type="text"
@@ -81,7 +80,7 @@ function Navbar() {
       </div>
 
       <div className="navbar-right">
-        {/* Dark Mode Toggle Button */}
+        {/* Dark mode */}
         <button
           className="navbar-icon"
           onClick={toggleDarkMode}
@@ -90,47 +89,58 @@ function Navbar() {
           <span className="icon">{isDarkMode ? "☀️" : "🌙"}</span>
         </button>
 
-        <button className="navbar-icon" title="Notifications">
-          <span className="icon">🔔</span>
-          <span className="badge">3</span>
-        </button>
+        {/* Notifications */}
+        <div className="navbar-icon-wrapper">
+          <button
+            className="navbar-icon"
+            title="Notifications"
+            onClick={notifDropdown.toggle}
+          >
+            <span className="icon">🔔</span>
+            {notif.data?.total > 0 && (
+              <span className="badge">{notif.data.total}</span>
+            )}
+          </button>
 
-        <button className="navbar-icon" title="Messages">
-          <span className="icon">✉️</span>
-        </button>
+          {notifDropdown.open && (
+            <NavbarNotificationsDropdown
+              data={notif.data}
+              close={notifDropdown.close}
+            />
+          )}
+        </div>
 
-        <div
-          className="navbar-user"
-          onClick={() => setShowDropdown(!showDropdown)}
-        >
+        {/* User dropdown */}
+        <div className="navbar-user" onClick={userDropdown.toggle}>
           <div className="user-avatar">
-            {user.username?.charAt(0).toUpperCase() || "U"}
+            {user.username?.charAt(0).toUpperCase()}
           </div>
           <span className="user-name">@{user.username}</span>
-          <span className="dropdown-arrow">{showDropdown ? "▲" : "▼"}</span>
+          <span className="dropdown-arrow">
+            {userDropdown.open ? "▲" : "▼"}
+          </span>
 
-          {showDropdown && (
+          {userDropdown.open && (
             <div className="user-dropdown">
               <button
                 className="dropdown-item"
                 onClick={() => {
-                  setShowDropdown(false);
+                  userDropdown.close();
                   navigate("/profile");
                 }}
               >
                 Profile
               </button>
+
+              <div className="dropdown-divider"></div>
+
               <button
-                className="dropdown-item"
+                className="dropdown-item logout"
                 onClick={() => {
-                  setShowDropdown(false);
-                  navigate("/settings");
+                  userDropdown.close();
+                  handleLogout();
                 }}
               >
-                Settings
-              </button>
-              <div className="dropdown-divider"></div>
-              <button className="dropdown-item logout" onClick={handleLogout}>
                 Logout
               </button>
             </div>

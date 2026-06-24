@@ -112,13 +112,9 @@ function CirclePage() {
 
       {/* CONTENT */}
       <div className="tab-content">
-        {activeTab === "posts" && (
-          <PostList posts={posts} circles={[circle]} />
-        )}
+        {activeTab === "posts" && <PostList posts={posts} circles={[circle]} />}
 
-        {activeTab === "members" && (
-          <CircleMemberManager circle={circle} />
-        )}
+        {activeTab === "members" && <CircleMemberManager circle={circle} />}
       </div>
 
       {/* DEBUG */}
