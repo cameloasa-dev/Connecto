@@ -1,10 +1,10 @@
 // frontend/src/contexts/AuthProvider.jsx
 import { useState, useEffect } from "react";
+import PropTypes from "prop-types";
 import AuthContext from "./AuthContext";
 import { authService } from "../services/auth.service";
 
 //AuthProvider component to manage authentication state and actions
-// eslint-disable-next-line react/prop-types
 const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -66,6 +66,10 @@ const AuthProvider = ({ children }) => {
       {children}
     </AuthContext.Provider>
   );
+};
+
+AuthProvider.propTypes = {
+  children: PropTypes.node.isRequired,
 };
 
 export default AuthProvider;

@@ -6,6 +6,7 @@ import { useUpdateCircle } from "../../hooks/mutations/useCircleMutations";
 const CircleEditor = ({ circle, onSuccess, onCancel }) => {
   const [name, setName] = useState(circle.name);
   const [description, setDescription] = useState(circle.description);
+  const [isPrivate, setIsPrivate] = useState(circle.is_private);
 
   const { mutateAsync: updateCircle, isPending } = useUpdateCircle();
 
@@ -18,7 +19,11 @@ const CircleEditor = ({ circle, onSuccess, onCancel }) => {
 
       await updateCircle({
         circleId: circle.id,
-        circleData: { name, description },
+        circleData: {
+          name,
+          description,
+          is_private: isPrivate,
+        },
       });
 
       onSuccess();
@@ -39,6 +44,16 @@ const CircleEditor = ({ circle, onSuccess, onCancel }) => {
         onChange={(e) => setDescription(e.target.value)}
         disabled={isPending}
       />
+
+      <label className="checkbox-row">
+        <input
+          type="checkbox"
+          checked={isPrivate}
+          onChange={(e) => setIsPrivate(e.target.checked)}
+          disabled={isPending}
+        />
+        Private circle
+      </label>
 
       <div className="actions">
         <button
@@ -66,6 +81,7 @@ CircleEditor.propTypes = {
     id: propTypes.number.isRequired,
     name: propTypes.string.isRequired,
     description: propTypes.string.isRequired,
+    is_private: propTypes.bool.isRequired,
   }).isRequired,
   onSuccess: propTypes.func.isRequired,
   onCancel: propTypes.func.isRequired,

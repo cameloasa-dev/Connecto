@@ -28,7 +28,9 @@ const CircleCard = ({ circle }) => {
   return (
     <div className="circle-card" onClick={openCircle}>
       <div className="circle-content">
-        <h4>{circle.name}</h4>
+        <h4>
+          {circle.name} {circle.is_private && "🔒"}
+        </h4>
         <p>{circle.description}</p>
       </div>
 
@@ -75,6 +77,7 @@ CircleCard.propTypes = {
     id: propTypes.number.isRequired,
     name: propTypes.string.isRequired,
     description: propTypes.string,
+    is_private: propTypes.bool,
   }).isRequired,
 };
 
