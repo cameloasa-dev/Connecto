@@ -7,7 +7,7 @@ vi.mock("../../src/services/api", () => ({
   default: {
     get: vi.fn(),
     post: vi.fn(),
-    put: vi.fn(),
+    patch: vi.fn(),
     delete: vi.fn(),
   },
 }));
@@ -74,7 +74,7 @@ describe("circleService (unit)", () => {
   // =========================
   describe("updateCircle", () => {
     it("updates circle name and description", async () => {
-      api.put.mockResolvedValue({
+      api.patch.mockResolvedValue({
         data: {
           id: 1,
           name: "Updated",
@@ -89,7 +89,7 @@ describe("circleService (unit)", () => {
 
       const result = await circleService.updateCircle(1, payload);
 
-      expect(api.put).toHaveBeenCalledWith("/circles/1", payload);
+      expect(api.patch).toHaveBeenCalledWith("/circles/1", payload);
 
       expect(result).toEqual({
         id: 1,

@@ -4,8 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/useAuth";
 import { useDashboardQuery } from "../hooks/dashboard/useDashboardQuery";
 
-import CircleCard from "../components/circles/CircleCard";
-import CreateCircle from "../components/circles/CreateCircle";
+import CircleList from "../components/circles/CircleList";
+import CircleEditor from "../components/circles/CircleEditor";
 
 import CreatePost from "../components/posts/CreatePost";
 import PostList from "../components/posts/PostList";
@@ -19,22 +19,36 @@ function UserDashboardPage() {
   const [showCreateCircle, setShowCreateCircle] = useState(false);
   const [showCreatePost, setShowCreatePost] = useState(false);
 
-  const { data: dashboard, isLoading, error } = useDashboardQuery();
+  const {
+    data: dashboard,
+    isLoading: dashboardLoading,
+    error,
+    refetch,
+  } = useDashboardQuery();
 
+  // Redirect only AFTER auth loading is done
   useEffect(() => {
     if (!authLoading && !user) {
       navigate("/login");
     }
   }, [authLoading, user, navigate]);
 
-  if (authLoading || isLoading) {
+  // Global loading state
+  if (authLoading || dashboardLoading) {
     return <div className="loading-spinner">Loading...</div>;
   }
 
   if (!user) return null;
 
   if (error) {
-    return <div className="error-message">Failed to load dashboard</div>;
+    return (
+      <div className="error-message">
+        Failed to load dashboard
+        <button className="primary-btn" onClick={() => refetch()}>
+          Retry
+        </button>
+      </div>
+    );
   }
 
   const circles = dashboard?.circles ?? [];
@@ -52,9 +66,9 @@ function UserDashboardPage() {
       <div className="action-buttons">
         <button
           className="primary-btn"
-          onClick={() => setShowCreateCircle((v) => !v)}
+          onClick={() => setShowCreateCircle(true)}
         >
-          {showCreateCircle ? "Cancel" : "+ Create Circle"}
+          + Create Circle
         </button>
 
         <button
@@ -65,52 +79,44 @@ function UserDashboardPage() {
         </button>
       </div>
 
-      {/* CREATE CIRCLE */}
-
+      {/* CREATE CIRCLE MODAL */}
       {showCreateCircle && (
-        <div className="create-circle-section">
-          <CreateCircle
-            onCircleCreated={() => {
-              setShowCreateCircle(false);
-              // optional: invalidate dashboard query
-            }}
-          />
+        <div className="circle-editor-overlay">
+          <div className="circle-editor-modal">
+            <CircleEditor
+              circle={null} // 🔥 create mode
+              onSuccess={() => {
+                setShowCreateCircle(false);
+                refetch();
+              }}
+              onCancel={() => setShowCreateCircle(false)}
+            />
+          </div>
         </div>
       )}
 
       {/* CREATE POST */}
       {showCreatePost && (
         <div className="create-post-section">
-          <CreatePost circles={circles} />
+          <CreatePost
+            circles={circles}
+            onPostCreated={() => {
+              setShowCreatePost(false);
+              refetch();
+            }}
+          />
         </div>
       )}
 
-      {/* CIRCLES */}
+      {/* ⭐ CIRCLES — CircleList PREMIUM */}
       <section className="circles-section">
         <h2>Your Circles</h2>
 
-        {circles.length ? (
-          <div className="circles-grid">
-            {circles.map((circle) => (
-              <CircleCard
-                key={circle.id}
-                circle={circle}
-                onClick={() => navigate(`/circles/${circle.id}`)}
-              />
-            ))}
-          </div>
-        ) : (
-          <div className="empty-state">
-            <p>You are not part of any circles yet.</p>
-
-            <button
-              className="primary-btn"
-              onClick={() => navigate("/circles/create")}
-            >
-              Create your first circle
-            </button>
-          </div>
-        )}
+        <CircleList
+          circles={circles}
+          onCreateCircle={() => setShowCreateCircle(true)}
+          onOpenCircle={(id) => navigate(`/circles/${id}`)}
+        />
       </section>
 
       {/* FEED */}

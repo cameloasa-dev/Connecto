@@ -1,45 +1,69 @@
-//frontend/src/components/posts/PostEditor.jsx
 import { useState } from "react";
 import propTypes from "prop-types";
-import { useUpdateCircle } from "../../hooks/mutations/useCircleMutations";
+import {
+  useCreateCircle,
+  useUpdateCircle,
+} from "../../hooks/mutations/useCircleMutations";
 
 const CircleEditor = ({ circle, onSuccess, onCancel }) => {
-  const [name, setName] = useState(circle.name);
-  const [description, setDescription] = useState(circle.description);
-  const [isPrivate, setIsPrivate] = useState(circle.is_private);
+  const isEdit = !!circle;
 
-  const { mutateAsync: updateCircle, isPending } = useUpdateCircle();
+  const [name, setName] = useState(circle?.name || "");
+  const [description, setDescription] = useState(circle?.description || "");
+  const [isPrivate, setIsPrivate] = useState(circle?.is_private || false);
+
+  const { mutateAsync: createCircle, isPending: isCreating } =
+    useCreateCircle();
+  const { mutateAsync: updateCircle, isPending: isUpdating } =
+    useUpdateCircle();
+
+  const isPending = isCreating || isUpdating;
 
   const handleSave = async () => {
     try {
-      if (name === circle.name && description === circle.description) {
-        onCancel();
-        return;
-      }
+      if (isEdit) {
+        // nothing changed?
+        if (
+          name === circle.name &&
+          description === circle.description &&
+          isPrivate === circle.is_private
+        ) {
+          onCancel();
+          return;
+        }
 
-      await updateCircle({
-        circleId: circle.id,
-        circleData: {
+        await updateCircle({
+          circleId: circle.id,
+          circleData: { name, description, is_private: isPrivate },
+        });
+      } else {
+        await createCircle({
           name,
           description,
           is_private: isPrivate,
-        },
-      });
+        });
+      }
 
       onSuccess();
     } catch (err) {
-      console.error("Failed to update circle:", err);
+      console.error("Failed to save circle:", err);
     }
   };
+
   return (
-    <div className="post-editor">
+    <div className="circle-editor">
+      <h3>{isEdit ? "Edit Circle" : "Create Circle"}</h3>
+
       <input
+        type="text"
+        placeholder="Circle name"
         value={name}
         onChange={(e) => setName(e.target.value)}
         disabled={isPending}
       />
 
       <textarea
+        placeholder="Describe your circle"
         value={description}
         onChange={(e) => setDescription(e.target.value)}
         disabled={isPending}
@@ -61,7 +85,7 @@ const CircleEditor = ({ circle, onSuccess, onCancel }) => {
           onClick={handleSave}
           disabled={isPending}
         >
-          Save
+          {isPending ? "Saving..." : "Save"}
         </button>
 
         <button
@@ -78,11 +102,11 @@ const CircleEditor = ({ circle, onSuccess, onCancel }) => {
 
 CircleEditor.propTypes = {
   circle: propTypes.shape({
-    id: propTypes.number.isRequired,
-    name: propTypes.string.isRequired,
-    description: propTypes.string.isRequired,
-    is_private: propTypes.bool.isRequired,
-  }).isRequired,
+    id: propTypes.number,
+    name: propTypes.string,
+    description: propTypes.string,
+    is_private: propTypes.bool,
+  }),
   onSuccess: propTypes.func.isRequired,
   onCancel: propTypes.func.isRequired,
 };

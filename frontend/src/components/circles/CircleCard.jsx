@@ -26,40 +26,49 @@ const CircleCard = ({ circle }) => {
   const closeEditor = () => setIsEditing(false);
 
   return (
-    <div className="circle-card" onClick={openCircle}>
-      <div className="circle-content">
-        <h4>
-          {circle.name} {circle.is_private && "🔒"}
-        </h4>
-        <p>{circle.description}</p>
+    <>
+      {/* CARD */}
+      <div className="circle-card" onClick={openCircle}>
+        <div className="circle-content">
+          <h4>
+            {circle.name}
+            {circle.is_private && (
+              <span className="private-badge">🔒 Private</span>
+            )}
+          </h4>
+
+          <p>{circle.description}</p>
+        </div>
+
+        <div className="circle-actions">
+          <button
+            className="circle-action-btn"
+            onClick={(e) => {
+              e.stopPropagation();
+              setIsEditing(true);
+            }}
+            disabled={isPending}
+          >
+            Edit
+          </button>
+
+          <button
+            className="circle-action-btn danger"
+            onClick={(e) => {
+              e.stopPropagation();
+              handleDelete(e);
+            }}
+            disabled={isPending}
+          >
+            {isPending ? "Deleting..." : "Delete"}
+          </button>
+        </div>
       </div>
 
-      <div className="circle-actions">
-        <button
-          className="circle-action-btn"
-          onClick={(e) => {
-            e.stopPropagation();
-            setIsEditing(true);
-          }}
-          disabled={isPending}
-        >
-          Edit
-        </button>
-
-        <button
-          className="post-action-btn danger"
-          onClick={handleDelete}
-          disabled={isPending}
-        >
-          {isPending ? "Deleting..." : "Delete"}
-        </button>
-      </div>
-
+      {/* EDITOR MODAL — OUTSIDE CARD */}
       {isEditing && (
         <div className="circle-editor-overlay">
           <div className="circle-editor-modal">
-            <h3>Edit Circle</h3>
-
             <CircleEditor
               circle={circle}
               onSuccess={closeEditor}
@@ -68,7 +77,7 @@ const CircleCard = ({ circle }) => {
           </div>
         </div>
       )}
-    </div>
+    </>
   );
 };
 

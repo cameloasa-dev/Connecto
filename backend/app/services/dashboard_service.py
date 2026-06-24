@@ -45,6 +45,7 @@ class DashboardService:
                     "id": circle.id,
                     "name": circle.name,
                     "description": circle.description,
+                    "is_private": circle.is_private,
                     "role": role,
                 }
             )
