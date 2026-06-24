@@ -128,7 +128,17 @@ class PostRepository:
     # COMMENTS
     # --------------------------------------------------
 
+    async def get_comment_by_id(self, comment_id: int) -> Comment | None:
+        result = await self.db.execute(select(Comment).where(Comment.id == comment_id))
+        return result.scalar_one_or_none()
+
     async def add_comment(self, comment: Comment) -> Comment:
+        self.db.add(comment)
+        await self.db.commit()
+        await self.db.refresh(comment)
+        return comment
+
+    async def update_comment(self, comment: Comment) -> Comment:
         self.db.add(comment)
         await self.db.commit()
         await self.db.refresh(comment)
@@ -138,14 +148,25 @@ class PostRepository:
         await self.db.delete(comment)
         await self.db.commit()
 
-    async def get_comments_for_post(self, post_id: int) -> Sequence[Comment]:
-        result = await self.db.execute(
-            select(Comment).where(Comment.post_id == post_id).order_by(Comment.created_at.asc())
-        )
+    async def get_comments_for_post(
+        self, post_id: int, status: str | None = None
+    ) -> Sequence[Comment]:
+
+        stmt = select(Comment).where(Comment.post_id == post_id).order_by(Comment.created_at.asc())
+
+        if status is not None:
+            stmt = stmt.where(Comment.status == status)
+
+        result = await self.db.execute(stmt)
         return result.scalars().all()
 
-    async def count_comments(self, post_id: int) -> int:
-        result = await self.db.execute(select(func.count()).where(Comment.post_id == post_id))
+    async def count_comments(self, post_id: int, status: str | None = None) -> int:
+        stmt = select(func.count(Comment.id)).where(Comment.post_id == post_id)
+
+        if status is not None:
+            stmt = stmt.where(Comment.status == status)
+
+        result = await self.db.execute(stmt)
         return result.scalar_one()
 
     # --------------------------------------------------

@@ -14,7 +14,7 @@ from app.repositories.post_repository import PostRepository
 from app.repositories.user_repository import UserRepository
 from app.schemas.posts.comments import CommentCreate, CommentResponse
 from app.schemas.posts.likes import LikeToggleResponse
-from app.schemas.posts.requests import PostCreate
+from app.schemas.posts.requests import PostCreate, PostUpdate
 from app.schemas.posts.responses import PostResponse
 from app.services.post_service import PostService
 
@@ -46,10 +46,10 @@ async def create_post(
 # ======================================================
 # UPDATE POST
 # ======================================================
-@router.put("/{post_id}", response_model=PostResponse)
+@router.patch("/{post_id}", response_model=PostResponse)
 async def update_post(
     post_id: int,
-    post_data: PostCreate,
+    post_data: PostUpdate,
     current_user: User = Depends(get_current_user_from_session),
     service: PostService = Depends(get_post_service),
 ) -> PostResponse:
@@ -129,3 +129,27 @@ async def delete_comment(
     service: PostService = Depends(get_post_service),
 ) -> None:
     await service.delete_comment(comment_id, current_user)
+
+
+# ======================================================
+# APPROVE COMMENT
+# ======================================================
+@router.post("/comments/{comment_id}/approve", response_model=CommentResponse)
+async def approve_comment(
+    comment_id: int,
+    current_user: User = Depends(get_current_user_from_session),
+    service: PostService = Depends(get_post_service),
+) -> CommentResponse:
+    return await service.approve_comment(comment_id, current_user)
+
+
+# ======================================================
+# GET PENDING COMMENTS FOR A POST
+# ======================================================
+@router.get("/{post_id}/comments/pending", response_model=list[CommentResponse])
+async def get_pending_comments(
+    post_id: int,
+    current_user: User = Depends(get_current_user_from_session),
+    service: PostService = Depends(get_post_service),
+) -> list[CommentResponse]:
+    return await service.get_pending_comments(post_id, current_user)

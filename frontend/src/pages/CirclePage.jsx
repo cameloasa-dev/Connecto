@@ -2,9 +2,8 @@ import { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/useAuth.js";
 
-import PostCard from "../components/posts/PostCard.jsx";
-import CreatePost from "../components/posts/CreatePost.jsx";
-
+import PostList from "../components/posts/PostList.jsx";
+import PostEditor from "../components/posts/PostEditor.jsx";
 import CircleMemberManager from "../components/members/CircleMemberManager.jsx";
 
 import { useCircle } from "../hooks/circles/useCircle";
@@ -86,7 +85,13 @@ function CirclePage() {
       </div>
 
       {/* CREATE POST */}
-      {showCreatePost && <CreatePost circles={[circle]} />}
+      {showCreatePost && (
+        <PostEditor
+          circles={[circle]}
+          onSuccess={() => setShowCreatePost(false)}
+          onCancel={() => setShowCreatePost(false)}
+        />
+      )}
 
       {/* TABS */}
       <div className="circle-tabs">
@@ -107,19 +112,13 @@ function CirclePage() {
 
       {/* CONTENT */}
       <div className="tab-content">
-        {/* POSTS */}
         {activeTab === "posts" && (
-          <div className="posts-section">
-            {posts.length === 0 ? (
-              <p>No posts yet</p>
-            ) : (
-              posts.map((post) => <PostCard key={post.id} post={post} />)
-            )}
-          </div>
+          <PostList posts={posts} circles={[circle]} />
         )}
 
-        {/* MEMBERS */}
-        {activeTab === "members" && <CircleMemberManager circle={circle} />}
+        {activeTab === "members" && (
+          <CircleMemberManager circle={circle} />
+        )}
       </div>
 
       {/* DEBUG */}

@@ -21,7 +21,7 @@ export const postService = {
   },
 
   async updatePost(postId, postData) {
-    const res = await api.put(`${BASE_URL}/${postId}`, postData);
+    const res = await api.patch(`${BASE_URL}/${postId}`, postData);
     return res.data;
   },
 

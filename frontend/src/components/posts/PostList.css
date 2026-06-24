@@ -1,0 +1,12 @@
+/* frontend/src/components/posts/PostList.css */
+
+.posts-grid {
+  display: grid;
+  gap: 1rem;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 2rem;
+  color: var(--text-secondary);
+}

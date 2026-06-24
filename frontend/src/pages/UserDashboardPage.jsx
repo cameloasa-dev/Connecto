@@ -7,7 +7,7 @@ import { useDashboardQuery } from "../hooks/dashboard/useDashboardQuery";
 import CircleList from "../components/circles/CircleList";
 import CircleEditor from "../components/circles/CircleEditor";
 
-import CreatePost from "../components/posts/CreatePost";
+import PostEditor from "../components/posts/PostEditor";
 import PostList from "../components/posts/PostList";
 
 import "./UserDashboardPage.css";
@@ -98,7 +98,7 @@ function UserDashboardPage() {
       {/* CREATE POST */}
       {showCreatePost && (
         <div className="create-post-section">
-          <CreatePost
+          <PostEditor
             circles={circles}
             onPostCreated={() => {
               setShowCreatePost(false);
