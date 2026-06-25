@@ -2,7 +2,7 @@
 
 import PropTypes from "prop-types";
 import { CommentItem } from "./CommentItem";
-import "/.CommentList.css";
+import "./CommentList.css";
 
 export const CommentList = ({ comments, postId, circleId }) => {
   if (!comments || comments.length === 0) {
