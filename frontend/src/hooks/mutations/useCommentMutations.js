@@ -3,6 +3,7 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { postService } from "../../services/post.service";
 
+// ❤️ LIKE / UNLIKE
 export const useToggleLike = () => {
   const queryClient = useQueryClient();
 
@@ -11,23 +12,23 @@ export const useToggleLike = () => {
 
     onSuccess: (_, postId) => {
       queryClient.invalidateQueries({ queryKey: ["post", postId] });
+      queryClient.invalidateQueries({ queryKey: ["feed"] });
+      queryClient.invalidateQueries({ queryKey: ["circle"] });
     },
   });
 };
 
+// ➕ ADD COMMENT
 export const useAddComment = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: ({ postId, data }) => postService.addComment(postId, data),
 
-    onSuccess: (_, variables) => {
-      const { postId } = variables;
-
+    onSuccess: (_, { postId }) => {
       queryClient.invalidateQueries({
         queryKey: ["comments", postId, "approved"],
       });
-
       queryClient.invalidateQueries({
         queryKey: ["comments", postId, "pending"],
       });
@@ -35,19 +36,21 @@ export const useAddComment = () => {
   });
 };
 
+// ✔ APPROVE COMMENT
 export const useApproveComment = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (commentId) => postService.approveComment(commentId),
+    mutationFn: ({ commentId }) => postService.approveComment(commentId),
 
-    onSuccess: (_, commentId, context) => {
-      const postId = context?.postId;
+    onMutate: ({ postId }) => ({ postId }),
+
+    onSuccess: (_, __, context) => {
+      const postId = context.postId;
 
       queryClient.invalidateQueries({
         queryKey: ["comments", postId, "approved"],
       });
-
       queryClient.invalidateQueries({
         queryKey: ["comments", postId, "pending"],
       });
@@ -55,19 +58,17 @@ export const useApproveComment = () => {
   });
 };
 
+// ❌ DELETE COMMENT
 export const useDeleteComment = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: ({ commentId }) => postService.deleteComment(commentId),
 
-    onSuccess: (_, variables) => {
-      const { postId } = variables;
-
+    onSuccess: (_, { postId }) => {
       queryClient.invalidateQueries({
         queryKey: ["comments", postId, "approved"],
       });
-
       queryClient.invalidateQueries({
         queryKey: ["comments", postId, "pending"],
       });

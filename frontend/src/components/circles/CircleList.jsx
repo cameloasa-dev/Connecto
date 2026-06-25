@@ -1,3 +1,4 @@
+//src/components/CircleList.jsx
 import CircleCard from "./CircleCard";
 import PropTypes from "prop-types";
 import "./CircleList.css";
@@ -11,14 +12,14 @@ const CircleList = ({ circles = [] }) => {
     );
   }
 
-  // SORTARE ALFABETICĂ
+  // Sort
   const sorted = [...circles].sort((a, b) => a.name.localeCompare(b.name));
 
-  // GRUPARE
+  // Grupp
   const ownerCircles = sorted.filter((c) => c.role === "owner");
   const memberCircles = sorted.filter((c) => c.role === "member");
 
-  // STATISTICI
+  // STATs
   const stats = {
     total: circles.length,
     owners: ownerCircles.length,
@@ -29,7 +30,7 @@ const CircleList = ({ circles = [] }) => {
 
   return (
     <div className="circle-list-container">
-      {/* ⭐ STATISTICI */}
+      {/* ⭐ STATIS */}
       <div className="circle-stats">
         <div className="stat-box">
           <span className="stat-number">{stats.total}</span>

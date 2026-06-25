@@ -4,14 +4,14 @@ import LoginPage from "./pages/LoginPage.jsx";
 import RegisterPage from "./pages/RegisterPage.jsx";
 import UserDashboardPage from "./pages/UserDashboardPage.jsx";
 import CirclePage from "./pages/CirclePage.jsx";
+import PostPage from "./pages/PostPage.jsx";
 import SearchPage from "./pages/SearchPage.jsx";
-//import SettingsPage from './pages/SettingsPage.jsx';
-//import HelpPage from './pages/HelpPage.jsx';
+import ProfilePage from "./pages/ProfilePage.jsx";
+
 import ProtectedRoute from "./routes/ProtectedRoute.jsx";
 import AuthProvider from "./contexts/AuthProvider";
 import { DarkModeProvider } from "./contexts/DarkModeProvider";
 import Layout from "./components/layout/Layout.jsx";
-//import "./App.css";
 import { APP_BASE_PATH } from "./config";
 
 function App() {
@@ -49,6 +49,17 @@ function App() {
             />
 
             <Route
+              path="posts/:postId"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <PostPage />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
+
+            <Route
               path="search"
               element={
                 <ProtectedRoute>
@@ -59,20 +70,16 @@ function App() {
               }
             />
 
-            {/* Commented out until pages are created */}
-            {/* 
-          <Route path="settings" element={
-            <ProtectedRoute>
-              <SettingsPage />
-            </ProtectedRoute>
-          } />
-          
-          <Route path="help" element={
-            <ProtectedRoute>
-              <HelpPage />
-            </ProtectedRoute>
-          } />
-            */}
+            <Route
+              path="profile/:userId"
+              element={
+                <ProtectedRoute>
+                  <Layout>
+                    <ProfilePage />
+                  </Layout>
+                </ProtectedRoute>
+              }
+            />
           </Routes>
         </Router>
       </DarkModeProvider>

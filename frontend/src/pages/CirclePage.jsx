@@ -4,6 +4,7 @@ import { useAuth } from "../contexts/useAuth.js";
 
 import PostList from "../components/posts/PostList.jsx";
 import PostEditor from "../components/posts/PostEditor.jsx";
+
 import CircleMemberManager from "../components/members/CircleMemberManager.jsx";
 
 import { useCircle } from "../hooks/circles/useCircle";
@@ -45,7 +46,6 @@ function CirclePage() {
   if (!circle) return null;
 
   const currentMember = circle.members?.find((m) => m.user_id === user?.id);
-
   const isOwner = currentMember?.role === "owner";
   const isModerator = currentMember?.role === "moderator";
 

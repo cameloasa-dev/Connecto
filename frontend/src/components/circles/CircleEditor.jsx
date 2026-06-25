@@ -4,6 +4,7 @@ import {
   useCreateCircle,
   useUpdateCircle,
 } from "../../hooks/mutations/useCircleMutations";
+import { validateCircle } from "../../validation/circleValidation";
 
 const CircleEditor = ({ circle, onSuccess, onCancel }) => {
   const isEdit = !!circle;
@@ -18,11 +19,23 @@ const CircleEditor = ({ circle, onSuccess, onCancel }) => {
     useUpdateCircle();
 
   const isPending = isCreating || isUpdating;
+  const [error, setError] = useState("");
 
   const handleSave = async () => {
+    // VALIDATION
+    const validationError = validateCircle({
+      name,
+      description,
+      is_private: isPrivate,
+    });
+
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+
     try {
       if (isEdit) {
-        // nothing changed?
         if (
           name === circle.name &&
           description === circle.description &&
@@ -53,6 +66,7 @@ const CircleEditor = ({ circle, onSuccess, onCancel }) => {
   return (
     <div className="circle-editor">
       <h3>{isEdit ? "Edit Circle" : "Create Circle"}</h3>
+      {error && <div className="error-message">{error}</div>}
 
       <input
         type="text"

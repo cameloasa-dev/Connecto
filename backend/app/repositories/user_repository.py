@@ -3,7 +3,7 @@ from collections.abc import Sequence
 from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.models import CircleMember, User, UserSession
+from app.db.models import Circle, CircleMember, Post, User, UserSession
 
 
 class UserRepository:
@@ -119,4 +119,21 @@ class UserRepository:
             .limit(limit)
         )
 
+        return result.scalars().all()
+
+    # --------------------------------------------------
+    # User profile
+    # --------------------------------------------------
+    async def get_user_posts(self, user_id: int) -> Sequence[Post]:
+        result = await self.db.execute(
+            select(Post).where(Post.author_id == user_id).order_by(Post.created_at.desc())
+        )
+        return result.scalars().all()
+
+    async def get_user_circles(self, user_id: int) -> Sequence[Circle]:
+        result = await self.db.execute(
+            select(Circle)
+            .join(CircleMember, CircleMember.circle_id == Circle.id)
+            .where(CircleMember.user_id == user_id)
+        )
         return result.scalars().all()

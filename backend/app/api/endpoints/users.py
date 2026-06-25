@@ -1,3 +1,5 @@
+from typing import Any
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -52,3 +54,14 @@ async def search_users(
         circle_id=circle_id,
         query=query,
     )
+
+
+# ======================================================
+# GET USER PROFILE (for ProfilePage)
+# ======================================================
+@router.get("/{user_id}/profile")
+async def get_user_profile(
+    user_id: int,
+    service: UserService = Depends(get_user_service),
+) -> dict[str, Any]:
+    return await service.get_profile(user_id)

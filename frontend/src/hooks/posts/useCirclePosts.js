@@ -9,3 +9,11 @@ export const useCirclePosts = (circleId) => {
     enabled: !!circleId,
   });
 };
+
+export const usePost = (postId) => {
+  return useQuery({
+    queryKey: ["post", postId],
+    queryFn: () => postService.getPost(postId),
+    enabled: !!postId,
+  });
+};

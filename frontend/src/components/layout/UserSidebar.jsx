@@ -22,11 +22,12 @@ function UserSidebar() {
   }, []);
 
   const menuItems = [
-    { icon: "🏠", label: "Dashboard", path: "/user-dashboard" },
-    { icon: "🔍", label: "Search", path: "/search" },
-    { icon: "⚙️", label: "Settings", path: "/settings" },
-    { icon: "❓", label: "Help", path: "/help" },
-  ];
+   { icon: "🏠", label: "Dashboard", path: "/user-dashboard" },
+  { icon: "🔍", label: "Search", path: "/search" },
+  { icon: "👥", label: "My Circles", path: "/user-dashboard#circles" },
+  { icon: "📝", label: "My Posts", path: "/user-dashboard#posts" },
+  
+];
 
   const isActive = (path) => location.pathname === path;
 
