@@ -1,0 +1,13 @@
+/* frontend/src/components/comments/CommentList.css */
+
+.comment-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.no-comments {
+  opacity: 0.7;
+  font-size: 14px;
+  padding: 10px 0;
+}

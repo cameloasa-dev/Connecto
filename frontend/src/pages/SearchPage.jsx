@@ -69,6 +69,7 @@ function SearchPage() {
           <div className="loading-spinner">Searching...</div>
         ) : (
           <>
+            {/* USERS */}
             {activeTab === "users" && (
               <div className="users-grid">
                 {results.users.map((user) => (
@@ -93,6 +94,7 @@ function SearchPage() {
               </div>
             )}
 
+            {/* CIRCLES */}
             {activeTab === "circles" && (
               <div className="circles-grid">
                 {results.circles.map((circle) => (
@@ -111,10 +113,15 @@ function SearchPage() {
               </div>
             )}
 
+            {/* POSTS */}
             {activeTab === "posts" && (
               <div className="posts-feed">
                 {results.posts.map((post) => (
-                  <div key={post.id} className="post-card">
+                  <div
+                    key={post.id}
+                    className="post-card"
+                    onClick={() => navigate(`/post/${post.id}`)}
+                  >
                     <h4>{post.title}</h4>
                     <p>{post.content}</p>
 
