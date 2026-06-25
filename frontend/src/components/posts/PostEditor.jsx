@@ -5,6 +5,7 @@ import {
   useCreatePost,
   useUpdatePost,
 } from "../../hooks/mutations/usePostMutations";
+import { validatePost } from "../../validation/postValidation";
 
 const PostEditor = ({ post, circles = [], onSuccess, onCancel }) => {
   const isEdit = !!post;
@@ -21,10 +22,21 @@ const PostEditor = ({ post, circles = [], onSuccess, onCancel }) => {
 
   const isPending = creating || updating;
 
+  const [error, setError] = useState("");
+
   const handleSave = async () => {
+    const validationError = validatePost({
+      title: formData.title,
+      content: formData.content,
+    });
+
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+
     try {
       if (isEdit) {
-        // EDIT MODE
         await updatePost({
           postId: post.id,
           postData: {
@@ -34,7 +46,6 @@ const PostEditor = ({ post, circles = [], onSuccess, onCancel }) => {
           },
         });
       } else {
-        // CREATE MODE
         await createPost(formData);
       }
 
@@ -43,10 +54,10 @@ const PostEditor = ({ post, circles = [], onSuccess, onCancel }) => {
       console.error("Failed to save post:", err);
     }
   };
-
   return (
     <div className="post-editor">
       <h3>{isEdit ? "Edit Post" : "Create New Post"}</h3>
+      {error && <div className="error-message">{error}</div>}
 
       <input
         type="text"

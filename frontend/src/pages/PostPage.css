@@ -1,0 +1,81 @@
+/* frontend/src/pages/PostPage.css */
+
+.post-page {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.back-btn {
+  background: none;
+  border: none;
+  color: var(--primary);
+  cursor: pointer;
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+
+.post-header {
+  border-bottom: 1px solid var(--border-light);
+  padding-bottom: 15px;
+  margin-bottom: 20px;
+}
+
+.post-title {
+  margin: 0;
+  font-size: 28px;
+}
+
+.post-meta {
+  display: flex;
+  gap: 12px;
+  font-size: 14px;
+  opacity: 0.8;
+  margin-top: 5px;
+}
+
+.post-circle-link {
+  margin-top: 8px;
+  font-size: 14px;
+}
+
+.circle-link {
+  color: var(--primary);
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.like-btn {
+  margin-top: 12px;
+  padding: 6px 12px;
+  background: var(--primary);
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.post-content {
+  font-size: 16px;
+  line-height: 1.6;
+  margin-bottom: 30px;
+}
+
+.comments-section {
+  margin-top: 30px;
+}
+
+.pending-comments {
+  margin-top: 25px;
+  padding: 15px;
+  background: #fff7e6;
+  border: 1px solid #ffd27f;
+  border-radius: 6px;
+}
+
+.debug-info {
+  margin-top: 30px;
+  background: #f7f7f7;
+  padding: 10px;
+  border-radius: 6px;
+}

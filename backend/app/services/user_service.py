@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Literal
+from typing import Any, Literal
 
 from fastapi import HTTPException, Request, Response, status
 
@@ -168,3 +168,18 @@ class UserService:
             )
             for user in users
         ]
+
+    # ---------- Profile USERS ----------
+    async def get_profile(self, user_id: int) -> dict[str, Any]:
+        user = await self.repo.get_by_id(user_id)
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+
+        posts = await self.repo.get_user_posts(user_id)
+        circles = await self.repo.get_user_circles(user_id)
+
+        return {
+            "user": user,
+            "posts": posts,
+            "circles": circles,
+        }

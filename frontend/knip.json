@@ -1,0 +1,18 @@
+{
+  "ignore": [
+    "tests/**/*",
+    "tests/**",
+    "tests",
+    "mocks/**/*",
+    "mocks/**",
+    "mocks",
+    "vitest.config.js"
+  ],
+  "ignoreDependencies": [
+    "@testing-library/jest-dom",
+    "@testing-library/user-event",
+    "eslint-plugin-vitest",
+    "globals",
+    "@mswjs/interceptors"
+  ]
+}

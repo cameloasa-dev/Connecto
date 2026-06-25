@@ -24,8 +24,9 @@ function UserSidebar() {
   const menuItems = [
     { icon: "🏠", label: "Dashboard", path: "/user-dashboard" },
     { icon: "🔍", label: "Search", path: "/search" },
-    { icon: "⚙️", label: "Settings", path: "/settings" },
-    { icon: "❓", label: "Help", path: "/help" },
+    { icon: "👥", label: "My Circles", path: "/user-dashboard#circles" },
+    { icon: "📝", label: "My Posts", path: "/user-dashboard#posts" },
+    { icon: "👤", label: "Profile", path: "/profile" },
   ];
 
   const isActive = (path) => location.pathname === path;

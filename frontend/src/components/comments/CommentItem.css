@@ -1,0 +1,44 @@
+/* frontend/src/components/comments/CommentItem.css */
+
+.comment-item {
+  padding: 10px;
+  border-bottom: 1px solid var(--border-light);
+}
+
+.comment-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  opacity: 0.8;
+}
+
+.comment-author {
+  font-weight: bold;
+}
+
+.comment-content {
+  margin: 6px 0;
+  font-size: 14px;
+}
+
+.comment-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.comment-btn {
+  padding: 4px 8px;
+  border-radius: 4px;
+  cursor: pointer;
+  border: none;
+}
+
+.comment-btn.delete {
+  background: #d9534f;
+  color: white;
+}
+
+.comment-btn.approve {
+  background: #5cb85c;
+  color: white;
+}
