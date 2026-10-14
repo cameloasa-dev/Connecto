@@ -1,3 +1,4 @@
+#schemas/circles/responses
 """ "
 Social feature schemas for Connecto
 Circles Responses
@@ -7,7 +8,7 @@ from datetime import datetime
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from .circle_members import CircleMemberResponse
+from .members import CircleMemberResponse
 
 # ======================================================
 # CIRCLE  RESPONSES SCHEMAS

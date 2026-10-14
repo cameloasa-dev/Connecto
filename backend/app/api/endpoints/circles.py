@@ -3,10 +3,10 @@ Circle management endpoints
 Session-based authentication
 """
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Response, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.endpoints.auth import get_current_user_from_session
+from app.api.dependencies.auth import get_current_user_from_session
 from app.db.database import get_db
 from app.db.models import User
 from app.repositories.circle_repository import CircleRepository
@@ -77,5 +77,6 @@ async def delete_circle(
     circle_id: int,
     current_user: User = Depends(get_current_user_from_session),
     service: CircleService = Depends(get_circle_service),
-) -> None:
+) -> Response:
     await service.delete_circle(circle_id, current_user)
+    return Response(status_code=204)

@@ -7,11 +7,11 @@ Integration tests for Circle endpoints.
 
 import pytest
 import pytest_asyncio
+from backend.app.schemas.circles.members import CircleRole
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models import Circle, CircleMember, User
-from app.schemas.circles.circle_members import CircleRole
 
 
 # ------------------------------------------------------

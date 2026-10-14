@@ -1,21 +1,21 @@
-from .circle_members import (
+from .members import (
     AddMemberRequest,
+    CircleMemberActionResponse,
     CircleMemberResponse,
     UpdateRoleRequest,
-    UserSearchResponse,
 )
-from .join import CircleJoinRequest, CircleJoinResponse
 from .requests import CircleCreate, CircleUpdate
 from .responses import CircleResponse
+from .roles import UserRoleItem, UserRolesResponse
 
 __all__ = [
     "CircleCreate",
     "CircleUpdate",
     "CircleResponse",
-    "CircleJoinRequest",
-    "CircleJoinResponse",
     "AddMemberRequest",
     "UpdateRoleRequest",
-    "UserSearchResponse",
     "CircleMemberResponse",
+    "CircleMemberActionResponse",
+    "UserRolesResponse",
+    "UserRoleItem"
 ]

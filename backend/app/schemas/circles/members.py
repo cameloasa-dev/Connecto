@@ -1,24 +1,12 @@
-""" "
-Social feature schemas for Connecto
-Circle Members
-"""
+#schemas/circles/members
+
 
 from datetime import datetime
-from enum import StrEnum
 from typing import Self
 
 from pydantic import BaseModel, ConfigDict, model_validator
 
-# ======================================================
-# ENUMS
-# ======================================================
-
-
-class CircleRole(StrEnum):
-    OWNER = "owner"
-    MODERATOR = "moderator"
-    MEMBER = "member"
-
+from .roles import CircleRole
 
 # ======================================================
 # REQUEST SCHEMAS
@@ -39,7 +27,6 @@ class UpdateRoleRequest(BaseModel):
 
 
 class CircleMemberResponse(BaseModel):
-    circle_id: int
     user_id: int
     username: str | None = None
     role: CircleRole
@@ -59,14 +46,8 @@ class CircleMemberResponse(BaseModel):
         return self
 
 
-class UserSearchResponse(BaseModel):
-    id: int
-    username: str
-    email: str
-    is_already_member: bool = False
-
-
-class MemberActionResponse(BaseModel):
+class CircleMemberActionResponse(BaseModel):
     success: bool
     message: str
     member: CircleMemberResponse | None = None
+

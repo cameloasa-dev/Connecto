@@ -1,3 +1,4 @@
+#schemas/post/requests
 """
 Social feature schemas for Connecto
 Posts Request

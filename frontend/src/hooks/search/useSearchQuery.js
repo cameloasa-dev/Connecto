@@ -2,10 +2,12 @@
 import { useQuery } from "@tanstack/react-query";
 import { searchService } from "../../services/search.service";
 
-export const useSearchQuery = (query) => {
+export const useSearchQuery = (query, page = 1) => {
   return useQuery({
-    queryKey: ["search", "global", query],
-    queryFn: () => searchService.searchGlobal(query),
+    queryKey: ["search", query, page],
+    queryFn: () => searchService.searchGlobal(query, page),
     enabled: !!query?.trim(),
+    staleTime: 1000 * 30, // 30 sec cache
+    keepPreviousData: true,
   });
 };

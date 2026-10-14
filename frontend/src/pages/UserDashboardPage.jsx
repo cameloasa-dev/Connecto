@@ -51,8 +51,15 @@ function UserDashboardPage() {
     );
   }
 
-  const circles = dashboard?.circles ?? [];
-  const posts = dashboard?.feed ?? [];
+  const circles =
+    dashboard?.circles_by_role?.flatMap(({ role, items }) =>
+      items.map((circle) => ({ ...circle, role })),
+    ) ?? [];
+  const posts =
+    dashboard?.recent_posts?.map((post) => ({
+      ...post,
+      author_username: post.author_name,
+    })) ?? [];
 
   return (
     <div className="dashboard">

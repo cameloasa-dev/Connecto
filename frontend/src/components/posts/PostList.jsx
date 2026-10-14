@@ -37,8 +37,12 @@ const PostList = ({ posts }) => {
           </p>
 
           <div className="post-list-footer">
-            <span className="post-list-author">@{post.author_username}</span>
-            <span className="post-list-likes">❤️ {post.like_count}</span>
+            <span className="post-list-author">
+              @{post.author_username ?? post.author_name}
+            </span>
+            {post.like_count != null && (
+              <span className="post-list-likes">❤️ {post.like_count}</span>
+            )}
           </div>
         </div>
       ))}

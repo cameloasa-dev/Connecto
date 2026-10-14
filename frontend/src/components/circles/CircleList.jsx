@@ -17,7 +17,7 @@ const CircleList = ({ circles = [] }) => {
 
   // Grupp
   const ownerCircles = sorted.filter((c) => c.role === "owner");
-  const memberCircles = sorted.filter((c) => c.role === "member");
+  const memberCircles = sorted.filter((c) => c.role !== "owner");
 
   // STATs
   const stats = {

@@ -1,3 +1,4 @@
+#schemas/circles/requests
 """
 Social feature schemas for Connecto
 Circles Requests
@@ -16,8 +17,6 @@ class CircleBase(BaseModel):
 
 
 class CircleCreate(CircleBase):
-    name: str = Field(..., min_length=3, max_length=50)
-    description: str | None = Field(None, max_length=255)
     is_private: bool = False
 
 

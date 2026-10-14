@@ -2,13 +2,13 @@
 
 import asyncio
 
+from backend.app.schemas.circles.members import CircleRole
 from sqlalchemy import select
 
 from app.core.config import settings
 from app.core.security import hash_password
 from app.db.database import SessionLocal
 from app.db.models import Circle, CircleMember, Post, User
-from app.schemas.circles.circle_members import CircleRole
 
 
 async def create_test_data() -> None:

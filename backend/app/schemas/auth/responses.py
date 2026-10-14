@@ -1,3 +1,4 @@
+#schemas/auth/responses
 """
 Authentication schemas for Connecto
 Primary authentication: SESSION-BASED

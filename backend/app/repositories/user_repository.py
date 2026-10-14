@@ -3,19 +3,27 @@ from collections.abc import Sequence
 from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.db.models import Circle, CircleMember, Post, User, UserSession
+from app.db.models import User, UserSession
 
 
 class UserRepository:
     def __init__(self, db: AsyncSession):
         self.db = db
 
+    # ======================================================
+    # BASIC USER QUERIES
+    # ======================================================
+
     async def get_by_id(self, user_id: int) -> User | None:
-        result = await self.db.execute(select(User).where(User.id == user_id))
+        result = await self.db.execute(
+            select(User).where(User.id == user_id)
+        )
         return result.scalar_one_or_none()
 
     async def get_by_username(self, username: str) -> User | None:
-        result = await self.db.execute(select(User).where(User.username == username))
+        result = await self.db.execute(
+            select(User).where(User.username == username)
+        )
         return result.scalar_one_or_none()
 
     async def get_by_email_case_insensitive(self, email: str) -> User | None:
@@ -24,52 +32,97 @@ class UserRepository:
         )
         return result.scalar_one_or_none()
 
-    async def get_all_except(self, current_user_id: int, skip: int, limit: int) -> Sequence[User]:
+    async def add_user(self, user: User) -> User:
+        self.db.add(user)
+        await self.db.commit()
+        await self.db.refresh(user)
+        return user
+
+    # ======================================================
+    # LIST / SEARCH USERS
+    # ======================================================
+
+    # ======================================================
+    # LIST USERS (BASIC)
+    # ======================================================
+
+    async def get_all_except(
+        self,
+        current_user_id: int,
+        skip: int,
+        limit: int,
+    ) -> Sequence[User]:
         result = await self.db.execute(
-            select(User).where(User.id != current_user_id).offset(skip).limit(limit)
+            select(User)
+            .where(User.id != current_user_id)
+            .offset(skip)
+            .limit(limit)
         )
         return result.scalars().all()
 
-    async def search_by_username_excluding_ids(
-        self,
-        query: str,
-        exclude_ids: list[int],
-        current_user_id: int,
-        limit: int = 20,
-    ) -> Sequence[User]:
-        stmt = (
-            select(User)
-            .where(
-                User.id != current_user_id,
-                User.username.ilike(f"%{query}%"),
-            )
-            .limit(limit)
-        )
+    # ======================================================
+    # SEARCH USERS (UNIFIED)
+    # ======================================================
 
+    async def search_users(
+        self,
+        term: str,
+        *,
+        limit: int = 20,
+        offset: int = 0,
+        current_user_id: int | None = None,
+        exclude_ids: list[int] | None = None,
+    ) -> Sequence[User]:
+
+        stmt = select(User)
+
+        # exclude current user if needed
+        if current_user_id is not None:
+            stmt = stmt.where(User.id != current_user_id)
+
+        # exclude additional ids (e.g. circle members)
         if exclude_ids:
             stmt = stmt.where(User.id.not_in(exclude_ids))
+
+        pattern = f"%{term}%"
+
+        stmt = (
+            stmt.where(
+                or_(
+                    User.username.ilike(pattern),
+                    User.email.ilike(pattern),
+                )
+            )
+            .order_by(User.username.asc())
+            .offset(offset)
+            .limit(limit)
+        )
 
         result = await self.db.execute(stmt)
         return result.scalars().all()
 
-    async def get_circle_member_ids(self, circle_id: int) -> list[int]:
-        result = await self.db.execute(
-            select(CircleMember.user_id).where(CircleMember.circle_id == circle_id)
-        )
-        return [row[0] for row in result.fetchall()]
+    # ======================================================
+    # GET USERS BY IDS (BATCH)
+    # ======================================================
 
-    async def get_user_circle_role(self, circle_id: int, user_id: int) -> CircleMember | None:
-        result = await self.db.execute(
-            select(CircleMember).where(
-                CircleMember.circle_id == circle_id,
-                CircleMember.user_id == user_id,
-            )
-        )
-        return result.scalar_one_or_none()
+    async def get_users_by_ids(
+        self,
+        user_ids: list[int],
+    ) -> Sequence[User]:
 
-    # --------------------------------------------------
-    # Session
-    # --------------------------------------------------
+        if not user_ids:
+            return []
+
+        result = await self.db.execute(
+            select(User).where(User.id.in_(user_ids))
+        )
+        return result.scalars().all()
+
+
+    # ======================================================
+    # SESSIONS
+    # ======================================================
+
     async def create_session(self, session: UserSession) -> None:
         self.db.add(session)
         await self.db.commit()
@@ -85,55 +138,3 @@ class UserRepository:
     async def delete_session(self, session: UserSession) -> None:
         await self.db.delete(session)
         await self.db.commit()
-
-    # --------------------------------------------------
-    # Add user
-    # --------------------------------------------------
-    async def add_user(self, user: User) -> User:
-        self.db.add(user)
-        await self.db.commit()
-        await self.db.refresh(user)
-        return user
-
-    # --------------------------------------------------
-    # SEARCH
-    # --------------------------------------------------
-    async def search_users(
-        self,
-        term: str,
-        limit: int,
-        offset: int,
-    ) -> Sequence[User]:
-        pattern = f"%{term}%"
-
-        result = await self.db.execute(
-            select(User)
-            .where(
-                or_(
-                    User.username.ilike(pattern),
-                    User.email.ilike(pattern),
-                )
-            )
-            .order_by(User.username.asc())
-            .offset(offset)
-            .limit(limit)
-        )
-
-        return result.scalars().all()
-
-    # --------------------------------------------------
-    # User profile
-    # --------------------------------------------------
-    async def get_user_posts(self, user_id: int) -> Sequence[Post]:
-        result = await self.db.execute(
-            select(Post).where(Post.author_id == user_id).order_by(Post.created_at.desc())
-        )
-        return result.scalars().all()
-
-    async def get_user_circles(self, user_id: int) -> Sequence[Circle]:
-        result = await self.db.execute(
-            select(Circle)
-            .join(CircleMember, CircleMember.circle_id == Circle.id)
-            .where(CircleMember.user_id == user_id)
-        )
-        return result.scalars().all()

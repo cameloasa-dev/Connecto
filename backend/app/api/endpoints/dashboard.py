@@ -6,12 +6,13 @@ Session-based authentication
 from fastapi import APIRouter, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.endpoints.auth import get_current_user_from_session
+from app.api.dependencies.auth import get_current_user_from_session
 from app.db.database import get_db
 from app.db.models import User
 from app.repositories.circle_repository import CircleRepository
 from app.repositories.post_repository import PostRepository
 from app.repositories.user_repository import UserRepository
+from app.schemas.dashboard.dashboard import DashboardResponse
 from app.services.dashboard_service import DashboardService
 from app.services.post_service import PostService
 
@@ -40,9 +41,9 @@ def get_dashboard_service(
 # --------------------------------------------------
 # GET DASHBOARD
 # --------------------------------------------------
-@router.get("", response_model=dict)
+@router.get("", response_model=DashboardResponse)
 async def get_dashboard(
     current_user: User = Depends(get_current_user_from_session),
     service: DashboardService = Depends(get_dashboard_service),
-) -> dict:
+) -> DashboardResponse:
     return await service.get_dashboard(current_user)

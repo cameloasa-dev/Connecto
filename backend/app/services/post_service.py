@@ -6,7 +6,7 @@ from app.db.models import Comment, Post, User
 from app.repositories.circle_repository import CircleRepository
 from app.repositories.post_repository import PostRepository
 from app.repositories.user_repository import UserRepository
-from app.schemas.circles.circle_members import CircleRole
+from app.schemas.circles.members import CircleRole
 from app.schemas.posts.comments import CommentCreate, CommentResponse
 from app.schemas.posts.likes import LikeToggleResponse
 from app.schemas.posts.requests import PostCreate, PostUpdate

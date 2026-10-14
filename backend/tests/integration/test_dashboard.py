@@ -1,10 +1,10 @@
 import pytest
 import pytest_asyncio
+from backend.app.schemas.circles.members import CircleRole
 from httpx import AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.db.models import Circle, CircleMember, User
-from app.schemas.circles.circle_members import CircleRole
 
 
 # ------------------------------------------------------
@@ -73,8 +73,8 @@ async def test_dashboard(client: AsyncClient, circle: Circle):
 
     # Validate structure
     assert "user" in data
-    assert "circles" in data
-    assert "feed" in data
+    assert "circles_by_role" in data
+    assert "recent_posts" in data
     assert "stats" in data
 
     # Validate user info
@@ -82,12 +82,18 @@ async def test_dashboard(client: AsyncClient, circle: Circle):
     assert data["user"]["username"] == "owner_dash"
 
     # Validate circles
-    assert len(data["circles"]) == 1
-    assert data["circles"][0]["id"] == circle.id
+    circles = [
+        circle_data
+        for group in data["circles_by_role"]
+        for circle_data in group["items"]
+    ]
+    assert len(circles) == 1
+    assert circles[0]["id"] == circle.id
+    assert data["circles_by_role"][0]["role"] == "owner"
 
     # Validate feed
-    assert len(data["feed"]) >= 2
-    titles = [p["title"] for p in data["feed"]]
+    assert len(data["recent_posts"]) >= 2
+    titles = [p["title"] for p in data["recent_posts"]]
     assert "Hello" in titles
     assert "Another" in titles
 

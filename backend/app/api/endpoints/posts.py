@@ -6,7 +6,7 @@ Clean, organized, session-based authentication
 from fastapi import APIRouter, Depends, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.api.endpoints.auth import get_current_user_from_session
+from app.api.dependencies.auth import get_current_user_from_session
 from app.db.database import get_db
 from app.db.models import User
 from app.repositories.circle_repository import CircleRepository
