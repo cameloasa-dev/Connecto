@@ -79,9 +79,12 @@ class CircleRepository:
         member = await self.get_member(circle_id, user_id)
         return member.role if member else None
 
-    async def get_members(self, circle_id: int) -> Sequence[CircleMember]:
+    async def get_members(self, circle_ids: list[int]) -> Sequence[CircleMember]:
+        if not circle_ids:
+            return []
+
         result = await self.db.execute(
-            select(CircleMember).where(CircleMember.circle_id == circle_id)
+            select(CircleMember).where(CircleMember.circle_id.in_(circle_ids))
         )
         return result.scalars().all()
 
@@ -118,6 +121,15 @@ class CircleRepository:
 
         rows = result.all()
         return [(circle, member) for circle, member in rows]
+
+    async def get_circles_for_user(self, user_id: int) -> Sequence[Circle]:
+        result = await self.db.execute(
+            select(Circle)
+            .join(CircleMember, Circle.id == CircleMember.circle_id)
+            .where(CircleMember.user_id == user_id)
+            .order_by(Circle.created_at.desc())
+        )
+        return result.scalars().all()
 
     # ==================================================
     # SEARCH

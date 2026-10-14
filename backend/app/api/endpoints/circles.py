@@ -10,6 +10,7 @@ from app.api.dependencies.auth import get_current_user_from_session
 from app.db.database import get_db
 from app.db.models import User
 from app.repositories.circle_repository import CircleRepository
+from app.repositories.user_repository import UserRepository
 from app.schemas.circles.requests import CircleCreate, CircleUpdate
 from app.schemas.circles.responses import CircleResponse
 from app.services.circle_service import CircleService
@@ -18,7 +19,7 @@ router = APIRouter(prefix="/circles", tags=["circles"])
 
 
 def get_circle_service(db: AsyncSession = Depends(get_db)) -> CircleService:
-    return CircleService(CircleRepository(db))
+    return CircleService(CircleRepository(db), UserRepository(db))
 
 
 # ======================================================

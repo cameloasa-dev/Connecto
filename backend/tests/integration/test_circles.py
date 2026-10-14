@@ -97,8 +97,12 @@ async def test_create_circle_duplicate_name(client: AsyncClient, owner: User):
 # ------------------------------------------------------
 @pytest.mark.asyncio
 async def test_get_my_circles(client: AsyncClient, circle: Circle):
-    response = await client.get("/circles/my")
+    response = await client.get(
+        "/circles/my",
+        headers={"Origin": "http://localhost:3000"},
+    )
     assert response.status_code == 200
+    assert response.headers["access-control-allow-origin"] == "http://localhost:3000"
 
     circles = response.json()
     assert len(circles) == 1
